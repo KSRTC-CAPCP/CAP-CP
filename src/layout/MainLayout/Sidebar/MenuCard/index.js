@@ -116,7 +116,7 @@ const MenuCard = () => {
             />
           </ListItem>
         </List>
-        <LinearProgressWithLabel value={80} />
+        {/* <LinearProgressWithLabel value={80} /> */}
       </CardContent>
     </CardStyle>
   );

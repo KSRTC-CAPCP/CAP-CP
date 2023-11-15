@@ -1,0 +1,28 @@
+.MuiDrawer-paper {
+  color: #fff !important;
+  background: rgb(2, 0, 36);
+  background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(0, 212, 255, 1) 100%) !important;
+  background-position: center !important;
+  background-size: cover !important;
+  color: #ffffff !important;
+}
+.MuiListItemButton-gutters,
+.css-1ips9rb-MuiListItemIcon-root {
+  color: #fff !important;
+}
+.Mui-selected,
+.Mui-selected > .MuiListItemIcon-root,
+.MuiListItemButton-root:hover {
+  color: #5e35b1 !important;
+  background-color: #fff !important;
+  font-weight: bold !important;
+}
+
+.MuiListItemButton-gutters:hover .MuiListItemIcon-root {
+  color: #5e35b1 !important;
+}
+
+.scrollbar-container
+{
+  margin-top: 3rem !important;
+}

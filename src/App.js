@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-
+import './assets/css/globalStyles.css'
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline, StyledEngineProvider } from '@mui/material';
 
