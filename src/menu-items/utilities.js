@@ -1,12 +1,13 @@
 // assets
-import { IconTypography, IconPalette, IconShadow, IconWindmill } from '@tabler/icons';
+import { IconTypography, IconPalette, IconBusinessplan, IconShadow, IconWindmill } from '@tabler/icons';
 
 // constant
 const icons = {
   IconTypography,
   IconPalette,
   IconShadow,
-  IconWindmill
+  IconWindmill,
+  IconBusinessplan
 };
 
 // ==============================|| UTILITIES MENU ITEMS ||============================== //
@@ -16,21 +17,63 @@ const utilities = {
   // title: 'Utilities',
   type: 'group',
   children: [
+    // {
+    //   id: 'util-typography',
+    //   title: 'Typography',
+    //   type: 'item',
+    //   url: '/utils/util-typography',
+    //   icon: icons.IconTypography,
+    //   breadcrumbs: false
+    // },
+    // {
+    //   id: 'util-color',
+    //   title: 'Color',
+    //   type: 'item',
+    //   url: '/utils/util-color',
+    //   icon: icons.IconPalette,
+    //   breadcrumbs: true
+    // },
+    // {
+    //   id: 'business-logics',
+    //   title: 'Business Logics',
+    //   type: 'item',
+    //   url: 'business-logics',
+    //   icon: icons.IconBusinessplan,
+    //   breadcrumbs: true
+    // },
+
     {
-      id: 'util-typography',
-      title: 'Typography',
-      type: 'item',
-      url: '/utils/util-typography',
-      icon: icons.IconTypography,
-      breadcrumbs: false
-    },
-    {
-      id: 'util-color',
-      title: 'Color',
-      type: 'item',
-      url: '/utils/util-color',
-      icon: icons.IconPalette,
-      breadcrumbs: false
+      id: 'icons',
+      title: 'Business Logics',
+      type: 'collapse',
+      icon: icons.IconBusinessplan,
+      children: [
+        {
+          id: 'tabler-icons',
+          title: 'Leads',
+          type: 'item',
+          url: 'logics/leads',
+          breadcrumbs: false
+        },
+        {
+          id: 'rfq',
+          title: 'RFQ',
+          type: 'item',
+          // external: true,
+          // target: '_blank',
+          url: 'logics/rfq',
+          breadcrumbs: false
+        },
+        {
+          id: 'projects',
+          title: 'Project',
+          type: 'item',
+          // external: true,
+          // target: '_blank',
+          url: 'logics/projects',
+          breadcrumbs: false
+        }
+      ]
     },
     {
       id: 'util-shadow',
@@ -39,30 +82,6 @@ const utilities = {
       url: '/utils/util-shadow',
       icon: icons.IconShadow,
       breadcrumbs: false
-    },
-    {
-      id: 'icons',
-      title: 'Icons',
-      type: 'collapse',
-      icon: icons.IconWindmill,
-      children: [
-        {
-          id: 'tabler-icons',
-          title: 'Tabler Icons',
-          type: 'item',
-          url: '/icons/tabler-icons',
-          breadcrumbs: false
-        },
-        {
-          id: 'material-icons',
-          title: 'Material Icons',
-          type: 'item',
-          external: true,
-          target: '_blank',
-          url: 'https://mui.com/material-ui/material-icons/',
-          breadcrumbs: false
-        }
-      ]
     }
   ]
 };

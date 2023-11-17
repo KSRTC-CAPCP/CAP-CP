@@ -22,7 +22,71 @@
   color: #5e35b1 !important;
 }
 
-.scrollbar-container
-{
+.scrollbar-container {
   margin-top: 3rem !important;
+}
+
+/* .login-section {
+  background: url(/src/assets/images/clips/clip1.mp4);
+} */
+video {
+  position: absolute;
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+.css-h4y409-MuiList-root {
+  padding-bottom: 0 !important;
+}
+
+.css-9d4wr9 {
+  border-top-left-radius: 0 !important;
+}
+
+.css-1vkmmdj-MuiPaper-root-MuiCard-root {
+  border-color: transparent !important;
+}
+.css-d0lab9-MuiPaper-root,
+.css-1kcnu38-MuiTableRow-root {
+  box-shadow: none !important;
+}
+
+.css-17pmaar-MuiCardContent-root {
+  padding: 10px 0 !important;
+}
+.MuiPaper-elevation2 {
+  z-index: 1222 !important;
+  /* padding-top: 2rem !important; */
+}
+
+/* main{
+  background-image: url(/src/assets/images/bg.png) !important;
+  background-position: center !important;
+  background-size: cover !important;
+  background-blend-mode:color-burn;
+  box-shadow: inset  10px -10px 25px rgba(0,0,0,0.6);} */
+
+.edit-table-container .css-wsew38 {
+  justify-content: end !important;
+}
+.max
+{
+  max-height: 86vh;
+  overflow-y: scroll;
+}
+::-webkit-scrollbar {
+  width: 2px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px rgb(255, 249, 249); 
+  border-radius: 10px;
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #777777; 
+  border-radius: 50%;
 }
