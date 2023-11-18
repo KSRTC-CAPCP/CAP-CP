@@ -189,28 +189,31 @@ const BusinessLeads = () => {
       //   Create History
       // </Button>
       <div className="title-bar">
-        <ButtonBase sx={{ borderRadius: '12px' }}>
-          <Avatar
-            variant="rounded"
-            sx={{
-              ...theme.typography.commonAvatar,
-              ...theme.typography.mediumAvatar,
-              transition: 'all .2s ease-in-out',
-              background: theme.palette.secondary.light,
-              color: theme.palette.secondary.dark,
-              '&[aria-controls="menu-list-grow"],&:hover': {
-                background: theme.palette.secondary.dark,
-                color: theme.palette.secondary.light
-              }
-            }}
-            onClick={() => {
-              table.setCreatingRow(true);
-            }}
-            color="inherit"
-          >
-            <IconPlus />
-          </Avatar>
-        </ButtonBase>
+        <div className="d-flex">
+          <p>red</p>
+          <ButtonBase sx={{ borderRadius: '12px' }}>
+            <Avatar
+              variant="rounded"
+              sx={{
+                ...theme.typography.commonAvatar,
+                ...theme.typography.mediumAvatar,
+                transition: 'all .2s ease-in-out',
+                background: theme.palette.secondary.light,
+                color: theme.palette.secondary.dark,
+                '&[aria-controls="menu-list-grow"],&:hover': {
+                  background: theme.palette.secondary.dark,
+                  color: theme.palette.secondary.light
+                }
+              }}
+              onClick={() => {
+                table.setCreatingRow(true);
+              }}
+              color="inherit"
+            >
+              <IconPlus />
+            </Avatar>
+          </ButtonBase>
+        </div>
       </div>
     )
   });
