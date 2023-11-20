@@ -13,7 +13,8 @@ import {
   InputLabel,
   Select,
   Divider,
-  Typography
+  Typography,
+  Input
 } from '@mui/material';
 import React from 'react';
 import MainCard from 'ui-component/cards/MainCard';
@@ -75,6 +76,22 @@ const csvConfig = mkConfig({
   useKeysAsHeaders: true
 });
 const BusinessLeads = () => {
+
+  const [options, setOptions] = useState([]);
+  const [inputValue, setInputValue] = useState('');
+
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleAddOption = () => {
+    if (inputValue.trim() !== '') {
+      setOptions([...options, inputValue]);
+      setInputValue('');
+    }
+  };
+
+
   const [view, setView] = useState({
     visible: false,
     mode: 'Initial' // 'add', 'edit', 'view'
@@ -455,13 +472,36 @@ const BusinessLeads = () => {
             <Grid xs={4} p={2}>
               <FormControl fullWidth>
                 <InputLabel id="demo-simple-select-label">Category</InputLabel>
-                <Select labelId="demo-simple-select-label" id="demo-simple-select" label="Age">
+                <Select labelId="demo-simple-select-label" id="demo-simple-select" label="Category">
                   <MenuItem value={'website'}>Website</MenuItem>
                   <MenuItem value={'Expo'}>Expo</MenuItem>
                   <MenuItem value={'Reference'}>Reference</MenuItem>
                   <MenuItem value={'coldcalls'}>Cold Calls</MenuItem>
                   <MenuItem value={'others'}>Others</MenuItem>
+                  {options.map((option, index) => (
+                    <MenuItem key={index} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                  <br/>
+                  <Input
+                    type="text"
+                    value={inputValue}
+                    onChange={handleInputChange}
+                    placeholder="Type Here..."
+                    size="small" 
+                  />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleAddOption}
+                    size="small" 
+                    style={{ marginTop: '5px' }} 
+                  >
+                    Save
+                  </Button>
                 </Select>
+
               </FormControl>
             </Grid>
             <Grid xs={4} p={2}>
