@@ -27,7 +27,8 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
-  Slide
+  Slide,
+  Input
 } from '@mui/material';
 import React, { forwardRef } from 'react';
 import MainCard from 'ui-component/cards/MainCard';
@@ -197,8 +198,9 @@ const Transition = forwardRef(function Transition(props, ref) {
 
 const BusinessLeads = () => {
 
-  const [options, setOptions] = useState([]);
   const [inputValue, setInputValue] = useState('');
+  const [options, setOptions] = useState([]);
+  const [selectedValue, setSelectedValue] = useState('');
 
   const handleInputChange = (e) => {
     setInputValue(e.target.value);
@@ -209,6 +211,10 @@ const BusinessLeads = () => {
       setOptions([...options, inputValue]);
       setInputValue('');
     }
+  };
+
+  const handleSelectChange = (event) => {
+    setSelectedValue(event.target.value);
   };
 
 
@@ -699,7 +705,16 @@ const BusinessLeads = () => {
             <Grid xs={4} p={2}>
               <FormControl fullWidth>
                 <InputLabel id="demo-simple-select-label">Category</InputLabel>
-                <Select labelId="demo-simple-select-label" id="demo-simple-select" label="Category">
+                <Select
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  label="Category"
+                  value={selectedValue}
+                  onChange={handleSelectChange}
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
                   <MenuItem value={'website'}>Website</MenuItem>
                   <MenuItem value={'Expo'}>Expo</MenuItem>
                   <MenuItem value={'Reference'}>Reference</MenuItem>
@@ -710,24 +725,23 @@ const BusinessLeads = () => {
                       {option}
                     </MenuItem>
                   ))}
-                  <br/>
-                  <Input
-                    type="text"
-                    value={inputValue}
-                    onChange={handleInputChange}
-                    placeholder="Type Here..."
-                    size="small" 
-                  />
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleAddOption}
-                    size="small" 
-                    style={{ marginTop: '5px' }} 
-                  >
-                    Save
-                  </Button>
                 </Select>
+                <Input
+                  type="text"
+                  value={inputValue}
+                  onChange={handleInputChange}
+                  placeholder="Type Here..."
+                  size="small"
+                />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleAddOption}
+                  size="small"
+                  style={{ marginTop: '5px' }}
+                >
+                  Save
+                </Button>
 
               </FormControl>
             </Grid>
@@ -1070,8 +1084,8 @@ const BusinessLeads = () => {
         open={open}
         TransitionComponent={Transition}
         keepMounted
-        // onClose={handleClose}
-        // aria-describedby="alert-dialog-slide-description"
+      // onClose={handleClose}
+      // aria-describedby="alert-dialog-slide-description"
       >
         <DialogTitle>
           <Typography variant="h3">Delete Lead</Typography>
