@@ -70,8 +70,7 @@ video {
 .edit-table-container .css-wsew38 {
   justify-content: end !important;
 }
-.max
-{
+.max {
   max-height: 86vh;
   overflow-y: scroll;
 }
@@ -82,16 +81,67 @@ video {
 
 /* Track */
 ::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 5px rgb(255, 249, 249); 
+  box-shadow: inset 0 0 5px rgb(255, 249, 249);
   border-radius: 10px;
 }
- 
+
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #d6d6d6; 
+  background: #d6d6d6;
 }
 
-.d-flex
-{
+.d-flex {
   display: flex;
+}
+.justify-content-between {
+  justify-content: space-between;
+}
+.rounded {
+  background-color: #e3f2fd;
+  border-radius: 50%;
+  height: 4rem;
+  width: 4rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.mb-1
+{
+  margin-bottom: 1rem;
+}
+.justify-content-center {
+  justify-content: center;
+}
+.align-item-center {
+  align-items: center;
+}
+.text-muted {
+  font-weight: bold;
+  color: #a3a3a3;
+}
+
+main {
+  background-color: #e3f2fd !important;
+}
+.MuiPaper-elevation0 {
+  border: 1px solid #00d2fd2e;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px !important;
+}
+.history-container .MuiCardHeader-root {
+  background-color: #e3f2fd !important;
+}
+.title-bar,
+.custum-header {
+  background-color: #e3f2fd !important;
+  padding: 0.2rem 1rem;
+  border-top-right-radius: 20px;
+  border-top-left-radius: 20px;
+  width: 100% !important;
+}
+.custum-header .MuiAvatar-colorDefault {
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+.custum-header {
+  display: flex;
+  justify-content: space-between;
 }
