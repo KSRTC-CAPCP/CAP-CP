@@ -13,16 +13,56 @@ import {
   InputLabel,
   Select,
   Divider,
-  Typography
+  Typography,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableBody,
+  TableCell,
+  Paper,
+  tableCellClasses,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Slide
 } from '@mui/material';
-import React from 'react';
+import React, { forwardRef } from 'react';
 import MainCard from 'ui-component/cards/MainCard';
 import { useTheme } from '@mui/material/styles';
-import { IconDownload, IconEdit, IconEye, IconPlus, IconTrash, IconUpload } from '@tabler/icons';
+import { IconDownload, IconEdit, IconEye, IconHistoryToggle, IconPlus, IconTrash, IconUpload } from '@tabler/icons';
 import { MaterialReactTable, createMRTColumnHelper, useMaterialReactTable } from 'material-react-table';
 import { mkConfig, generateCsv, download } from 'export-to-csv';
-import { DeleteRounded, KeyboardBackspaceRounded, ModeEditRounded, VisibilityRounded } from '@mui/icons-material';
+import {
+  ConnectWithoutContact,
+  Delete,
+  DeleteRounded,
+  Group,
+  History,
+  KeyboardBackspaceRounded,
+  Label,
+  ModeEditRounded,
+  NotStarted,
+  PersonAdd,
+  TaskAlt,
+  ThumbDown,
+  ThumbDownAltSharp,
+  ThumbUpSharp,
+  VisibilityRounded
+} from '@mui/icons-material';
 import { useState } from 'react';
+import styled from '@emotion/styled';
+import {
+  Timeline,
+  TimelineConnector,
+  TimelineContent,
+  TimelineDot,
+  TimelineItem,
+  TimelineOppositeContent,
+  TimelineSeparator
+} from '@mui/lab';
 
 const columnHelper = createMRTColumnHelper();
 const data = [
@@ -45,40 +85,126 @@ const data = [
 ];
 const columns = [
   columnHelper.accessor('id', {
-    header: 'ID',
-    size: 40
+    header: 'ID'
   }),
   columnHelper.accessor('firstName', {
-    header: 'First Name',
-    size: 120
+    header: 'First Name'
   }),
   columnHelper.accessor('lastName', {
-    header: 'Last Name',
-    size: 120
+    header: 'Last Name'
   }),
   columnHelper.accessor('company', {
-    header: 'Company',
-    size: 300
+    header: 'Company'
   }),
   columnHelper.accessor('city', {
     header: 'City'
   }),
   columnHelper.accessor('country', {
-    header: 'Country',
-    size: 220
+    header: 'Country'
   })
 ];
-
+const optionsForHistoryStatus = [' New Lead', 'Contact Establish', 'Technicle Meeting', 'Hold', 'Reject', 'Conform'];
+const optionsForTaskStatus = ['Not Started', 'On Going', 'Completed'];
+const coumnsForHistory = [
+  {
+    accessorKey: 'id',
+    header: 'Id'
+  },
+  {
+    accessorKey: 'date',
+    header: 'Date',
+    muiEditTextFieldProps: {
+      type: 'date',
+      required: true
+    }
+  },
+  {
+    accessorKey: 'description',
+    header: 'Lead Description',
+    enableEditing: true
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status',
+    editVariant: 'select',
+    editSelectOptions: optionsForHistoryStatus,
+    muiEditTextFieldProps: {
+      select: true
+    },
+    enableEditing: true
+  }
+];
+const coumnsForTask = [
+  {
+    accessorKey: 'id',
+    header: 'Id'
+  },
+  {
+    accessorKey: 'title',
+    header: 'Title'
+  },
+  {
+    accessorKey: 'description',
+    header: 'Description',
+    enableEditing: true
+  },
+  {
+    accessorKey: 'responsible',
+    header: 'Responsible',
+    enableEditing: true
+  },
+  {
+    accessorKey: 'remarks',
+    header: 'Remarks',
+    enableEditing: true
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status',
+    editVariant: 'select',
+    editSelectOptions: optionsForTaskStatus,
+    muiEditTextFieldProps: {
+      select: true
+    },
+    enableEditing: true
+  }
+];
 const csvConfig = mkConfig({
   fieldSeparator: ',',
   decimalSeparator: '.',
   useKeysAsHeaders: true
 });
+const dataForHistory = [
+  {
+    id: '123',
+    date: '12-09-2023',
+    description: 'description',
+    remarks: 'remarks',
+    status: 'status'
+  },
+  {
+    id: '123',
+    date: '12-09-2023',
+    description: 'description',
+    remarks: 'remarks',
+    status: 'status'
+  }
+];
+
+const Transition = forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
+
 const BusinessLeads = () => {
   const [view, setView] = useState({
     visible: false,
     mode: 'Initial' // 'add', 'edit', 'view'
   });
+  const [open, setOpen] = useState(false);
+  const handleDelete = () => {
+    setOpen(true);
+    console.log('open', open);
+  };
   const theme = useTheme();
   const handleExportData = () => {
     const csv = generateCsv(csvConfig)(data);
@@ -98,6 +224,7 @@ const BusinessLeads = () => {
       mode: 'View'
     });
   };
+
   const table = useMaterialReactTable({
     columns,
     data,
@@ -105,7 +232,7 @@ const BusinessLeads = () => {
     positionActionsColumn: 'last',
     renderRowActions: ({ row }) => (
       <div style={{ display: 'flex' }}>
-        <IconButton onClick={handleEdit}>
+        <IconButton onClick={handleDelete}>
           <DeleteRounded style={{ color: '#2196f3' }} />
         </IconButton>
         <IconButton onClick={handleView}>
@@ -147,9 +274,9 @@ const BusinessLeads = () => {
     //   </Box>
     // )
   });
-  const editable = useMaterialReactTable({
-    columns,
-    data: data,
+  const editableForHistory = useMaterialReactTable({
+    columns: coumnsForHistory,
+    data: dataForHistory,
     createDisplayMode: 'row', // ('modal', and 'custom' are also available)
     editDisplayMode: 'row', // ('modal', 'cell', 'table', and 'custom' are also available)
     enableEditing: true,
@@ -189,8 +316,8 @@ const BusinessLeads = () => {
       //   Create History
       // </Button>
       <div className="title-bar">
-        <div className="d-flex">
-          <p>red</p>
+        <div className="custum-header">
+          <p style={{ fontWeight: 'bold', fontSize: 'large' }}>History Creation</p>
           <ButtonBase sx={{ borderRadius: '12px' }}>
             <Avatar
               variant="rounded"
@@ -217,7 +344,107 @@ const BusinessLeads = () => {
       </div>
     )
   });
+  const editableForTask = useMaterialReactTable({
+    columns: coumnsForTask,
+    data: dataForHistory,
+    createDisplayMode: 'row', // ('modal', and 'custom' are also available)
+    editDisplayMode: 'row', // ('modal', 'cell', 'table', and 'custom' are also available)
+    enableEditing: true,
+    positionActionsColumn: 'last',
+    enableColumnFilters: false,
+    enableFilters: false,
+    enableDensityToggle: false,
+    enablePagination: false,
+    enableHiding: false,
+    enableFullScreenToggle: false,
+    getRowId: (row) => row.id,
+    onCreatingRowCancel: () => console.log('err'),
+    // onCreatingRowSave: handleCreateUser,
+    onEditingRowCancel: () => console.log('err'),
+    // onEditingRowSave: handleSaveUser,
+    renderRowActions: ({ row, table }) => (
+      <Box sx={{ display: 'flex', gap: '1rem' }}>
+        <Tooltip title="Edit">
+          <IconButton onClick={() => table.setEditingRow(row)}>
+            <ModeEditRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Delete">
+          <IconButton color="error" onClick={() => console.log('del')}>
+            <DeleteRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    ),
+    renderTopToolbarCustomActions: ({ table }) => (
+      // <Button
+      //   variant="contained"
+      //   onClick={() => {
+      //     table.setCreatingRow(true);
+      //   }}
+      // >
+      //   Create History
+      // </Button>
+      <div className="title-bar">
+        <div className="custum-header">
+          <p style={{ fontWeight: 'bold', fontSize: 'large' }}>Task Creation</p>
+          <ButtonBase sx={{ borderRadius: '12px' }}>
+            <Avatar
+              variant="rounded"
+              sx={{
+                ...theme.typography.commonAvatar,
+                ...theme.typography.mediumAvatar,
+                transition: 'all .2s ease-in-out',
+                background: theme.palette.secondary.light,
+                color: theme.palette.secondary.dark,
+                '&[aria-controls="menu-list-grow"],&:hover': {
+                  background: theme.palette.secondary.dark,
+                  color: theme.palette.secondary.light
+                }
+              }}
+              onClick={() => {
+                table.setCreatingRow(true);
+              }}
+              color="inherit"
+            >
+              <IconPlus />
+            </Avatar>
+          </ButtonBase>
+        </div>
+      </div>
+    )
+  });
+  const StyledTableCell = styled(TableCell)(({ theme }) => ({
+    [`&.${tableCellClasses.head}`]: {
+      backgroundColor: '#e3f2fd',
+      color: '#333'
+    },
+    [`&.${tableCellClasses.body}`]: {
+      fontSize: 14
+    }
+  }));
 
+  const StyledTableRow = styled(TableRow)(({ theme }) => ({
+    '&:nth-of-type(even)': {
+      backgroundColor: theme.palette.action.hover
+    },
+    // hide last border
+    '&:last-child td, &:last-child th': {
+      border: 0
+    }
+  }));
+
+  function createData(name, calories, fat, carbs) {
+    return { name, calories, fat, carbs };
+  }
+
+  const rows = [
+    createData('Frozen yoghurt', 159, 6.0, 24),
+    createData('Ice cream sandwich', 237, 9.0, 3),
+    createData('Eclair', 262, 16.0, 24),
+    createData('Cupcake', 305, 3.7, 67),
+    createData('Gingerbread', 356, 16.0, 49)
+  ];
   const handleToggle = () => {
     setView({
       visible: true,
@@ -230,6 +457,7 @@ const BusinessLeads = () => {
       mode: 'Initial'
     });
   };
+
   return (
     <div className="max">
       {view.mode === 'Add' && (
@@ -510,19 +738,324 @@ const BusinessLeads = () => {
             </Grid> */}
           </Grid>
           {/* <Divider /> */}
-          <Box p={5} className="edit-table-container">
-            <MaterialReactTable table={editable} />
+          <Box p={2} className="edit-table-container">
+            <MaterialReactTable table={editableForHistory} />
           </Box>
-          <Box p={5} className="edit-table-container">
-            <MaterialReactTable table={editable} />
+          <Box p={2} className="edit-table-container">
+            <MaterialReactTable table={editableForTask} />
           </Box>
           <Button variant="contained" style={{ float: 'right', margin: '2rem' }}>
             Save
           </Button>
         </MainCard>
       )}
+      {view.mode === 'View' && (
+        <>
+          <MainCard
+            title="Note"
+            secondary={
+              <Box
+                sx={{
+                  ml: 2,
+                  // mr: 3,
+                  [theme.breakpoints.down('md')]: {
+                    mr: 2
+                  }
+                }}
+              >
+                <ButtonBase sx={{ borderRadius: '12px' }}>
+                  <Avatar
+                    variant="rounded"
+                    sx={{
+                      ...theme.typography.commonAvatar,
+                      ...theme.typography.mediumAvatar,
+                      transition: 'all .2s ease-in-out',
+                      background: theme.palette.secondary.light,
+                      color: theme.palette.secondary.dark,
+                      '&[aria-controls="menu-list-grow"],&:hover': {
+                        background: theme.palette.secondary.dark,
+                        color: theme.palette.secondary.light
+                      }
+                    }}
+                    aria-haspopup="true"
+                    onClick={handleClose}
+                    color="inherit"
+                  >
+                    <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
+                  </Avatar>
+                </ButtonBase>
+              </Box>
+            }
+          >
+            <Grid container m={3}>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Project Number</label>
+                <p>001</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Date</label>
+                <p>23-09-2022</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Source</label>
+                <p>Website</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Pilot</label>
+                <p>Lakshmi</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Company Name</label>
+                <p>AB & Co</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Category</label>
+                <p>Automobile</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Contact Name</label>
+                <p>Krishna</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Department</label>
+                <p>Testing</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Phone Number</label>
+                <p>9876543210</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Email</label>
+                <p>abcd@gmail.com</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Business Verticle</label>
+                <p>Modeling</p>
+              </Grid>
+            </Grid>
+            <Grid container p={3}>
+              <Grid xs={4} p={2}>
+                <div className="history-container">
+                  <MainCard
+                    title="History"
+                    secondary={
+                      <Box
+                        sx={{
+                          ml: 2,
+                          // mr: 3,
+                          [theme.breakpoints.down('md')]: {
+                            mr: 2
+                          }
+                        }}
+                      >
+                        <ButtonBase sx={{ borderRadius: '12px' }}>
+                          <Avatar
+                            variant="rounded"
+                            sx={{
+                              ...theme.typography.commonAvatar,
+                              ...theme.typography.mediumAvatar,
+                              transition: 'all .2s ease-in-out',
+                              background: theme.palette.secondary.light,
+                              color: theme.palette.secondary.dark,
+                              '&[aria-controls="menu-list-grow"],&:hover': {
+                                background: theme.palette.secondary.dark,
+                                color: theme.palette.secondary.light
+                              }
+                            }}
+                            aria-haspopup="true"
+                            color="inherit"
+                          >
+                            <History stroke={2} size="1.3rem" />
+                          </Avatar>
+                        </ButtonBase>
+                      </Box>
+                    }
+                  >
+                    <Timeline>
+                      <TimelineItem>
+                        <TimelineOppositeContent style={{ display: 'none' }}></TimelineOppositeContent>
+                        <TimelineSeparator>
+                          <Tooltip title="New Lead" placement="top" arrow>
+                            <TimelineDot color="secondary">
+                              <PersonAdd />
+                            </TimelineDot>
+                          </Tooltip>
+                          <TimelineConnector />
+                        </TimelineSeparator>
+                        <TimelineContent>
+                          <Typography variant="h6" component="span" className="text-muted">
+                            23-01-2021
+                          </Typography>
+                          <li> New Lead is arrived from mannaran company</li>
+                        </TimelineContent>
+                      </TimelineItem>
+                      <TimelineItem>
+                        <TimelineOppositeContent style={{ display: 'none' }}></TimelineOppositeContent>
+                        <TimelineSeparator>
+                          <TimelineConnector />
+                          <Tooltip title="Contact Established" placement="top" arrow>
+                            <TimelineDot color="secondary">
+                              <ConnectWithoutContact />
+                            </TimelineDot>
+                          </Tooltip>
+                          <TimelineConnector />
+                        </TimelineSeparator>
+                        <TimelineContent>
+                          <Typography variant="h6" component="span" className="text-muted">
+                            25-01-20221
+                          </Typography>
+                          <Typography>Contact received</Typography>
+                        </TimelineContent>
+                      </TimelineItem>
+                      <TimelineItem>
+                        <TimelineOppositeContent style={{ display: 'none' }}></TimelineOppositeContent>
+                        <TimelineSeparator>
+                          <TimelineConnector />
+                          <Tooltip title="Technicle Meeting" placement="top" arrow>
+                            <TimelineDot color="secondary">
+                              <Group />
+                            </TimelineDot>
+                          </Tooltip>
+                          <TimelineConnector />
+                        </TimelineSeparator>
+                        <TimelineContent>
+                          <Typography variant="h6" component="span" className="text-muted">
+                            25-01-2021
+                          </Typography>
+                          <Typography>technicle Meeting Arranged</Typography>
+                        </TimelineContent>
+                      </TimelineItem>
+                      <TimelineItem>
+                        <TimelineOppositeContent style={{ display: 'none' }}></TimelineOppositeContent>
+                        <TimelineSeparator>
+                          <TimelineConnector />
+                          <Tooltip title="Hold" placement="top" arrow>
+                            <TimelineDot color="secondary">
+                              <NotStarted />
+                            </TimelineDot>
+                          </Tooltip>
+                          <TimelineConnector />
+                        </TimelineSeparator>
+                        <TimelineContent>
+                          <Typography variant="h6" component="span" className="text-muted">
+                            25-01-2021
+                          </Typography>
+                          <Typography>Because this is the life you love!</Typography>
+                        </TimelineContent>
+                      </TimelineItem>
+                      <TimelineItem>
+                        <TimelineOppositeContent style={{ display: 'none' }}></TimelineOppositeContent>
+                        <TimelineSeparator>
+                          <TimelineConnector sx={{ bgcolor: 'secondary.main' }} />
+                          <Tooltip title="Requirement Confirmed" placement="top" arrow>
+                            <TimelineDot color="secondary">
+                              <ThumbUpSharp />
+                            </TimelineDot>
+                          </Tooltip>
+                          <TimelineConnector />
+                        </TimelineSeparator>
+                        <TimelineContent>
+                          <Typography variant="h6" component="span" className="text-muted">
+                            26-01-2021
+                          </Typography>
+                          <Typography>Because this is the life you love!</Typography>
+                        </TimelineContent>
+                      </TimelineItem>
+                      <TimelineItem>
+                        <TimelineOppositeContent style={{ display: 'none' }}></TimelineOppositeContent>
+                        <TimelineSeparator>
+                          <TimelineConnector />
+                          <Tooltip title="Reject" placement="top" arrow>
+                            <TimelineDot color="secondary">
+                              <ThumbDown />
+                            </TimelineDot>
+                          </Tooltip>
+                          {/* <TimelineConnector /> */}
+                        </TimelineSeparator>
+                        <TimelineContent>
+                          <Typography variant="h6" component="span" className="text-muted">
+                            27-01-2021
+                          </Typography>
+                          <Typography>Because this is the life you love!</Typography>
+                        </TimelineContent>
+                      </TimelineItem>
+                    </Timeline>
+                  </MainCard>
+                </div>
+              </Grid>
+              <Grid xs={8} p={2}>
+                <div className="history-container">
+                  <MainCard
+                    title="Task"
+                    secondary={
+                      <Box
+                        sx={{
+                          ml: 2,
+                          // mr: 3,
+                          [theme.breakpoints.down('md')]: {
+                            mr: 2
+                          }
+                        }}
+                      >
+                        <ButtonBase sx={{ borderRadius: '12px' }}>
+                          <Avatar
+                            variant="rounded"
+                            sx={{
+                              ...theme.typography.commonAvatar,
+                              ...theme.typography.mediumAvatar,
+                              transition: 'all .2s ease-in-out',
+                              background: theme.palette.secondary.light,
+                              color: theme.palette.secondary.dark,
+                              '&[aria-controls="menu-list-grow"],&:hover': {
+                                background: theme.palette.secondary.dark,
+                                color: theme.palette.secondary.light
+                              }
+                            }}
+                            aria-haspopup="true"
+                            color="inherit"
+                          >
+                            <TaskAlt stroke={2} size="1.3rem" />
+                          </Avatar>
+                        </ButtonBase>
+                      </Box>
+                    }
+                  ></MainCard>
+                </div>
+              </Grid>
+            </Grid>
+          </MainCard>
+        </>
+      )}
+      <Dialog
+        fullWidth
+        open={open}
+        TransitionComponent={Transition}
+        keepMounted
+        // onClose={handleClose}
+        // aria-describedby="alert-dialog-slide-description"
+      >
+        <DialogTitle>
+          <Typography variant="h3">Delete Lead</Typography>
+        </DialogTitle>
+        <Divider />
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description" className="d-flex justify-content-center align-item-center">
+            <div className="bg-light rounded ">
+              <Delete style={{ fontSize: '32' }} />
+            </div>
+          </DialogContentText>
+          <Typography variant="h4" className="muted" display="block" gutterBottom style={{ textAlign: 'center' }} mt={2}>
+            Are you want to Delete ?
+          </Typography>
+        </DialogContent>
+        <DialogActions className="d-flex justify-content-center mb-1">
+          <Button variant="outlined" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          <Button variant="contained">Delete</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
-
 export default BusinessLeads;
