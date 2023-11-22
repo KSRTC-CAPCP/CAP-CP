@@ -4,6 +4,7 @@ import { useState } from 'react';
 // material-ui
 import { useTheme } from '@mui/material/styles';
 import {
+  Alert,
   Box,
   Button,
   Checkbox,
@@ -16,6 +17,7 @@ import {
   InputAdornment,
   InputLabel,
   OutlinedInput,
+  Snackbar,
   Stack,
   Typography
   // useMediaQuery
@@ -57,6 +59,20 @@ const FirebaseLogin = ({ ...others }) => {
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
+  const [state, setState] = useState({
+    open: false,
+    vertical: 'top',
+    horizontal: 'center'
+  });
+  const { vertical, horizontal, open } = state;
+
+  const handleClose = () => {
+    setState({ ...state, open: false });
+  };
+
+  const handleClick = (newState) => () => {
+    setState({ ...newState, open: true });
+  };
 
   return (
     <>
@@ -92,8 +108,8 @@ const FirebaseLogin = ({ ...others }) => {
 
       <Formik
         initialValues={{
-          email: 'admin@capcp.in',
-          password: '123456',
+          email: '',
+          password: '',
           submit: null
         }}
         validationSchema={Yup.object().shape({
@@ -119,15 +135,15 @@ const FirebaseLogin = ({ ...others }) => {
         {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
           <form noValidate onSubmit={handleSubmit} {...others}>
             <FormControl fullWidth error={Boolean(touched.email && errors.email)} sx={{ ...theme.typography.customInput }}>
-              <InputLabel htmlFor="outlined-adornment-email-login">Email Address</InputLabel>
+              <InputLabel htmlFor="outlined-adornment-email-login">User ID</InputLabel>
               <OutlinedInput
                 id="outlined-adornment-email-login"
-                type="email"
-                value={values.email}
-                name="email"
+                type="text"
+                value={values.userId}
+                name="userId"
                 onBlur={handleBlur}
                 onChange={handleChange}
-                label="Email Address / Username"
+                label="User ID"
                 inputProps={{}}
               />
               {touched.email && errors.email && (
@@ -175,9 +191,19 @@ const FirebaseLogin = ({ ...others }) => {
                 }
                 label="Remember me"
               />
-              <Typography variant="subtitle1" color="secondary" sx={{ textDecoration: 'none', cursor: 'pointer' }}>
-                Forgot Password?
+              <Typography
+                variant="subtitle1"
+                color="secondary"
+                sx={{ textDecoration: 'none', cursor: 'pointer' }}
+                onClick={handleClick({ vertical: 'top', horizontal: 'center' })}
+              >
+                Forgot Credentials?
               </Typography>
+              <Snackbar open={open} autoHideDuration={3000} onClose={handleClose} anchorOrigin={{ vertical, horizontal }}>
+                <Alert onClose={handleClose} severity="info" sx={{ width: '100%' }}>
+                  Contact your HR Manager for Credential Info...
+                </Alert>
+              </Snackbar>
             </Stack>
             {errors.submit && (
               <Box sx={{ mt: 3 }}>
