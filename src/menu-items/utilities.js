@@ -1,5 +1,5 @@
 // assets
-import { IconTypography, IconPalette, IconBusinessplan, IconShadow, IconWindmill } from '@tabler/icons';
+import { IconTypography, IconPalette, IconBusinessplan, IconShadow, IconWindmill, IconUser } from '@tabler/icons';
 
 // constant
 const icons = {
@@ -7,7 +7,9 @@ const icons = {
   IconPalette,
   IconShadow,
   IconWindmill,
-  IconBusinessplan
+  IconBusinessplan,
+  IconUser
+  
 };
 
 // ==============================|| UTILITIES MENU ITEMS ||============================== //
@@ -75,15 +77,32 @@ const utilities = {
         }
       ]
     },
+    // {
+    //   id: 'util-shadow',
+    //   title: 'Shadow',
+    //   type: 'item',
+    //   url: '/utils/util-shadow',
+    //   icon: icons.IconShadow,
+    //   breadcrumbs: false
+    // },
     {
-      id: 'util-shadow',
-      title: 'Shadow',
+      id: 'profiles',
+      title: 'Profiles',
       type: 'item',
-      url: '/utils/util-shadow',
-      icon: icons.IconShadow,
+      url: '/profile-page',
+      icon: icons.IconUser,
+      breadcrumbs: false
+    },
+    {
+      id: 'roles-access',
+      title: 'Roles Access',
+      type: 'item',
+      url: '/roles-access',
+      icon: icons.IconUser,
       breadcrumbs: false
     }
   ]
 };
 
 export default utilities;
+

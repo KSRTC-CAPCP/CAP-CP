@@ -28,7 +28,9 @@ import {
   DialogContentText,
   DialogActions,
   Slide,
-  Input
+  Input,
+  Card,
+  Badge
 } from '@mui/material';
 import React, { forwardRef } from 'react';
 import MainCard from 'ui-component/cards/MainCard';
@@ -38,20 +40,24 @@ import { MaterialReactTable, createMRTColumnHelper, useMaterialReactTable } from
 import { mkConfig, generateCsv, download } from 'export-to-csv';
 import {
   ConnectWithoutContact,
+  CreateTwoTone,
   Delete,
   DeleteRounded,
+  DeleteTwoTone,
   Group,
   History,
   KeyboardBackspaceRounded,
   Label,
   ModeEditRounded,
   NotStarted,
+  PeopleAltTwoTone,
   PersonAdd,
   TaskAlt,
   ThumbDown,
   ThumbDownAltSharp,
   ThumbUpSharp,
-  VisibilityRounded
+  VisibilityRounded,
+  VisibilityTwoTone
 } from '@mui/icons-material';
 import { useState } from 'react';
 import styled from '@emotion/styled';
@@ -64,8 +70,56 @@ import {
   TimelineOppositeContent,
   TimelineSeparator
 } from '@mui/lab';
+import { useMemo } from 'react';
 
 const columnHelper = createMRTColumnHelper();
+const dataTask = [
+  {
+    name: {
+      firstName: 'John',
+      lastName: 'Doe'
+    },
+    address: '261 Erdman Ford',
+    city: 'East Daphne',
+    state: 'Kentucky'
+  },
+  {
+    name: {
+      firstName: 'Jane',
+      lastName: 'Doe'
+    },
+    address: '769 Dominic Grove',
+    city: 'Columbus',
+    state: 'Ohio'
+  },
+  {
+    name: {
+      firstName: 'Joe',
+      lastName: 'Doe'
+    },
+    address: '566 Brakus Inlet',
+    city: 'South Linda',
+    state: 'West Virginia'
+  },
+  {
+    name: {
+      firstName: 'Kevin',
+      lastName: 'Vandy'
+    },
+    address: '722 Emie Stream',
+    city: 'Lincoln',
+    state: 'Nebraska'
+  },
+  {
+    name: {
+      firstName: 'Joshua',
+      lastName: 'Rolluffs'
+    },
+    address: '32188 Larkin Turnpike',
+    city: 'Charleston',
+    state: 'South Carolina'
+  }
+];
 const data = [
   {
     id: 1,
@@ -197,26 +251,94 @@ const Transition = forwardRef(function Transition(props, ref) {
 });
 
 const BusinessLeads = () => {
-
   const [inputValue, setInputValue] = useState('');
+  const [categoryOptions, setCategoryOptions] = useState([
+    { value: 'Option 1', label: 'Option 1' },
+    { value: 'Option 2', label: 'Option 2' },
+    { value: 'Option 3', label: 'Option 3' }
+  ]);
+
+  const [selectedOption, setSelectedOption] = useState('');
+  const [showSelect, setShowSelect] = useState(true);
+  const [customOption, setCustomOption] = useState('');
   const [options, setOptions] = useState([]);
   const [selectedValue, setSelectedValue] = useState('');
 
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
+  const fileInputRef = React.createRef();
+  const handleImportClick = () => {
+    fileInputRef.current.click();
   };
-
-  const handleAddOption = () => {
-    if (inputValue.trim() !== '') {
-      setOptions([...options, inputValue]);
-      setInputValue('');
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const parsedData = XLSX.utils.sheet_to_json(sheet);
+        await uploadToServer(parsedData);
+      };
+      reader.readAsArrayBuffer(file);
+    }
+  };
+  const uploadToServer = async (data) => {
+    try {
+      const response = await fetch('http://localhost:3001/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ data })
+      });
+      // Handle response if needed
+      console.log('Upload successful:', response);
+    } catch (error) {
+      console.error('Error uploading file:', error);
     }
   };
 
-  const handleSelectChange = (event) => {
-    setSelectedValue(event.target.value);
+  const handleSelectOnChange = (event) => {
+    const value = event.target.value;
+
+    // If "Add More Option" is selected, hide the select input and show the text input
+    if (value === 'addMore') {
+      setShowSelect(false);
+    } else {
+      setSelectedOption(value);
+      setShowSelect(true);
+    }
   };
 
+  const handleSelectInputChange = (event) => {
+    setCustomOption(event.target.value);
+  };
+
+  const handleSaveCustomOption = () => {
+    if (customOption.trim() !== '') {
+      const newOption = { value: customOption, label: customOption };
+      setCategoryOptions([...categoryOptions, newOption]);
+      setSelectedOption(customOption);
+      setCustomOption('');
+      setShowSelect(true);
+    }
+  };
+
+
+const handleAddOption = () => {
+  if (inputValue.trim() !== '') {
+    setOptions([...options, inputValue]);
+    setInputValue('');
+  }
+};
+
+const handleSelectChange = (event) => {
+  setSelectedValue(event.target.value);
+};
+
+
+  const customOptions = [...categoryOptions, { value: 'addMore', label: 'Add More Option' }];
 
   const [view, setView] = useState({
     visible: false,
@@ -255,13 +377,13 @@ const BusinessLeads = () => {
     renderRowActions: ({ row }) => (
       <div style={{ display: 'flex' }}>
         <IconButton onClick={handleDelete}>
-          <DeleteRounded style={{ color: '#2196f3' }} />
+          <DeleteTwoTone style={{ color: '#2196f3' }} />
         </IconButton>
         <IconButton onClick={handleView}>
-          <VisibilityRounded style={{ color: '#2196f3' }} />
+          <VisibilityTwoTone style={{ color: '#2196f3' }} />
         </IconButton>
         <IconButton onClick={handleEdit}>
-          <ModeEditRounded style={{ color: '#2196f3' }} />
+          <CreateTwoTone style={{ color: '#2196f3' }} />
         </IconButton>
       </div>
     ),
@@ -269,18 +391,26 @@ const BusinessLeads = () => {
     columnFilterDisplayMode: 'popover',
     paginationDisplayMode: 'pages',
     positionToolbarAlertBanner: 'bottom',
-    renderTopToolbarCustomActions: () => (
-      <>
-        <div style={{ marginLeft: '0.5rem' }}>
-          <Button onClick={handleExportData} variant="outlined" startIcon={<IconUpload />} style={{ marginRight: '1rem' }}>
-            Import
-          </Button>
-          <Button onClick={handleExportData} variant="outlined" startIcon={<IconDownload />}>
-            Export
-          </Button>
-        </div>
-      </>
-    )
+        renderTopToolbarCustomActions: () => (
+        <>
+          <div style={{ marginLeft: '0.5rem' }}>
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleFileUpload}
+              accept=".xls,.xlsx"
+            />
+            <Button variant="contained" style={{marginRight:'1rem'}} color="primary" onClick={handleImportClick} startIcon={<IconUpload />}>
+              Import
+            </Button>
+            <Button onClick={handleExportData} variant="contained" color="primary" startIcon={<IconDownload />}>
+              Export
+            </Button>
+          </div>
+        </>
+      )
+
     // renderRowActions: ({ row, table }) => (
     //   <Box sx={{ display: 'flex', gap: '1rem' }}>
     //     <Tooltip title="Edit">
@@ -687,7 +817,7 @@ const BusinessLeads = () => {
             <Grid xs={4} p={2}>
               <FormControl fullWidth>
                 <InputLabel id="demo-simple-select-label">Source</InputLabel>
-                <Select labelId="demo-simple-select-label" id="demo-simple-select" label="Age">
+                <Select labelId="demo-simple-select-label" id="demo-simple-select" label="">
                   <MenuItem value={'website'}>Website</MenuItem>
                   <MenuItem value={'Expo'}>Expo</MenuItem>
                   <MenuItem value={'Reference'}>Reference</MenuItem>
@@ -703,47 +833,39 @@ const BusinessLeads = () => {
               <TextField fullWidth id="outlined-basic" label="Company Name" variant="outlined" />
             </Grid>{' '}
             <Grid xs={4} p={2}>
-              <FormControl fullWidth>
-                <InputLabel id="demo-simple-select-label">Category</InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  label="Category"
-                  value={selectedValue}
-                  onChange={handleSelectChange}
-                >
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
-                  <MenuItem value={'website'}>Website</MenuItem>
-                  <MenuItem value={'Expo'}>Expo</MenuItem>
-                  <MenuItem value={'Reference'}>Reference</MenuItem>
-                  <MenuItem value={'coldcalls'}>Cold Calls</MenuItem>
-                  <MenuItem value={'others'}>Others</MenuItem>
-                  {options.map((option, index) => (
-                    <MenuItem key={index} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
-                </Select>
-                <Input
-                  type="text"
-                  value={inputValue}
-                  onChange={handleInputChange}
-                  placeholder="Type Here..."
-                  size="small"
-                />
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleAddOption}
-                  size="small"
-                  style={{ marginTop: '5px' }}
-                >
-                  Save
-                </Button>
-
-              </FormControl>
+              {showSelect ? (
+                <FormControl fullWidth>
+                  <InputLabel id="demo-simple-select-label">Category</InputLabel>
+                  <Select
+                    value={selectedOption}
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    fullWidth
+                    onChange={handleSelectOnChange}
+                    label="Select"
+                    placeholder="Select"
+                  >
+                    {customOptions.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              ) : (
+                <>
+                  <div style={{ display: 'flex' }}>
+                    <TextField
+                      type="text"
+                      fullWidth
+                      value={customOption}
+                      onChange={handleSelectInputChange}
+                      placeholder="Enter custom option"
+                    />
+                    <Button onClick={handleSaveCustomOption}>Save</Button>
+                  </div>
+                </>
+              )}
             </Grid>
             <Grid xs={4} p={2}>
               <TextField fullWidth id="outlined-basic" label="Contact Name" variant="outlined" />
@@ -1072,7 +1194,37 @@ const BusinessLeads = () => {
                         </ButtonBase>
                       </Box>
                     }
-                  ></MainCard>
+                  >
+                    <Card sx={{ margin: '1rem', padding: '1rem' }} className="card-hover">
+                      <div className="d-flex justify-content-between">
+                        <div className="d-flex">
+                          <Avatar sx={{ bgcolor: '#ede7f6', color: '#5e35b1' }}>S</Avatar>
+                          <div className="ms-1">
+                            <p className="avatar-name">Sowmya</p>
+                            <p className="text-muted-light d-flex align-item-center mt-1">
+                              <p className="text-muted-light m-0">#TECH123</p> &nbsp;/
+                              <PeopleAltTwoTone style={{ fontSize: 'medium' }} />
+                              <span className="ms-01"> Team</span>
+                            </p>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-muted-light m-0">12-02-2020 </p>
+                          <p className="badge-success">Completed</p>
+                        </div>
+                      </div>
+                      <div className="mt-2 ms-1">
+                        <p className="text-muted m-0">Title</p>
+                        <p className="">
+                          <span> Use the neural RSS application, then you can program the bluetooth firewall! #DOO</span>
+                        </p>
+                        <p className="text-muted m-0">Remarks</p>
+                        <p className="">
+                          <span> Use the neural RSS application, then you can program the bluetooth firewall! #DOO</span>
+                        </p>
+                      </div>
+                    </Card>
+                  </MainCard>
                 </div>
               </Grid>
             </Grid>
@@ -1084,8 +1236,8 @@ const BusinessLeads = () => {
         open={open}
         TransitionComponent={Transition}
         keepMounted
-      // onClose={handleClose}
-      // aria-describedby="alert-dialog-slide-description"
+        // onClose={handleClose}
+        // aria-describedby="alert-dialog-slide-description"
       >
         <DialogTitle>
           <Typography variant="h3">Delete Lead</Typography>
@@ -1093,7 +1245,7 @@ const BusinessLeads = () => {
         <Divider />
         <DialogContent>
           <DialogContentText id="alert-dialog-slide-description" className="d-flex justify-content-center align-item-center">
-            <div className="bg-light rounded ">
+            <div className="bg-red rounded ">
               <Delete style={{ fontSize: '32' }} />
             </div>
           </DialogContentText>

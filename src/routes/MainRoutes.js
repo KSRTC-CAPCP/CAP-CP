@@ -3,8 +3,11 @@ import { lazy } from 'react';
 // project imports
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
-import RFQ from 'views/logics/rfq';
-import Projects from 'views/logics/project';
+import Projects from 'views/profiles';
+import Profiles from 'views/project';
+import Access from 'views/access';
+import BusinessRFQ from 'views/rfq';
+
 // import BusinessLeads from 'views/logics';
 
 // dashboard routing
@@ -82,7 +85,7 @@ const MainRoutes = {
       children: [
         {
           path: 'rfq',
-          element: <RFQ />
+          element: <BusinessRFQ />
         }
       ]
     },
@@ -107,6 +110,14 @@ const MainRoutes = {
     {
       path: 'sample-page',
       element: <SamplePage />
+    },
+    {
+      path: 'profile-page',
+      element: <Profiles />
+    },
+    {
+      path: '/roles-access',
+      element: <Access />
     }
   ]
 };
