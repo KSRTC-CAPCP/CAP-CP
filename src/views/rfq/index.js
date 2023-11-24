@@ -71,107 +71,156 @@ import {
    const columnHelper = createMRTColumnHelper();
    const data = [
      {
-       id: 1,
-       firstName: 'Elenora',
-       lastName: 'Wilkinson',
-       company: 'Feest - Reilly',
-       city: 'Hertaland',
-       country: 'Qatar'
+      date: '02-04-2001',
+      source: 'Berneice',
+      pilot: 'Feil',
+      companyname: 'Deckow, Leuschke and Jaskolski',
+      category: 'Millcreek',
+      contactname: 'Nepal',
+      department: 'Nepal',
+      phonenumber: 'Nepal',
+      email: 'Nepal',
+      businessverticle: 'Nepal',
+      rfqdescription: 'Nepal',
+      status: 'Nepal'
      },
      {
-       id: 2,
-       firstName: 'Berneice',
-       lastName: 'Feil',
-       company: 'Deckow, Leuschke and Jaskolski',
-       city: 'Millcreek',
-       country: 'Nepal'
+      date: '02-04-2001',
+      source: 'Berneice',
+      pilot: 'Feil',
+      companyname: 'Deckow, Leuschke and Jaskolski',
+      category: 'Millcreek',
+      contactname: 'Nepal',
+      department: 'Nepal',
+      phonenumber: 'Nepal',
+      email: 'Nepal',
+      businessverticle: 'Nepal',
+      rfqdescription: 'Nepal',
+      status: 'Nepal'
      }
    ];
    const columns = [
-     columnHelper.accessor('id', {
-       header: 'ID'
-     }),
-     columnHelper.accessor('firstName', {
-       header: 'First Name'
-     }),
-     columnHelper.accessor('lastName', {
-       header: 'Last Name'
-     }),
-     columnHelper.accessor('company', {
-       header: 'Company'
-     }),
-     columnHelper.accessor('city', {
-       header: 'City'
-     }),
-     columnHelper.accessor('country', {
-       header: 'Country'
-     })
+    columnHelper.accessor('date', {
+      header: 'Date'
+    }),
+    columnHelper.accessor('source', {
+      header: 'Source'
+    }),
+    columnHelper.accessor('pilot', {
+      header: 'Pilot'
+    }),
+    columnHelper.accessor('companyname', {
+      header: 'Company Name'
+    }),
+    columnHelper.accessor('category', {
+      header: 'Category'
+    }),
+    columnHelper.accessor('contactname', {
+      header: 'Contact Name'
+    }),
+    columnHelper.accessor('department', {
+      header: 'Department'
+    }),
+    columnHelper.accessor('phonenumber', {
+      header: 'Phone Number'
+    }),
+    columnHelper.accessor('email', {
+      header: 'Email'
+    }),
+    columnHelper.accessor('businessverticle', {
+      header: 'Business Verticle'
+    }),
+    columnHelper.accessor('rfqdescription', {
+      header: 'RFQ Description'
+    }),
+    columnHelper.accessor('status', {
+      header: 'Status'
+    })
    ];
+   const optionsForHistoryApproval = ['Pending', 'Approval', 'Reject'];
    const optionsForHistoryStatus = [' New RFQ', 'Tech Meet Done', 'TCO Sumbited', 'Negotiation', 'Business Awarded', 'Lost'];
    const optionsForTaskStatus = ['Not Started', 'On Going', 'Completed'];
    const coumnsForHistory = [
-     {
-       accessorKey: 'id',
-       header: 'Id'
-     },
-     {
-       accessorKey: 'date',
-       header: 'Date',
-       muiEditTextFieldProps: {
-         type: 'date',
-         required: true
-       }
-     },
-     {
-       accessorKey: 'description',
-       header: 'Lead Description',
-       enableEditing: true
-     },
-     {
-       accessorKey: 'status',
-       header: 'Status',
-       editVariant: 'select',
-       editSelectOptions: optionsForHistoryStatus,
-       muiEditTextFieldProps: {
-         select: true
-       },
-       enableEditing: true
-     }
+    {
+      accessorKey: 'date',
+      header: 'Date',
+      muiEditTextFieldProps: {
+        type: 'date',
+        required: true
+      }
+    },
+    {
+      accessorKey: 'description',
+      header: 'Lead Description',
+      enableEditing: true
+    },
+    {
+      accessorKey: 'requeststatus',
+      header: 'Request Status',
+      editVariant: 'select',
+      editSelectOptions: optionsForHistoryStatus,
+      muiEditTextFieldProps: {
+        select: true
+      },
+      enableEditing: true
+    },
+    {
+      accessorKey: 'approvalstatus',
+      header: 'Approval Status',
+      editVariant: 'select',
+      editSelectOptions: optionsForHistoryApproval,
+      muiEditTextFieldProps: {
+        select: true
+      },
+      enableEditing: true
+    }
    ];
    const coumnsForTask = [
-     {
-       accessorKey: 'id',
-       header: 'Id'
-     },
-     {
-       accessorKey: 'title',
-       header: 'Title'
-     },
-     {
-       accessorKey: 'description',
-       header: 'Description',
-       enableEditing: true
-     },
-     {
-       accessorKey: 'responsible',
-       header: 'Responsible',
-       enableEditing: true
-     },
-     {
-       accessorKey: 'remarks',
-       header: 'Remarks',
-       enableEditing: true
-     },
-     {
-       accessorKey: 'status',
-       header: 'Status',
-       editVariant: 'select',
-       editSelectOptions: optionsForTaskStatus,
-       muiEditTextFieldProps: {
-         select: true
-       },
-       enableEditing: true
-     }
+    {
+      accessorKey: 'title',
+      header: 'Title'
+    },
+    {
+      accessorKey: 'description',
+      header: 'Description',
+      enableEditing: true
+    },
+    {
+      accessorKey: 'responsible',
+      header: 'Responsible',
+      enableEditing: true
+    },
+    {
+      accessorKey: 'remarks',
+      header: 'Remarks',
+      enableEditing: true
+    },
+    {
+      accessorKey: 'assigneddate',
+      header: 'Assigned Date',
+      muiEditTextFieldProps: {
+        type: 'date',
+        required: true
+      }
+    },
+    {
+      accessorKey: 'targetdate',
+      header: 'Target Date',
+      muiEditTextFieldProps: {
+        type: 'date',
+        required: true
+      }
+    },
+    {
+      accessorKey: 'status',
+      header: 'Status',
+      editVariant: 'select',
+      editSelectOptions: optionsForTaskStatus,
+      muiEditTextFieldProps: {
+        select: true
+      },
+      enableEditing: true
+    }
    ];
    const csvConfig = mkConfig({
      fieldSeparator: ',',
@@ -179,20 +228,24 @@ import {
      useKeysAsHeaders: true
    });
    const dataForHistory = [
-     {
-       id: '123',
-       date: '12-09-2023',
-       description: 'description',
-       remarks: 'remarks',
-       status: 'status'
-     },
-     {
-       id: '123',
-       date: '12-09-2023',
-       description: 'description',
-       remarks: 'remarks',
-       status: 'status'
-     }
+    {
+      // id: '123',
+      date: '12-09-2023',
+      description: 'description',
+      remarks: 'remarks',
+      status: 'status',
+      assigneddate:'2-04-2001',
+      targetdate:'27-04-2001'
+    },
+    {
+      // id: '123',
+      date: '12-09-2023',
+      description: 'description',
+      remarks: 'remarks',
+      status: 'status',
+      assigneddate:'2-04-2001',
+      targetdate:'27-04-2001'
+    }
    ];
    
    const Transition = forwardRef(function Transition(props, ref) {
@@ -241,6 +294,22 @@ import {
        }
      };
    
+
+
+     const [showAdditionalSelect, setShowAdditionalSelect] = useState(false);
+     const [selectedOption, setSelectedOption] = useState('');
+   
+     const handleSelectChanged = (event) => {
+       setSelectedOption(event.target.value);
+   
+       // Check if 'RFQ From Lead' is selected, then show the additional Select
+       if (event.target.value === 'rfqfromlead') {
+         setShowAdditionalSelect(true);
+       } else {
+         setShowAdditionalSelect(false);
+       }
+     };
+
      const [inputValue, setInputValue] = useState('');
      const [options, setOptions] = useState([]);
      const [selectedValue, setSelectedValue] = useState('');
@@ -569,6 +638,39 @@ import {
              }
            >
              <Grid container>
+             <Grid item xs={4} p={2}>
+        <FormControl fullWidth>
+          <InputLabel id="demo-simple-select-label">RFQ</InputLabel>
+          <Select
+            labelId="demo-simple-select-label"
+            id="demo-simple-select"
+            label="Age"
+            value={selectedOption}
+            onChange={handleSelectChanged}
+            style={{ backgroundColor: 'lightgray' }}
+          >
+            <MenuItem value={'rfqfromlead'}>RFQ From Lead</MenuItem>
+            <MenuItem value={'createnewrfq'}>Create New RFQ</MenuItem>
+          </Select>
+        </FormControl>
+      </Grid>
+      {showAdditionalSelect && (
+        <Grid item xs={4} p={2}>
+          <FormControl fullWidth>
+            {/* Additional Select */}
+            <InputLabel id="additional-select-label">Select Lead</InputLabel>
+            <Select
+              labelId="additional-select-label"
+              id="additional-select"
+              label="Additional Option"
+              style={{ backgroundColor: 'lightgray' }}
+            >
+              <MenuItem value={'option1'}>Option 1</MenuItem>
+              <MenuItem value={'option2'}>Option 2</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+      )}
                <Grid xs={4} p={2}>
                  <TextField fullWidth type="date" variant="outlined" name="dob" className="w-100" />
                </Grid>
@@ -638,18 +740,19 @@ import {
                    <InputLabel id="demo-simple-select-label">Status</InputLabel>
                    <Select labelId="demo-simple-select-label" id="demo-simple-select" label="status">
                      <MenuItem value={'newlead'}>New RFQ</MenuItem>
-                     <MenuItem value={'contactEstablish'}>Tech Meet Done</MenuItem>
+                     {/* <MenuItem value={'contactEstablish'}>Tech Meet Done</MenuItem>
                      <MenuItem value={'technicleMeeting'}>TCO Submited</MenuItem>
                      <MenuItem value={'requirementConfirm'}>Negotiation</MenuItem>
                      <MenuItem value={'hold'}>Business Awarded</MenuItem>
-                     <MenuItem value={'reject'}>Lost</MenuItem>
+                     <MenuItem value={'reject'}>Lost</MenuItem> */}
                    </Select>
                  </FormControl>
                </Grid>
-               <Grid xs={4} p={2}>
+              
+               {/* <Grid xs={4} p={2}>
                  <TextField fullWidth id="outlined-basic" label="TCO No" variant="outlined" />
-               </Grid>
-               <Grid xs={4} p={2}>
+               </Grid> */}
+               {/* <Grid xs={4} p={2}>
                  <TextField
                    fullWidth
                   
@@ -664,7 +767,7 @@ import {
                      ),
                    }}
                  />
-               </Grid>
+               </Grid> */}
              </Grid>
    
              <Button variant="contained" style={{ float: 'right', margin: '2rem' }}>

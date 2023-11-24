@@ -79,25 +79,27 @@ import {
    const columnHelper = createMRTColumnHelper();
    const data = [
      {
-       proNo: 111,
+      rfqNo: 111,
        startDate: '22-04-2022',
        endDate: '23-08-2023',
        projectTeamAllocation: 'Rose Team',
        PONO: 'yes',
-       No: '1234'
+       No: '1234',
+       companyname:'abc'
      },
      {
-       proNo: 222,
+      rfqNo: 222,
        startDate: '22-04-2022',
        endDate: '23-08-2023',
        projectTeamAllocation: 'Rose Team',
        PONO: 'yes',
-       No: '1234'
+       No: '1234',
+       companyname:'abc'
      }
    ];
    const columns = [
-     columnHelper.accessor('proNo', {
-       header: 'Project No'
+     columnHelper.accessor('rfqNo', {
+       header: 'RFQ No'
      }),
      columnHelper.accessor('startDate', {
        header: 'Start Date'
@@ -113,73 +115,95 @@ import {
      }),
      columnHelper.accessor('No', {
        header: 'No'
-     })
+     }),
+     columnHelper.accessor('companyname', {
+      header: 'Company Name'
+    })
    ];
+   const optionsForHistoryApproval = ['Pending', 'Approval', 'Reject'];
    const optionsForHistoryStatus = [' OnGoing', 'Customer Review', 'Internal Review', 'Complete', 'Hold'];
    const optionsForTaskStatus = ['Not Started', 'On Going', 'Completed'];
    const coumnsForHistory = [
-     {
-       accessorKey: 'id',
-       header: 'Id'
-     },
-     {
-       accessorKey: 'date',
-       header: 'Date',
-       muiEditTextFieldProps: {
-         type: 'date',
-         required: true
-       }
-     },
-     {
-       accessorKey: 'description',
-       header: 'Lead Description',
-       enableEditing: true
-     },
-     {
-       accessorKey: 'status',
-       header: 'Status',
-       editVariant: 'select',
-       editSelectOptions: optionsForHistoryStatus,
-       muiEditTextFieldProps: {
-         select: true
-       },
-       enableEditing: true
-     }
+    {
+      accessorKey: 'date',
+      header: 'Date',
+      muiEditTextFieldProps: {
+        type: 'date',
+        required: true
+      }
+    },
+    {
+      accessorKey: 'description',
+      header: 'Lead Description',
+      enableEditing: true
+    },
+    {
+      accessorKey: 'requeststatus',
+      header: 'Request Status',
+      editVariant: 'select',
+      editSelectOptions: optionsForHistoryStatus,
+      muiEditTextFieldProps: {
+        select: true
+      },
+      enableEditing: true
+    },
+    {
+      accessorKey: 'approvalstatus',
+      header: 'Approval Status',
+      editVariant: 'select',
+      editSelectOptions: optionsForHistoryApproval,
+      muiEditTextFieldProps: {
+        select: true
+      },
+      enableEditing: true
+    }
    ];
    const coumnsForTask = [
-     {
-       accessorKey: 'id',
-       header: 'Id'
-     },
-     {
-       accessorKey: 'title',
-       header: 'Title'
-     },
-     {
-       accessorKey: 'description',
-       header: 'Description',
-       enableEditing: true
-     },
-     {
-       accessorKey: 'responsible',
-       header: 'Responsible',
-       enableEditing: true
-     },
-     {
-       accessorKey: 'remarks',
-       header: 'Remarks',
-       enableEditing: true
-     },
-     {
-       accessorKey: 'status',
-       header: 'Status',
-       editVariant: 'select',
-       editSelectOptions: optionsForTaskStatus,
-       muiEditTextFieldProps: {
-         select: true
-       },
-       enableEditing: true
-     }
+    {
+      accessorKey: 'title',
+      header: 'Title'
+    },
+    {
+      accessorKey: 'description',
+      header: 'Description',
+      enableEditing: true
+    },
+    {
+      accessorKey: 'responsible',
+      header: 'Responsible',
+      enableEditing: true
+    },
+    {
+      accessorKey: 'remarks',
+      header: 'Remarks',
+      enableEditing: true
+    },
+    {
+      accessorKey: 'assigneddate',
+      header: 'Assigned Date',
+      muiEditTextFieldProps: {
+        type: 'date',
+        required: true
+      }
+    },
+    {
+      accessorKey: 'targetdate',
+      header: 'Target Date',
+      muiEditTextFieldProps: {
+        type: 'date',
+        required: true
+      }
+    },
+    {
+      accessorKey: 'status',
+      header: 'Status',
+      editVariant: 'select',
+      editSelectOptions: optionsForTaskStatus,
+      muiEditTextFieldProps: {
+        select: true
+      },
+      enableEditing: true
+    }
    ];
    const csvConfig = mkConfig({
      fieldSeparator: ',',
@@ -188,18 +212,20 @@ import {
    });
    const dataForHistory = [
      {
-       id: '123',
-       date: '12-09-2023',
-       description: 'description',
-       remarks: 'remarks',
-       status: 'status'
+      date: '12-09-2023',
+      description: 'description',
+      remarks: 'remarks',
+      status: 'status',
+      assigneddate:'2-04-2001',
+      targetdate:'27-04-2001'
      },
      {
-       id: '123',
-       date: '12-09-2023',
-       description: 'description',
-       remarks: 'remarks',
-       status: 'status'
+      date: '12-09-2023',
+      description: 'description',
+      remarks: 'remarks',
+      status: 'status',
+      assigneddate:'2-04-2001',
+      targetdate:'27-04-2001'
      }
    ];
    
@@ -604,10 +630,10 @@ import {
            >
              <Grid container>
                <Grid xs={4} p={2}>
-                 <TextField fullWidth id="outlined-basic" label="Project No" variant="outlined" />
+                 <TextField fullWidth id="outlined-basic" label="RFQ No" variant="outlined" />
                </Grid>
                <Grid xs={4} p={2}>
-                 <TextField fullWidth id="outlined-basic" label="Customer Name" variant="outlined" />
+                 <TextField fullWidth id="outlined-basic" label="Company Name" variant="outlined" />
                </Grid>
                <Grid xs={4} p={2}>
                  <DateRangePicker

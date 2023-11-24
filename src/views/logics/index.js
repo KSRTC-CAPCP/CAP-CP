@@ -122,49 +122,80 @@ const dataTask = [
 ];
 const data = [
   {
-    id: 1,
-    firstName: 'Elenora',
-    lastName: 'Wilkinson',
-    company: 'Feest - Reilly',
-    city: 'Hertaland',
-    country: 'Qatar'
+    date: '02-04-2001',
+    source: 'Berneice',
+    pilot: 'Feil',
+    companyname: 'Deckow, Leuschke and Jaskolski',
+    category: 'Millcreek',
+    contactname: 'Nepal',
+    department: 'Nepal',
+    phonenumber: 'Nepal',
+    email: 'Nepal',
+    businessverticle: 'Nepal',
+    leaddescription: 'Nepal',
+    status: 'Nepal'
   },
   {
-    id: 2,
-    firstName: 'Berneice',
-    lastName: 'Feil',
-    company: 'Deckow, Leuschke and Jaskolski',
-    city: 'Millcreek',
-    country: 'Nepal'
+    date: '02-04-2001',
+    source: 'Berneice',
+    pilot: 'Feil',
+    companyname: 'Deckow, Leuschke and Jaskolski',
+    category: 'Millcreek',
+    contactname: 'Nepal',
+    department: 'Nepal',
+    phonenumber: 'Nepal',
+    email: 'Nepal',
+    businessverticle: 'Nepal',
+    leaddescription: 'Nepal',
+    status: 'Nepal'
   }
 ];
 const columns = [
-  columnHelper.accessor('id', {
-    header: 'ID'
+  columnHelper.accessor('date', {
+    header: 'Date'
   }),
-  columnHelper.accessor('firstName', {
-    header: 'First Name'
+  columnHelper.accessor('source', {
+    header: 'Source'
   }),
-  columnHelper.accessor('lastName', {
-    header: 'Last Name'
+  columnHelper.accessor('pilot', {
+    header: 'Pilot'
   }),
-  columnHelper.accessor('company', {
-    header: 'Company'
+  columnHelper.accessor('companyname', {
+    header: 'Company Name'
   }),
-  columnHelper.accessor('city', {
-    header: 'City'
+  columnHelper.accessor('category', {
+    header: 'Category'
   }),
-  columnHelper.accessor('country', {
-    header: 'Country'
+  columnHelper.accessor('contactname', {
+    header: 'Contact Name'
+  }),
+  columnHelper.accessor('department', {
+    header: 'Department'
+  }),
+  columnHelper.accessor('phonenumber', {
+    header: 'Phone Number'
+  }),
+  columnHelper.accessor('email', {
+    header: 'Email'
+  }),
+  columnHelper.accessor('businessverticle', {
+    header: 'Business Verticle'
+  }),
+  columnHelper.accessor('leaddescription', {
+    header: 'Lead Description'
+  }),
+  columnHelper.accessor('status', {
+    header: 'Status'
   })
 ];
+const optionsForHistoryApproval = ['Pending', 'Approval', 'Reject'];
 const optionsForHistoryStatus = [' New Lead', 'Contact Establish', 'Technicle Meeting', 'Hold', 'Reject', 'Conform'];
 const optionsForTaskStatus = ['Not Started', 'On Going', 'Completed'];
 const coumnsForHistory = [
-  {
-    accessorKey: 'id',
-    header: 'Id'
-  },
+  // {
+  //   accessorKey: 'id',
+  //   header: 'Id'
+  // },
   {
     accessorKey: 'date',
     header: 'Date',
@@ -179,10 +210,20 @@ const coumnsForHistory = [
     enableEditing: true
   },
   {
-    accessorKey: 'status',
-    header: 'Status',
+    accessorKey: 'requeststatus',
+    header: 'Request Status',
     editVariant: 'select',
     editSelectOptions: optionsForHistoryStatus,
+    muiEditTextFieldProps: {
+      select: true
+    },
+    enableEditing: true
+  },
+  {
+    accessorKey: 'approvalstatus',
+    header: 'Approval Status',
+    editVariant: 'select',
+    editSelectOptions: optionsForHistoryApproval,
     muiEditTextFieldProps: {
       select: true
     },
@@ -190,10 +231,10 @@ const coumnsForHistory = [
   }
 ];
 const coumnsForTask = [
-  {
-    accessorKey: 'id',
-    header: 'Id'
-  },
+  // {
+  //   accessorKey: 'id',
+  //   header: 'Id'
+  // },
   {
     accessorKey: 'title',
     header: 'Title'
@@ -214,6 +255,22 @@ const coumnsForTask = [
     enableEditing: true
   },
   {
+    accessorKey: 'assigneddate',
+    header: 'Assigned Date',
+    muiEditTextFieldProps: {
+      type: 'date',
+      required: true
+    }
+  },
+  {
+    accessorKey: 'targetdate',
+    header: 'Target Date',
+    muiEditTextFieldProps: {
+      type: 'date',
+      required: true
+    }
+  },
+  {
     accessorKey: 'status',
     header: 'Status',
     editVariant: 'select',
@@ -231,18 +288,22 @@ const csvConfig = mkConfig({
 });
 const dataForHistory = [
   {
-    id: '123',
+    // id: '123',
     date: '12-09-2023',
     description: 'description',
     remarks: 'remarks',
-    status: 'status'
+    status: 'status',
+    assigneddate:'2-04-2001',
+    targetdate:'27-04-2001'
   },
   {
-    id: '123',
+    // id: '123',
     date: '12-09-2023',
     description: 'description',
     remarks: 'remarks',
-    status: 'status'
+    status: 'status',
+    assigneddate:'2-04-2001',
+    targetdate:'27-04-2001'
   }
 ];
 
@@ -719,11 +780,11 @@ const handleSelectChange = (event) => {
                 <InputLabel id="demo-simple-select-label">Status</InputLabel>
                 <Select labelId="demo-simple-select-label" id="demo-simple-select" label="status">
                   <MenuItem value={'newlead'}>New Lead</MenuItem>
-                  <MenuItem value={'contactEstablish'}>Contact Establish</MenuItem>
+                  {/* <MenuItem value={'contactEstablish'}>Contact Establish</MenuItem>
                   <MenuItem value={'technicleMeeting'}>Technicle Meeting</MenuItem>
                   <MenuItem value={'requirementConfirm'}>Requirement Confirm</MenuItem>
                   <MenuItem value={'hold'}>Hold</MenuItem>
-                  <MenuItem value={'reject'}>Reject</MenuItem>
+                  <MenuItem value={'reject'}>Reject</MenuItem> */}
                 </Select>
               </FormControl>
             </Grid>
