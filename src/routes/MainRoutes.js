@@ -3,10 +3,10 @@ import { lazy } from 'react';
 // project imports
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
-import Projects from 'views/profiles';
 import Profiles from 'views/project';
 import Access from 'views/access';
-import BusinessRFQ from 'views/rfq';
+import BusinessRFQ from 'views/logics/rfq';
+import Projects from 'views/logics/project';
 
 // import BusinessLeads from 'views/logics';
 
@@ -112,7 +112,7 @@ const MainRoutes = {
       element: <SamplePage />
     },
     {
-      path: 'profile-page',
+      path: 'profile',
       element: <Profiles />
     },
     {
