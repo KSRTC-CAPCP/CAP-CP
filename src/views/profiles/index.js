@@ -123,6 +123,9 @@ import {
    const optionsForHistoryApproval = ['Pending', 'Approval', 'Reject'];
    const optionsForHistoryStatus = [' OnGoing', 'Customer Review', 'Internal Review', 'Complete', 'Hold'];
    const optionsForTaskStatus = ['Not Started', 'On Going', 'Completed'];
+   const optionsForproject = ['CAE0001', 'CAE0002', 'CAE0003'];
+   const optionsForteamproject = ['IT Team', 'Finance Team', 'Teardown Team'];
+   const optionsForlocation = ['Thiruvallur', 'Ambattur'];
    const coumnsForHistory = [
     {
       accessorKey: 'date',
@@ -158,6 +161,69 @@ import {
       enableEditing: true
     }
    ];
+
+   const coumnsForproject = [
+    {
+      accessorKey: 'empcode',
+      header: 'Employee Code',
+      editVariant: 'select',
+      editSelectOptions: optionsForproject,
+      muiEditTextFieldProps: {
+        select: true
+      },
+      enableEditing: true
+    },
+    {
+      accessorKey: 'name',
+      header: 'Name',
+      enableEditing: true
+    },
+    {
+      accessorKey: 'fromdate',
+      header: 'From Date',
+      muiEditTextFieldProps: {
+        type: 'date',
+        required: true
+      }
+    },
+    {
+      accessorKey: 'todate',
+      header: 'To Date',
+      muiEditTextFieldProps: {
+        type: 'date',
+        required: true
+      }
+    },
+    {
+      accessorKey: 'percentage',
+      header: 'Percentage',
+      enableEditing: true
+    },
+   
+    {
+      accessorKey: 'team',
+      header: 'Team',
+      editVariant: 'select',
+      editSelectOptions: optionsForteamproject,
+      muiEditTextFieldProps: {
+        select: true
+      },
+      enableEditing: true
+    },
+    {
+      accessorKey: 'location',
+      header: 'Location',
+      editVariant: 'select',
+      editSelectOptions: optionsForlocation,
+      muiEditTextFieldProps: {
+        select: true
+      },
+      enableEditing: true
+    },
+    
+   ];
+
+
    const coumnsForTask = [
     {
       accessorKey: 'title',
@@ -205,6 +271,10 @@ import {
       enableEditing: true
     }
    ];
+
+
+
+   
    const csvConfig = mkConfig({
      fieldSeparator: ',',
      decimalSeparator: '.',
@@ -228,6 +298,30 @@ import {
       targetdate:'27-04-2001'
      }
    ];
+
+
+
+   const dataForproject = [
+    {
+      empcode: 'CAE0001',
+      name: 'Ram',
+      fromdate: '21-02-2001',
+      todate: '21-05-2001',
+      percentage:'50%',
+      team:'IT Team',
+      location:'Chennai',
+     
+    },
+    {
+      empcode: 'CAE0002',
+      name: 'Anbu',
+      fromdate: '21-02-2001',
+      todate: '21-05-2001',
+      percentage:'50%',
+      team:'IT Team',
+      location:'Chennai'
+    }
+  ];
    
    const Transition = forwardRef(function Transition(props, ref) {
      return <Slide direction="up" ref={ref} {...props} />;
@@ -294,7 +388,7 @@ import {
            body: JSON.stringify({ data }),
          });
    
-         // Handle response if needed
+         
          console.log('Upload successful:', response);
        } catch (error) {
          console.error('Error uploading file:', error);
@@ -322,7 +416,7 @@ import {
    
      const [view, setView] = useState({
        visible: false,
-       mode: 'Initial' // 'add', 'edit', 'view'
+       mode: 'Initial' 
      });
      const [open, setOpen] = useState(false);
      const handleDelete = () => {
@@ -348,6 +442,8 @@ import {
          mode: 'View'
        });
      };
+
+    
    
      const table = useMaterialReactTable({
        columns,
@@ -390,26 +486,14 @@ import {
            </div>
          </>
        )
-       // renderRowActions: ({ row, table }) => (
-       //   <Box sx={{ display: 'flex', gap: '1rem' }}>
-       //     <Tooltip title="Edit">
-       //       <IconButton onClick={() => table.setEditingRow(row)}>
-       //         <IconEdit />
-       //       </IconButton>
-       //     </Tooltip>
-       //     <Tooltip title="Delete">
-       //       <IconButton color="error" onClick={() => openDeleteConfirmModal(row)}>
-       //         <IconEdit />
-       //       </IconButton>
-       //     </Tooltip>
-       //   </Box>
-       // )
+       
+       
      });
      const editableForHistory = useMaterialReactTable({
        columns: coumnsForHistory,
        data: dataForHistory,
-       createDisplayMode: 'row', // ('modal', and 'custom' are also available)
-       editDisplayMode: 'row', // ('modal', 'cell', 'table', and 'custom' are also available)
+       createDisplayMode: 'row', 
+       editDisplayMode: 'row', 
        enableEditing: true,
        positionActionsColumn: 'last',
        enableColumnFilters: false,
@@ -420,9 +504,9 @@ import {
        enableFullScreenToggle: false,
        getRowId: (row) => row.id,
        onCreatingRowCancel: () => console.log('err'),
-       // onCreatingRowSave: handleCreateUser,
+      
        onEditingRowCancel: () => console.log('err'),
-       // onEditingRowSave: handleSaveUser,
+      
        renderRowActions: ({ row, table }) => (
          <Box sx={{ display: 'flex', gap: '1rem' }}>
            <Tooltip title="Edit">
@@ -438,14 +522,7 @@ import {
          </Box>
        ),
        renderTopToolbarCustomActions: ({ table }) => (
-         // <Button
-         //   variant="contained"
-         //   onClick={() => {
-         //     table.setCreatingRow(true);
-         //   }}
-         // >
-         //   Create History
-         // </Button>
+         
          <div className="title-bar">
            <div className="custum-header">
              <p style={{ fontWeight: 'bold', fontSize: 'large' }}>History Creation</p>
@@ -475,11 +552,78 @@ import {
          </div>
        )
      });
+     const editableForproject = useMaterialReactTable({
+      columns: coumnsForproject,
+      data: dataForproject,
+      createDisplayMode: 'row', 
+      editDisplayMode: 'row', 
+      enableEditing: true,
+      positionActionsColumn: 'last',
+      enableColumnFilters: false,
+      enableFilters: false,
+      enableDensityToggle: false,
+      enablePagination: false,
+      enableHiding: false,
+      enableFullScreenToggle: false,
+      getRowId: (row) => row.id,
+      onCreatingRowCancel: () => console.log('err'),
+     
+      onEditingRowCancel: () => console.log('err'),
+     
+      renderRowActions: ({ row, table }) => (
+        <Box sx={{ display: 'flex', gap: '1rem' }}>
+          <Tooltip title="Edit">
+            <IconButton onClick={() => table.setEditingRow(row)}>
+              <ModeEditRounded style={{ color: '#2196f3' }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete">
+            <IconButton color="error" onClick={() => console.log('del')}>
+              <DeleteRounded style={{ color: '#2196f3' }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="add here">
+            <IconButton color="error" onClick={() => console.log('add')}>
+              <IconPlus style={{ color: '#2196f3' }} />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      ),
+      renderTopToolbarCustomActions: ({ table }) => (
+        <div className="title-bar">
+          <div className="custum-header">
+            <p style={{ fontWeight: 'bold', fontSize: 'large' }}>Project Team Allocation</p>
+            <ButtonBase sx={{ borderRadius: '12px' }}>
+              <Avatar
+                variant="rounded"
+                sx={{
+                  ...theme.typography.commonAvatar,
+                  ...theme.typography.mediumAvatar,
+                  transition: 'all .2s ease-in-out',
+                  background: theme.palette.secondary.light,
+                  color: theme.palette.secondary.dark,
+                  '&[aria-controls="menu-list-grow"],&:hover': {
+                    background: theme.palette.secondary.dark,
+                    color: theme.palette.secondary.light
+                  }
+                }}
+                onClick={() => {
+                  table.setCreatingRow(true);
+                }}
+                color="inherit"
+              >
+                <IconPlus />
+              </Avatar>
+            </ButtonBase>
+          </div>
+        </div>
+      )
+    });
      const editableForTask = useMaterialReactTable({
        columns: coumnsForTask,
        data: dataForHistory,
-       createDisplayMode: 'row', // ('modal', and 'custom' are also available)
-       editDisplayMode: 'row', // ('modal', 'cell', 'table', and 'custom' are also available)
+       createDisplayMode: 'row', 
+       editDisplayMode: 'row', 
        enableEditing: true,
        positionActionsColumn: 'last',
        enableColumnFilters: false,
@@ -490,9 +634,9 @@ import {
        enableFullScreenToggle: false,
        getRowId: (row) => row.id,
        onCreatingRowCancel: () => console.log('err'),
-       // onCreatingRowSave: handleCreateUser,
+       
        onEditingRowCancel: () => console.log('err'),
-       // onEditingRowSave: handleSaveUser,
+      
        renderRowActions: ({ row, table }) => (
          <Box sx={{ display: 'flex', gap: '1rem' }}>
            <Tooltip title="Edit">
@@ -508,14 +652,6 @@ import {
          </Box>
        ),
        renderTopToolbarCustomActions: ({ table }) => (
-         // <Button
-         //   variant="contained"
-         //   onClick={() => {
-         //     table.setCreatingRow(true);
-         //   }}
-         // >
-         //   Create History
-         // </Button>
          <div className="title-bar">
            <div className="custum-header">
              <p style={{ fontWeight: 'bold', fontSize: 'large' }}>Task Creation</p>
@@ -559,7 +695,7 @@ import {
        '&:nth-of-type(even)': {
          backgroundColor: theme.palette.action.hover
        },
-       // hide last border
+      
        '&:last-child td, &:last-child th': {
          border: 0
        }
@@ -569,6 +705,9 @@ import {
        return { name, calories, fat, carbs };
      }
    
+
+     
+
      const rows = [
        createData('Frozen yoghurt', 159, 6.0, 24),
        createData('Ice cream sandwich', 237, 9.0, 3),
@@ -643,27 +782,8 @@ import {
                    defaultCalendarValue={[new Date('01-02-2001 '), new Date('01-05-2001 ')]}
                  />
                </Grid>
-               <Grid xs={4} p={2}>
-         <FormControl fullWidth>
-           <InputLabel id="demo-simple-select-label">Project Team Allocation</InputLabel>
-           <Select labelId="demo-simple-select-label" id="demo-simple-select" label="Age">
-             {teamMembers.map((member) => (
-               <MenuItem key={member.name} value={member.name}>
-                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                   <span>{member.name}</span>
-                   <LinearProgress
-                     variant="determinate"
-                     value={(member.projects / 30) * 100} // Assuming a maximum of 30 projects for full progress
-                     style={{ width: '80px', marginLeft: '10px' }}
-                   />
-                   <span style={{ marginLeft: '10px' }}>{Math.floor((member.projects / 30) * 100)}%</span>
-                 </div>
-               </MenuItem>
-             ))}
-           </Select>
-         </FormControl>
-       </Grid>
-   
+          
+    
                <Grid xs={4} p={2}>
                  <FormControl fullWidth>
                    <InputLabel id="demo-simple-select-label">Status</InputLabel>
@@ -693,7 +813,7 @@ import {
                    <FormControlLabel value="no" control={<Radio />} label="No" />
                  </RadioGroup>
                </Grid>
-               {selectedOption === 'yes' && ( // Render TextField only if 'Yes' is selected
+               {selectedOption === 'yes' && ( 
                  <Grid item xs={4} p={2}>
                    <TextField
                      fullWidth
@@ -706,6 +826,12 @@ import {
                    />
                  </Grid>
                )}
+         <Box p={2} className="edit-table-container">
+
+         <MaterialReactTable sx={{ boxShadow: 'rgba(0, 0, 0, 0.18) 1.95px 1.95px 2.7px' }} table={editableForproject} />
+
+             </Box>
+
              </Grid>
              <Button variant="contained" style={{ float: 'right', margin: '2rem' }}>
                Save
@@ -862,24 +988,9 @@ import {
                    </Select>
                  </FormControl>
                </Grid>
-               {/* <Grid xs={4} p={2}>
-                 <TextField fullWidth variant="outlined" placeholder="Lead Description" multiline rows={1} maxRows={4} />{' '}
-               </Grid>
-               <Grid xs={4} p={2}>
-                 <FormControl fullWidth>
-                   <InputLabel id="demo-simple-select-label">Status</InputLabel>
-                   <Select labelId="demo-simple-select-label" id="demo-simple-select" label="status">
-                     <MenuItem value={'newlead'}>New Lead</MenuItem>
-                     <MenuItem value={'contactEstablish'}>Contact Establish</MenuItem>
-                     <MenuItem value={'technicleMeeting'}>Technicle Meeting</MenuItem>
-                     <MenuItem value={'requirementConfirm'}>Requirement Confirm</MenuItem>
-                     <MenuItem value={'hold'}>Hold</MenuItem>
-                     <MenuItem value={'reject'}>Reject</MenuItem>
-                   </Select>
-                 </FormControl>
-               </Grid> */}
+               
              </Grid>
-             {/* <Divider /> */}
+             
              <Box p={2} className="edit-table-container">
                <MaterialReactTable table={editableForHistory} />
              </Box>
@@ -899,7 +1010,7 @@ import {
                  <Box
                    sx={{
                      ml: 2,
-                     // mr: 3,
+                    
                      [theme.breakpoints.down('md')]: {
                        mr: 2
                      }
@@ -984,7 +1095,7 @@ import {
                          <Box
                            sx={{
                              ml: 2,
-                             // mr: 3,
+                            
                              [theme.breakpoints.down('md')]: {
                                mr: 2
                              }
@@ -1112,7 +1223,7 @@ import {
                                  <ThumbDown />
                                </TimelineDot>
                              </Tooltip>
-                             {/* <TimelineConnector /> */}
+                            
                            </TimelineSeparator>
                            <TimelineContent>
                              <Typography variant="h6" component="span" className="text-muted">
@@ -1133,7 +1244,7 @@ import {
                          <Box
                            sx={{
                              ml: 2,
-                             // mr: 3,
+                             
                              [theme.breakpoints.down('md')]: {
                                mr: 2
                              }
@@ -1173,8 +1284,7 @@ import {
            open={open}
            TransitionComponent={Transition}
            keepMounted
-         // onClose={handleClose}
-         // aria-describedby="alert-dialog-slide-description"
+        
          >
            <DialogTitle>
              <Typography variant="h3">Delete Lead</Typography>

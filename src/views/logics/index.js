@@ -73,53 +73,7 @@ import {
 import { useMemo } from 'react';
 
 const columnHelper = createMRTColumnHelper();
-const dataTask = [
-  {
-    name: {
-      firstName: 'John',
-      lastName: 'Doe'
-    },
-    address: '261 Erdman Ford',
-    city: 'East Daphne',
-    state: 'Kentucky'
-  },
-  {
-    name: {
-      firstName: 'Jane',
-      lastName: 'Doe'
-    },
-    address: '769 Dominic Grove',
-    city: 'Columbus',
-    state: 'Ohio'
-  },
-  {
-    name: {
-      firstName: 'Joe',
-      lastName: 'Doe'
-    },
-    address: '566 Brakus Inlet',
-    city: 'South Linda',
-    state: 'West Virginia'
-  },
-  {
-    name: {
-      firstName: 'Kevin',
-      lastName: 'Vandy'
-    },
-    address: '722 Emie Stream',
-    city: 'Lincoln',
-    state: 'Nebraska'
-  },
-  {
-    name: {
-      firstName: 'Joshua',
-      lastName: 'Rolluffs'
-    },
-    address: '32188 Larkin Turnpike',
-    city: 'Charleston',
-    state: 'South Carolina'
-  }
-];
+
 const data = [
   {
     date: '02-04-2001',
@@ -189,7 +143,7 @@ const columns = [
   })
 ];
 const optionsForHistoryApproval = ['Pending', 'Approval', 'Reject'];
-const optionsForHistoryStatus = [' New Lead', 'Contact Establish', 'Technicle Meeting', 'Hold', 'Reject', 'Conform'];
+const optionsForHistoryStatus = ['Contact Establish'];//' New Lead',  'Technicle Meeting', 'Hold', 'Reject', 'Conform'
 const optionsForTaskStatus = ['Not Started', 'On Going', 'Completed'];
 const coumnsForHistory = [
   // {

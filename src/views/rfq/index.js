@@ -138,7 +138,7 @@ import {
     })
    ];
    const optionsForHistoryApproval = ['Pending', 'Approval', 'Reject'];
-   const optionsForHistoryStatus = [' New RFQ', 'Tech Meet Done', 'TCO Sumbited', 'Negotiation', 'Business Awarded', 'Lost'];
+   const optionsForHistoryStatus = [ 'Tech Meet Done'];//, 'TCO Sumbited', 'Negotiation', 'Business Awarded', 'Lost',' New RFQ',
    const optionsForTaskStatus = ['Not Started', 'On Going', 'Completed'];
    const coumnsForHistory = [
     {

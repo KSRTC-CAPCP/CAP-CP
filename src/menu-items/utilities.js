@@ -1,5 +1,5 @@
 // assets
-import { IconTypography, IconPalette, IconBusinessplan, IconShadow, IconWindmill, IconUser } from '@tabler/icons';
+import { IconTypography, IconPalette, IconBusinessplan, IconShadow, IconWindmill, IconUser, IconLockAccess } from '@tabler/icons';
 
 // constant
 const icons = {
@@ -8,7 +8,8 @@ const icons = {
   IconShadow,
   IconWindmill,
   IconBusinessplan,
-  IconUser
+  IconUser,
+  IconLockAccess
   
 };
 
@@ -98,7 +99,7 @@ const utilities = {
       title: 'Roles Access',
       type: 'item',
       url: '/roles-access',
-      icon: icons.IconUser,
+      icon: icons.IconLockAccess,
       breadcrumbs: false
     }
   ]

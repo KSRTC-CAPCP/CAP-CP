@@ -104,7 +104,7 @@ const columns = [
     }),
 ];
 const optionsForHistoryApproval = ['Pending', 'Approval', 'Reject'];
-const optionsForHistoryStatus = [' New Lead', 'Contact Establish', 'Technicle Meeting', 'Hold', 'Reject', 'Conform'];
+const optionsForHistoryStatus = ['Contact Establish'];
 const optionsForTaskStatus = ['Not Started', 'On Going', 'Completed'];
 const coumnsForHistory = [
     {
