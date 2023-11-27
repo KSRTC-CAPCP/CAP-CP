@@ -209,3 +209,14 @@ main {
   padding-bottom: 12px !important;
 }
 
+
+.css-zow5z4-MuiGrid-root{
+  padding: 10px;
+}
+
+.css-17pmaar-MuiCardContent-root:last-child{
+  margin-left: 13px;
+}
+p{
+  padding: 10px;
+}
