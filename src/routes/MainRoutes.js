@@ -3,10 +3,10 @@ import { lazy } from 'react';
 // project imports
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
-import Profiles from 'views/project';
 import Access from 'views/access';
 import BusinessRFQ from 'views/logics/rfq';
 import Projects from 'views/logics/project';
+import Profiles from 'views/profiles';
 
 // import BusinessLeads from 'views/logics';
 
