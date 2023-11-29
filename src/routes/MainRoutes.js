@@ -112,7 +112,7 @@ const MainRoutes = {
       element: <SamplePage />
     },
     {
-      path: 'profile',
+      path: '/profile',
       element: <Profiles />
     },
     {
