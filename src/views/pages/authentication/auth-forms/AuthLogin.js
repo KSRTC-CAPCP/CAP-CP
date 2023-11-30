@@ -34,7 +34,9 @@ import AnimateButton from 'ui-component/extended/AnimateButton';
 // assets
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { Link } from 'react-router-dom';
+import { LOGIN } from 'api/apiEndPoint';
+import { postData } from 'utils/apiUtils';
+import { useNavigate } from 'react-router';
 
 // import Google from 'assets/images/icons/social-google.svg';
 
@@ -69,7 +71,7 @@ const FirebaseLogin = ({ ...others }) => {
   const handleClose = () => {
     setState({ ...state, open: false });
   };
-
+  const navigate = useNavigate();
   const handleClick = (newState) => () => {
     setState({ ...newState, open: true });
   };
@@ -108,21 +110,35 @@ const FirebaseLogin = ({ ...others }) => {
 
       <Formik
         initialValues={{
-          email: '',
-          password: '',
-          submit: null
+          UserId: '',
+          Password: ''
         }}
         validationSchema={Yup.object().shape({
-          email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
-          password: Yup.string().max(255).required('Password is required')
+          UserId: Yup.string().required('User Id is required'),
+          Password: Yup.string().max(255).required('Password is required')
         })}
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
+          console.log(values, 'values');
+          const updatedvalues = {
+            EmployeeCode: values.UserId,
+            DateOfBirth: values.Password
+          };
           try {
+            const endpoint = LOGIN;
+            const response = await postData(endpoint, updatedvalues);
+            navigate('/');
+            // Handle the response based on your needs
+            console.log(response, 'responce');
+            // Store data in local storage when success is true
+            localStorage.setItem('userData', JSON.stringify(response));
+            console.log('Login successful:', response);
+
             if (scriptedRef.current) {
               setStatus({ success: true });
               setSubmitting(false);
             }
           } catch (err) {
+            console.error('Unexpected error during login:', err.message);
             console.error(err);
             if (scriptedRef.current) {
               setStatus({ success: false });
@@ -134,32 +150,32 @@ const FirebaseLogin = ({ ...others }) => {
       >
         {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
           <form noValidate onSubmit={handleSubmit} {...others}>
-            <FormControl fullWidth error={Boolean(touched.email && errors.email)} sx={{ ...theme.typography.customInput }}>
+            <FormControl fullWidth error={Boolean(touched.UserId && errors.UserId)} sx={{ ...theme.typography.customInput }}>
               <InputLabel htmlFor="outlined-adornment-email-login">User ID</InputLabel>
               <OutlinedInput
                 id="outlined-adornment-email-login"
                 type="text"
-                value={values.userId}
-                name="userId"
+                value={values.UserId}
+                name="UserId"
                 onBlur={handleBlur}
                 onChange={handleChange}
                 label="User ID"
                 inputProps={{}}
               />
-              {touched.email && errors.email && (
-                <FormHelperText error id="standard-weight-helper-text-email-login">
-                  {errors.email}
+              {touched.UserId && errors.UserId && (
+                <FormHelperText error id="standard-weight-helper-text-UserId-login">
+                  {errors.UserId}
                 </FormHelperText>
               )}
             </FormControl>
 
-            <FormControl fullWidth error={Boolean(touched.password && errors.password)} sx={{ ...theme.typography.customInput }}>
-              <InputLabel htmlFor="outlined-adornment-password-login">Password</InputLabel>
+            <FormControl fullWidth error={Boolean(touched.Password && errors.Password)} sx={{ ...theme.typography.customInput }}>
+              <InputLabel htmlFor="outlined-adornment-Password-login">Password</InputLabel>
               <OutlinedInput
-                id="outlined-adornment-password-login"
-                type={showPassword ? 'text' : 'password'}
-                value={values.password}
-                name="password"
+                id="outlined-adornment-Password-login"
+                type={showPassword ? 'text' : 'Password'}
+                value={values.Password}
+                name="Password"
                 onBlur={handleBlur}
                 onChange={handleChange}
                 endAdornment={
@@ -178,9 +194,9 @@ const FirebaseLogin = ({ ...others }) => {
                 label="Password"
                 inputProps={{}}
               />
-              {touched.password && errors.password && (
-                <FormHelperText error id="standard-weight-helper-text-password-login">
-                  {errors.password}
+              {touched.Password && errors.Password && (
+                <FormHelperText error id="standard-weight-helper-text-Password-login">
+                  {errors.Password}
                 </FormHelperText>
               )}
             </FormControl>
@@ -205,27 +221,11 @@ const FirebaseLogin = ({ ...others }) => {
                 </Alert>
               </Snackbar>
             </Stack>
-            {errors.submit && (
-              <Box sx={{ mt: 3 }}>
-                <FormHelperText error>{errors.submit}</FormHelperText>
-              </Box>
-            )}
-
             <Box sx={{ mt: 2 }}>
               <AnimateButton>
-                <Link to="/">
-                  <Button
-                    disableElevation
-                    disabled={isSubmitting}
-                    fullWidth
-                    size="large"
-                    type="submit"
-                    variant="contained"
-                    color="secondary"
-                  >
-                    Sign in
-                  </Button>
-                </Link>
+                <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained" color="secondary">
+                  Sign in
+                </Button>
               </AnimateButton>
             </Box>
           </form>

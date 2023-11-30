@@ -90,7 +90,7 @@ const utilities = {
       id: 'profiles',
       title: 'Profiles',
       type: 'item',
-      url: '/profile-page',
+      url: '/profile',
       icon: icons.IconUser,
       breadcrumbs: false
     },

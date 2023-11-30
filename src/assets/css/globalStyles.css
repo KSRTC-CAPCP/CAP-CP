@@ -145,8 +145,7 @@ main {
   display: flex;
   justify-content: space-between;
 }
-.card-hover
-{
+.card-hover {
   border: 1px solid transparent !important;
   box-shadow: none !important;
 }
@@ -188,10 +187,30 @@ main {
 .badge-warning {
   background-color: #ffe1ba;
   color: #c0710e;
+  border-radius: 20px;
+  text-align: center;
+}
+.max-width {
+  max-width: fit-content !important;
+  padding: 10px 22px;
+}
+.text-end
+{
+  text-align: end;
+}
+.justify-content-end
+{
+  justify-content: end !important;
+}
+.float-end
+{
+  float: inline-end !important;
 }
 .badge-danger {
   background-color: #ffbaba;
   color: #e30000;
+  border-radius: 20px;
+  text-align: center;
 }
 .mt-1 {
   margin-top: 1rem;
@@ -209,14 +228,17 @@ main {
   padding-bottom: 12px !important;
 }
 
-
-.css-zow5z4-MuiGrid-root{
+.css-zow5z4-MuiGrid-root {
   padding: 10px;
 }
 
-.css-17pmaar-MuiCardContent-root:last-child{
+.css-17pmaar-MuiCardContent-root:last-child {
   margin-left: 13px;
 }
-p{
+p {
   padding: 10px;
+}
+
+.text-danger {
+  color: red;
 }
