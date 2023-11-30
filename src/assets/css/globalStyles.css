@@ -242,3 +242,39 @@ p {
 .text-danger {
   color: red;
 }
+.justify-content-between{
+  margin-right: 39px;
+}
+ 
+.rs-modal-content{
+  margin-top: 235px;
+}
+hr{
+  padding-left: 36rem;
+}
+.css-1w9i8cz-MuiTypography-root{
+  padding-top: 12px;
+}
+.css-14c97s3-MuiPaper-root-MuiCard-root{
+  height: 35rem;
+}
+.css-f1yple-MuiCardHeader-root{
+  margin-bottom: 456px;    
+}
+.css-14c97s3-MuiPaper-root-MuiCard-root{
+  background-color:#e2f1fc ;
+}
+.css-1w9i8cz-MuiTypography-root{
+  margin-left: 26px;
+  margin-top: -35px;
+}
+.css-f1yple-MuiCardHeader-root .MuiCardHeader-title{
+  margin-left: -15px;
+}
+.css-w75fiz-MuiInputBase-root-MuiOutlinedInput-root{
+  margin-bottom: 11px;
+  margin-left: 28px;
+}
+.css-1vz8i7x-MuiTypography-root{
+  padding-top: 10px;
+}
