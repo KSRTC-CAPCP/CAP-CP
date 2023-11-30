@@ -1,34 +1,35 @@
 /*eslint-disable */
 import {
-    Avatar,
-    Box,
-    ButtonBase,
-    Button,
-    Tooltip,
-    IconButton,
-    MenuItem,
-    Grid,
-    TextField,
-    FormControl,
-    InputLabel,
-    Select,
-    Divider,
-    Typography,
-    TableContainer,
-    Table,
-    TableHead,
-    TableRow,
-    TableBody,
-    TableCell,
-    Paper,
-    tableCellClasses,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogContentText,
-    DialogActions,
-    Slide,
-    Input
+  Avatar,
+  Box,
+  ButtonBase,
+  Button,
+  Tooltip,
+  IconButton,
+  MenuItem,
+  Grid,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  Divider,
+  Typography,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableBody,
+  TableCell,
+  Paper,
+  tableCellClasses,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Slide,
+  Input,
+  FormHelperText
 } from '@mui/material';
 import React, { forwardRef } from 'react';
 import MainCard from 'ui-component/cards/MainCard';
@@ -37,813 +38,914 @@ import { IconDownload, IconEdit, IconEye, IconHistoryToggle, IconPlus, IconTrash
 import { MaterialReactTable, createMRTColumnHelper, useMaterialReactTable } from 'material-react-table';
 import { mkConfig, generateCsv, download } from 'export-to-csv';
 import * as XLSX from 'xlsx';
- 
+
 import {
-    ConnectWithoutContact,
-    Delete,
-    DeleteRounded,
-    Group,
-    History,
-    KeyboardBackspaceRounded,
-    Label,
-    ModeEditRounded,
-    NotStarted,
-    PersonAdd,
-    TaskAlt,
-    ThumbDown,
-    ThumbDownAltSharp,
-    ThumbUpSharp,
-    VisibilityRounded
+  ConnectWithoutContact,
+  Delete,
+  DeleteRounded,
+  Group,
+  History,
+  KeyboardBackspaceRounded,
+  Label,
+  ModeEditRounded,
+  NotStarted,
+  PersonAdd,
+  TaskAlt,
+  ThumbDown,
+  ThumbDownAltSharp,
+  ThumbUpSharp,
+  VisibilityRounded
 } from '@mui/icons-material';
 import { useState } from 'react';
 import styled from '@emotion/styled';
 import {
-    Timeline,
-    TimelineConnector,
-    TimelineContent,
-    TimelineDot,
-    TimelineItem,
-    TimelineOppositeContent,
-    TimelineSeparator
+  Timeline,
+  TimelineConnector,
+  TimelineContent,
+  TimelineDot,
+  TimelineItem,
+  TimelineOppositeContent,
+  TimelineSeparator
 } from '@mui/lab';
 import { DateRangePicker } from 'rsuite';
- 
+import { fetchData, postData } from 'utils/apiUtils';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import { PROFILES_CREATE, PROFILES_GET, TEAMS_GET } from 'api/apiEndPoint';
+import { useEffect } from 'react';
+
 const columnHelper = createMRTColumnHelper();
-const data = [
-    {
-        NameOfCandidate: 'Thara',
-        DateOfBirth: '27-04-2001',
-        Designation: 'Developer',
-        Team: 'Abc Team',
-        ContactNumber: '9876543293',
- 
-    },
-    {
-        NameOfCandidate: 'Thara',
-        DateOfBirth: '27-04-2001',
-        Designation: 'Developer',
-        Team: 'Abc Team',
-        ContactNumber: '9876543293',
-    }
-];
-const columns = [
-    columnHelper.accessor('NameOfCandidate', {
-        header: 'Name Of Candidate'
-    }),
-    columnHelper.accessor('DateOfBirth', {
-        header: 'Date Of Borth'
-    }),
-    columnHelper.accessor('Designation', {
-        header: 'Designation'
-    }),
-    columnHelper.accessor('Team', {
-        header: 'Team'
-    }),
-    columnHelper.accessor('ContactNumber', {
-        header: 'Contact Number'
-    }),
-];
+
+const validationSchema = Yup.object({
+  NameOfCandidate: Yup.string().required('Name is required'),
+  DateOfBirth: Yup.string().required('Date Of Birth is required'),
+  Designation: Yup.string().required('Designation is required'),
+  Team: Yup.string().required('Team is required'),
+  ContactNumber: Yup.string().required('ContactNumber is required'),
+  Role: Yup.string().required('Role is required')
+});
 const optionsForHistoryApproval = ['Pending', 'Approval', 'Reject'];
 const optionsForHistoryStatus = ['Contact Establish'];
 const optionsForTaskStatus = ['Not Started', 'On Going', 'Completed'];
 const coumnsForHistory = [
-    {
-        accessorKey: 'NameOfCandidate',
-        header: 'Name Of Candidate'
+  {
+    accessorKey: 'NameOfCandidate',
+    header: 'Name Of Candidate'
+  },
+  {
+    accessorKey: 'DateOfBirth',
+    header: 'Date Of Borth',
+    muiEditTextFieldProps: {
+      type: 'date',
+      required: true
+    }
+  },
+  {
+    accessorKey: 'Designation',
+    header: 'Designation',
+    enableEditing: true
+  },
+  {
+    accessorKey: 'requeststatus',
+    header: 'Request Status',
+    editVariant: 'select',
+    editSelectOptions: optionsForHistoryStatus,
+    muiEditTextFieldProps: {
+      select: true
     },
-    {
-        accessorKey: 'DateOfBirth',
-        header: 'Date Of Borth',
-        muiEditTextFieldProps: {
-            type: 'date',
-            required: true
-        }
+    enableEditing: true
+  },
+  {
+    accessorKey: 'approvalstatus',
+    header: 'Approval Status',
+    editVariant: 'select',
+    editSelectOptions: optionsForHistoryApproval,
+    muiEditTextFieldProps: {
+      select: true
     },
-    {
-        accessorKey: 'Designation',
-        header: 'Designation',
-        enableEditing: true
-    },
-    {
-        accessorKey: 'requeststatus',
-        header: 'Request Status',
-        editVariant: 'select',
-        editSelectOptions: optionsForHistoryStatus,
-        muiEditTextFieldProps: {
-            select: true
-        },
-        enableEditing: true
-    },
-    {
-        accessorKey: 'approvalstatus',
-        header: 'Approval Status',
-        editVariant: 'select',
-        editSelectOptions: optionsForHistoryApproval,
-        muiEditTextFieldProps: {
-            select: true
-        },
-        enableEditing: true
-    },
-    {
-        accessorKey: 'Team',
-        header: 'Team',
-        enableEditing: true
-    },
-    {
-        accessorKey: 'ContactNumber',
-        header: 'Contact Number',
-        enableEditing: true
-    },
+    enableEditing: true
+  },
+  {
+    accessorKey: 'Team',
+    header: 'Team',
+    enableEditing: true
+  },
+  {
+    accessorKey: 'ContactNumber',
+    header: 'Contact Number',
+    enableEditing: true
+  }
 ];
 const coumnsForTask = [
-    {
-        accessorKey: 'NameOfCandidate',
-        header: 'Name Of Candidate'
-    },
-    {
-        accessorKey: 'DateOfBirth',
-        header: 'Date Of Birth'
-    },
-    {
-        accessorKey: 'Designation',
-        header: 'Designation',
-        enableEditing: true
-    },
-    {
-        accessorKey: 'Team',
-        header: 'Team',
-        enableEditing: true
-    },
-    {
-        accessorKey: 'ContactNumber',
-        header: 'Contact Number',
-        enableEditing: true
-    },
-    {
-        accessorKey: 'assigneddate',
-        header: 'Assigned Date',
-        muiEditTextFieldProps: {
-            type: 'date',
-            required: true
-        }
-    },
-    {
-        accessorKey: 'targetdate',
-        header: 'Target Date',
-        muiEditTextFieldProps: {
-            type: 'date',
-            required: true
-        }
-    },
- 
+  {
+    accessorKey: 'NameOfCandidate',
+    header: 'Name Of Candidate'
+  },
+  {
+    accessorKey: 'DateOfBirth',
+    header: 'Date Of Birth'
+  },
+  {
+    accessorKey: 'Designation',
+    header: 'Designation',
+    enableEditing: true
+  },
+  {
+    accessorKey: 'Team',
+    header: 'Team',
+    enableEditing: true
+  },
+  {
+    accessorKey: 'ContactNumber',
+    header: 'Contact Number',
+    enableEditing: true
+  },
+  {
+    accessorKey: 'assigneddate',
+    header: 'Assigned Date',
+    muiEditTextFieldProps: {
+      type: 'date',
+      required: true
+    }
+  },
+  {
+    accessorKey: 'targetdate',
+    header: 'Target Date',
+    muiEditTextFieldProps: {
+      type: 'date',
+      required: true
+    }
+  }
 ];
 const csvConfig = mkConfig({
-    fieldSeparator: ',',
-    decimalSeparator: '.',
-    useKeysAsHeaders: true
+  fieldSeparator: ',',
+  decimalSeparator: '.',
+  useKeysAsHeaders: true
 });
 const dataForHistory = [
+  {
+    NameOfCandidate: 'Thara',
+    DateOfBirth: '27-04-2001',
+    Designation: 'Developer',
+    Team: 'Abc Team',
+    ContactNumber: '9876543293',
+    assigneddate: '2-04-2001',
+    targetdate: '27-04-2001'
+  },
+  {
+    NameOfCandidate: 'Thara',
+    DateOfBirth: '27-04-2001',
+    Designation: 'Developer',
+    Team: 'Abc Team',
+    ContactNumber: '9876543293',
+    assigneddate: '2-04-2001',
+    targetdate: '27-04-2001'
+  }
+];
+
+const Transition = forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
+
+const Profiles = () => {
+  const [dob, setDOB] = useState('');
+  const [localData, setLocalData] = useState('');
+  const [teamsData, setTeamsData] = useState([]);
+  const [employeeData, setEmployeeData] = useState([]);
+  const teamsOption = teamsData.map((data) => ({
+    label: data.Team,
+    value: data.Team
+  }));
+  console.log(teamsOption, 'teamsOption');
+  const handleDOBChange = (event) => {
+    setDOB(event.target.value);
+  };
+  const data = [
     {
-        NameOfCandidate: 'Thara',
-        DateOfBirth: '27-04-2001',
-        Designation: 'Developer',
-        Team: 'Abc Team',
-        ContactNumber: '9876543293',
-        assigneddate: '2-04-2001',
-        targetdate: '27-04-2001'
+      NameOfCandidate: 'Thara',
+      DateOfBirth: '27-04-2001',
+      Designation: 'Developer',
+      Team: 'Abc Team',
+      ContactNumber: '9876543293'
     },
     {
-        NameOfCandidate: 'Thara',
-        DateOfBirth: '27-04-2001',
-        Designation: 'Developer',
-        Team: 'Abc Team',
-        ContactNumber: '9876543293',
-        assigneddate: '2-04-2001',
-        targetdate: '27-04-2001'
- 
+      NameOfCandidate: 'Thara',
+      DateOfBirth: '27-04-2001',
+      Designation: 'Developer',
+      Team: 'Abc Team',
+      ContactNumber: '9876543293'
     }
-];
- 
-const Transition = forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
- 
- 
-const Profiles = () => {
- 
- 
-    const [dob, setDOB] = useState('');
- 
-    const handleDOBChange = (event) => {
-        setDOB(event.target.value);
-    };
- 
-    const fileInputRef = React.createRef();
-    const handleImportClick = () => {
-        fileInputRef.current.click();
-    };
- 
-    const handleFileUpload = async (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const sheetName = workbook.SheetNames[0];
-                const sheet = workbook.Sheets[sheetName];
-                const parsedData = XLSX.utils.sheet_to_json(sheet);
- 
-                await uploadToServer(parsedData);
-            };
-            reader.readAsArrayBuffer(file);
-        }
-    };
- 
-    const uploadToServer = async (data) => {
-        try {
-            const response = await fetch('http://localhost:3001/upload', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ data }),
-            });
- 
-            // Handle response if needed
-            console.log('Upload successful:', response);
-        } catch (error) {
-            console.error('Error uploading file:', error);
-        }
-    };
- 
-    const [inputValue, setInputValue] = useState('');
-    const [options, setOptions] = useState([]);
-    const [selectedValue, setSelectedValue] = useState('');
- 
-    const handleInputChange = (e) => {
-        setInputValue(e.target.value);
-    };
- 
-    const handleAddOption = () => {
-        if (inputValue.trim() !== '') {
-            setOptions([...options, inputValue]);
-            setInputValue('');
-        }
-    };
- 
-    const handleSelectChange = (event) => {
-        setSelectedValue(event.target.value);
-    };
- 
-    const [view, setView] = useState({
-        visible: false,
-        mode: 'Initial' // 'add', 'edit', 'view'
-    });
-    const [open, setOpen] = useState(false);
-    const handleDelete = () => {
-        setOpen(true);
-        console.log('open', open);
-    };
-    const theme = useTheme();
-    const handleExportData = () => {
-        const csv = generateCsv(csvConfig)(data);
-        download(csvConfig)(csv);
-    };
-    const handleEdit = () => {
-        console.log('worked');
-        setView({
-            visible: true,
-            mode: 'Edit'
-        });
-    };
-    const handleView = () => {
-        console.log('worked');
-        setView({
-            visible: true,
-            mode: 'View'
-        });
-    };
- 
-    const table = useMaterialReactTable({
-        columns,
-        data,
-        enableRowActions: true,
-        positionActionsColumn: 'last',
-        renderRowActions: ({ row }) => (
-            <div style={{ display: 'flex' }}>
-                <IconButton onClick={handleDelete}>
-                    <DeleteRounded style={{ color: '#2196f3' }} />
-                </IconButton>
-                <IconButton onClick={handleView}>
-                    <VisibilityRounded style={{ color: '#2196f3' }} />
-                </IconButton>
-                <IconButton onClick={handleEdit}>
-                    <ModeEditRounded style={{ color: '#2196f3' }} />
-                </IconButton>
-            </div>
-        ),
-        enableRowSelection: true,
-        columnFilterDisplayMode: 'popover',
-        paginationDisplayMode: 'pages',
-        positionToolbarAlertBanner: 'bottom',
-        renderTopToolbarCustomActions: () => (
-            <>
-                <div style={{ marginLeft: '0.5rem' }}>
-                    <input
-                        type="file"
-                        ref={fileInputRef}
-                        style={{ display: 'none' }}
-                        onChange={handleFileUpload}
-                        accept=".xls,.xlsx"
-                    />
-                    <Button variant="contained" style={{ marginRight: '1rem' }} color="primary" onClick={handleImportClick} startIcon={<IconUpload />}>
-                        Import
-                    </Button>
-                    <Button onClick={handleExportData} variant="contained" color="primary" startIcon={<IconDownload />}>
-                        Export
-                    </Button>
-                </div>
-            </>
-        )
-        // renderRowActions: ({ row, table }) => (
-        //   <Box sx={{ display: 'flex', gap: '1rem' }}>
-        //     <Tooltip title="Edit">
-        //       <IconButton onClick={() => table.setEditingRow(row)}>
-        //         <IconEdit />
-        //       </IconButton>
-        //     </Tooltip>
-        //     <Tooltip title="Delete">
-        //       <IconButton color="error" onClick={() => openDeleteConfirmModal(row)}>
-        //         <IconEdit />
-        //       </IconButton>
-        //     </Tooltip>
-        //   </Box>
-        // )
-    });
-    const editableForHistory = useMaterialReactTable({
-        columns: coumnsForHistory,
-        data: dataForHistory,
-        createDisplayMode: 'row', // ('modal', and 'custom' are also available)
-        editDisplayMode: 'row', // ('modal', 'cell', 'table', and 'custom' are also available)
-        enableEditing: true,
-        positionActionsColumn: 'last',
-        enableColumnFilters: false,
-        enableFilters: false,
-        enableDensityToggle: false,
-        enablePagination: false,
-        enableHiding: false,
-        enableFullScreenToggle: false,
-        getRowId: (row) => row.id,
-        onCreatingRowCancel: () => console.log('err'),
-        // onCreatingRowSave: handleCreateUser,
-        onEditingRowCancel: () => console.log('err'),
-        // onEditingRowSave: handleSaveUser,
-        renderRowActions: ({ row, table }) => (
-            <Box sx={{ display: 'flex', gap: '1rem' }}>
-                <Tooltip title="Edit">
-                    <IconButton onClick={() => table.setEditingRow(row)}>
-                        <ModeEditRounded style={{ color: '#2196f3' }} />
-                    </IconButton>
-                </Tooltip>
-                <Tooltip title="Delete">
-                    <IconButton color="error" onClick={() => console.log('del')}>
-                        <DeleteRounded style={{ color: '#2196f3' }} />
-                    </IconButton>
-                </Tooltip>
-            </Box>
-        ),
-        renderTopToolbarCustomActions: ({ table }) => (
-            // <Button
-            //   variant="contained"
-            //   onClick={() => {
-            //     table.setCreatingRow(true);
-            //   }}
-            // >
-            //   Create History
-            // </Button>
-            <div className="title-bar">
-                <div className="custum-header">
-                    <p style={{ fontWeight: 'bold', fontSize: 'large' }}>History Creation</p>
-                    <ButtonBase sx={{ borderRadius: '12px' }}>
-                        <Avatar
-                            variant="rounded"
-                            sx={{
-                                ...theme.typography.commonAvatar,
-                                ...theme.typography.mediumAvatar,
-                                transition: 'all .2s ease-in-out',
-                                background: theme.palette.secondary.light,
-                                color: theme.palette.secondary.dark,
-                                '&[aria-controls="menu-list-grow"],&:hover': {
-                                    background: theme.palette.secondary.dark,
-                                    color: theme.palette.secondary.light
-                                }
-                            }}
-                            onClick={() => {
-                                table.setCreatingRow(true);
-                            }}
-                            color="inherit"
-                        >
-                            <IconPlus />
-                        </Avatar>
-                    </ButtonBase>
-                </div>
-            </div>
-        )
-    });
-    const editableForTask = useMaterialReactTable({
-        columns: coumnsForTask,
-        data: dataForHistory,
-        createDisplayMode: 'row',
-        editDisplayMode: 'row',
-        enableEditing: true,
-        positionActionsColumn: 'last',
-        enableColumnFilters: false,
-        enableFilters: false,
-        enableDensityToggle: false,
-        enablePagination: false,
-        enableHiding: false,
-        enableFullScreenToggle: false,
-        getRowId: (row) => row.id,
-        onCreatingRowCancel: () => console.log('err'),
-        // onCreatingRowSave: handleCreateUser,
-        onEditingRowCancel: () => console.log('err'),
-        // onEditingRowSave: handleSaveUser,
-        renderRowActions: ({ row, table }) => (
-            <Box sx={{ display: 'flex', gap: '1rem' }}>
-                <Tooltip title="Edit">
-                    <IconButton onClick={() => table.setEditingRow(row)}>
-                        <ModeEditRounded style={{ color: '#2196f3' }} />
-                    </IconButton>
-                </Tooltip>
-                <Tooltip title="Delete">
-                    <IconButton color="error" onClick={() => console.log('del')}>
-                        <DeleteRounded style={{ color: '#2196f3' }} />
-                    </IconButton>
-                </Tooltip>
-            </Box>
-        ),
-        renderTopToolbarCustomActions: ({ table }) => (
-            // <Button
-            //   variant="contained"
-            //   onClick={() => {
-            //     table.setCreatingRow(true);
-            //   }}
-            // >
-            //   Create History
-            // </Button>
-            <div className="title-bar">
-                <div className="custum-header">
-                    <p style={{ fontWeight: 'bold', fontSize: 'large' }}>Task Creation</p>
-                    <ButtonBase sx={{ borderRadius: '12px' }}>
-                        <Avatar
-                            variant="rounded"
-                            sx={{
-                                ...theme.typography.commonAvatar,
-                                ...theme.typography.mediumAvatar,
-                                transition: 'all .2s ease-in-out',
-                                background: theme.palette.secondary.light,
-                                color: theme.palette.secondary.dark,
-                                '&[aria-controls="menu-list-grow"],&:hover': {
-                                    background: theme.palette.secondary.dark,
-                                    color: theme.palette.secondary.light
-                                }
-                            }}
-                            onClick={() => {
-                                table.setCreatingRow(true);
-                            }}
-                            color="inherit"
-                        >
-                            <IconPlus />
-                        </Avatar>
-                    </ButtonBase>
-                </div>
-            </div>
-        )
-    });
-    const StyledTableCell = styled(TableCell)(({ theme }) => ({
-        [`&.${tableCellClasses.head}`]: {
-            backgroundColor: '#e3f2fd',
-            color: '#333'
-        },
-        [`&.${tableCellClasses.body}`]: {
-            fontSize: 14
-        }
-    }));
- 
-    const StyledTableRow = styled(TableRow)(({ theme }) => ({
-        '&:nth-of-type(even)': {
-            backgroundColor: theme.palette.action.hover
-        },
-        // hide last border
-        '&:last-child td, &:last-child th': {
-            border: 0
-        }
-    }));
- 
-    function createData(name, calories, fat, carbs) {
-        return { name, calories, fat, carbs };
+  ];
+  const columns = [
+    columnHelper.accessor('NameOfCandidate', {
+      header: 'Name Of Candidate'
+    }),
+    columnHelper.accessor('DateOfBirth', {
+      header: 'Date Of Borth'
+    }),
+    columnHelper.accessor('Designation', {
+      header: 'Designation'
+    }),
+    columnHelper.accessor('Team', {
+      header: 'Team'
+    }),
+    columnHelper.accessor('Role', {
+      header: 'Role'
+    }),
+    columnHelper.accessor('ContactNumber', {
+      header: 'Contact Number'
+    })
+  ];
+  const fileInputRef = React.createRef();
+  const handleImportClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const parsedData = XLSX.utils.sheet_to_json(sheet);
+
+        await uploadToServer(parsedData);
+      };
+      reader.readAsArrayBuffer(file);
     }
- 
-    const rows = [
-        createData('Frozen yoghurt', 159, 6.0, 24),
-        createData('Ice cream sandwich', 237, 9.0, 3),
-        createData('Eclair', 262, 16.0, 24),
-        createData('Cupcake', 305, 3.7, 67),
-        createData('Gingerbread', 356, 16.0, 49)
-    ];
-    const handleToggle = () => {
-        setView({
-            visible: true,
-            mode: 'Add'
-        });
-    };
-    const handleClose = () => {
-        setView({
-            visible: true,
-            mode: 'Initial'
-        });
-    };
- 
-    return (
-        <div className="max">
-            {view.mode === 'Add' && (
-                <MainCard
-                    title="Profile Creation"
-                    secondary={
-                        <Box
-                            sx={{
-                                ml: 2,
-                                // mr: 3,
-                                [theme.breakpoints.down('md')]: {
-                                    mr: 2
-                                }
-                            }}
-                        >
-                            <ButtonBase sx={{ borderRadius: '12px' }}>
-                                <Avatar
-                                    variant="rounded"
-                                    sx={{
-                                        ...theme.typography.commonAvatar,
-                                        ...theme.typography.mediumAvatar,
-                                        transition: 'all .2s ease-in-out',
-                                        background: theme.palette.secondary.light,
-                                        color: theme.palette.secondary.dark,
-                                        '&[aria-controls="menu-list-grow"],&:hover': {
-                                            background: theme.palette.secondary.dark,
-                                            color: theme.palette.secondary.light
-                                        }
-                                    }}
-                                    aria-haspopup="true"
-                                    onClick={handleClose}
-                                    color="inherit"
-                                >
-                                    <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
-                                </Avatar>
-                            </ButtonBase>
-                        </Box>
-                    }
-                >
-                    <Grid container>
-                        <Grid xs={4} p={2}>
-                            <TextField fullWidth id="outlined-basic" label="Name Of Candidate" variant="outlined" />
-                        </Grid>
-                        <Grid xs={4} p={2}>
-                            <TextField
-                                fullWidth
-                                type="date"
-                                variant="outlined"
-                                name="dob"
-                                className="w-100"
-                                InputLabelProps={{ shrink: true }}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputLabel htmlFor="outlined-adornment-dob" shrink>
-                                            Date Of Birth
-                                        </InputLabel>
-                                    ),
-                                }}
-                            />
-                        </Grid>
-                        <Grid xs={4} p={2}>
-                            <TextField fullWidth id="outlined-basic" label="Designation" variant="outlined" />
-                        </Grid>
-                        <Grid xs={4} p={2}>
-                            <TextField fullWidth id="outlined-basic" label="Team" variant="outlined" />
-                        </Grid>
-                        <Grid xs={4} p={2}>
-                            <TextField fullWidth id="outlined-basic" label="Contact Number" variant="outlined" />
-                        </Grid>
-                    </Grid>
-                    <Button variant="contained" style={{ float: 'right', margin: '2rem' }}>
-                        Save
-                    </Button>
-                </MainCard>
-            )}
-            {view.mode === 'Initial' && (
-                <MainCard
-                    title="Profiles"
-                    secondary={
-                        <Box
-                            sx={{
-                                ml: 2,
-                                // mr: 3,
-                                [theme.breakpoints.down('md')]: {
-                                    mr: 2
-                                }
-                            }}
-                        >
-                            <ButtonBase sx={{ borderRadius: '12px' }}>
-                                <Avatar
-                                    variant="rounded"
-                                    sx={{
-                                        ...theme.typography.commonAvatar,
-                                        ...theme.typography.mediumAvatar,
-                                        transition: 'all .2s ease-in-out',
-                                        background: theme.palette.secondary.light,
-                                        color: theme.palette.secondary.dark,
-                                        '&[aria-controls="menu-list-grow"],&:hover': {
-                                            background: theme.palette.secondary.dark,
-                                            color: theme.palette.secondary.light
-                                        }
-                                    }}
-                                    aria-haspopup="true"
-                                    onClick={handleToggle}
-                                    color="inherit"
-                                >
-                                    <IconPlus stroke={2} size="1.3rem" />
-                                </Avatar>
-                            </ButtonBase>
-                        </Box>
-                    }
-                >
-                    <MaterialReactTable table={table} />
-                </MainCard>
-            )}
-            {view.mode === 'Edit' && (
-                <MainCard
-                    title="Profile Updations"
-                    secondary={
-                        <Box
-                            sx={{
-                                ml: 2,
-                                // mr: 3,
-                                [theme.breakpoints.down('md')]: {
-                                    mr: 2
-                                }
-                            }}
-                        >
-                            <ButtonBase sx={{ borderRadius: '12px' }}>
-                                <Avatar
-                                    variant="rounded"
-                                    sx={{
-                                        ...theme.typography.commonAvatar,
-                                        ...theme.typography.mediumAvatar,
-                                        transition: 'all .2s ease-in-out',
-                                        background: theme.palette.secondary.light,
-                                        color: theme.palette.secondary.dark,
-                                        '&[aria-controls="menu-list-grow"],&:hover': {
-                                            background: theme.palette.secondary.dark,
-                                            color: theme.palette.secondary.light
-                                        }
-                                    }}
-                                    aria-haspopup="true"
-                                    onClick={handleClose}
-                                    color="inherit"
-                                >
-                                    <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
-                                </Avatar>
-                            </ButtonBase>
-                        </Box>
-                    }
-                >
-                    <Grid container>
-                        <Grid xs={4} p={2}>
-                            <TextField fullWidth id="outlined-basic" label="Name Of Candidate" variant="outlined" />
-                        </Grid>
-                        <Grid xs={4} p={2}>
-                            <TextField fullWidth type="date" variant="outlined" name="dob" className="w-100" />
-                        </Grid>
- 
-                        <Grid xs={4} p={2}>
-                            <TextField fullWidth id="outlined-basic" label="Designation" variant="outlined" />
-                        </Grid>
-                        <Grid xs={4} p={2}>
-                            <TextField fullWidth id="outlined-basic" label="Team" variant="outlined" />
-                        </Grid>
-                        <Grid xs={4} p={2}>
-                            <TextField fullWidth id="outlined-basic" label="Contact Number" variant="outlined" />
-                        </Grid>
-                    </Grid>
-                    {/* <Divider /> */}
-                    <Box p={2} className="edit-table-container">
-                        <MaterialReactTable table={editableForHistory} />
-                    </Box>
-                    <Box p={2} className="edit-table-container">
-                        <MaterialReactTable table={editableForTask} />
-                    </Box>
-                    <Button variant="contained" style={{ float: 'right', margin: '2rem' }}>
-                        Save
-                    </Button>
-                </MainCard>
-            )}
-            {view.mode === 'View' && (
-                <>
-                    <MainCard
-                        title="Note"
-                        secondary={
-                            <Box
-                                sx={{
-                                    ml: 2,
-                                    // mr: 3,
-                                    [theme.breakpoints.down('md')]: {
-                                        mr: 2
-                                    }
-                                }}
-                            >
-                                <ButtonBase sx={{ borderRadius: '12px' }}>
-                                    <Avatar
-                                        variant="rounded"
-                                        sx={{
-                                            ...theme.typography.commonAvatar,
-                                            ...theme.typography.mediumAvatar,
-                                            transition: 'all .2s ease-in-out',
-                                            background: theme.palette.secondary.light,
-                                            color: theme.palette.secondary.dark,
-                                            '&[aria-controls="menu-list-grow"],&:hover': {
-                                                background: theme.palette.secondary.dark,
-                                                color: theme.palette.secondary.light
-                                            }
-                                        }}
-                                        aria-haspopup="true"
-                                        onClick={handleClose}
-                                        color="inherit"
-                                    >
-                                        <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
-                                    </Avatar>
-                                </ButtonBase>
-                            </Box>
-                        }
-                    >
-                        <Grid container m={3}>
-                            <Grid xs={3} p={2}>
-                                <label className="text-muted">Employee Code</label>
-                                <p>001</p>
-                            </Grid>
-                            <Grid xs={3} p={2}>
-                                <label className="text-muted">Name Of Candidate</label>
-                                <p>Thara</p>
-                            </Grid>
-                            <Grid xs={3} p={2}>
-                                <label className="text-muted">Date Of Birth</label>
-                                <p>27-09-2001</p>
-                            </Grid>
-                            <Grid xs={3} p={2}>
-                                <label className="text-muted">Designation</label>
-                                <p>Developer</p>
-                            </Grid>
-                            <Grid xs={3} p={2}>
-                                <label className="text-muted">Team</label>
-                                <p>ABC Team</p>
-                            </Grid>
-                            <Grid xs={3} p={2}>
-                                <label className="text-muted">Contact Number</label>
-                                <p>9876543278</p>
-                            </Grid>
-                        </Grid>
-                    </MainCard>
-                </>
-            )}
-            <Dialog
-                fullWidth
-                open={open}
-                TransitionComponent={Transition}
-                keepMounted
-            // onClose={handleClose}
-            // aria-describedby="alert-dialog-slide-description"
-            >
-                <DialogTitle>
-                    <Typography variant="h3">Delete Lead</Typography>
-                </DialogTitle>
-                <Divider />
-                <DialogContent>
-                    <DialogContentText id="alert-dialog-slide-description" className="d-flex justify-content-center align-item-center">
-                        <div className="bg-light rounded ">
-                            <Delete style={{ fontSize: '32' }} />
-                        </div>
-                    </DialogContentText>
-                    <Typography variant="h4" className="muted" display="block" gutterBottom style={{ textAlign: 'center' }} mt={2}>
-                        Are you want to Delete ?
-                    </Typography>
-                </DialogContent>
-                <DialogActions className="d-flex justify-content-center mb-1">
-                    <Button variant="outlined" onClick={() => setOpen(false)}>
-                        Cancel
-                    </Button>
-                    <Button variant="contained">Delete</Button>
-                </DialogActions>
-            </Dialog>
+  };
+
+  const uploadToServer = async (data) => {
+    try {
+      const response = await fetch('http://localhost:3001/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ data })
+      });
+
+      // Handle response if needed
+      console.log('Upload successful:', response);
+    } catch (error) {
+      console.error('Error uploading file:', error);
+    }
+  };
+
+  const [inputValue, setInputValue] = useState('');
+  const [options, setOptions] = useState([]);
+  const [selectedValue, setSelectedValue] = useState('');
+
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleAddOption = () => {
+    if (inputValue.trim() !== '') {
+      setOptions([...options, inputValue]);
+      setInputValue('');
+    }
+  };
+
+  const handleSelectChange = (event) => {
+    setSelectedValue(event.target.value);
+  };
+
+  const [view, setView] = useState({
+    visible: false,
+    mode: 'Initial' // 'add', 'edit', 'view'
+  });
+  const [open, setOpen] = useState(false);
+  const handleDelete = () => {
+    setOpen(true);
+    console.log('open', open);
+  };
+  const theme = useTheme();
+  const handleExportData = () => {
+    const csv = generateCsv(csvConfig)(data);
+    download(csvConfig)(csv);
+  };
+  const handleEdit = () => {
+    console.log('worked');
+    setView({
+      visible: true,
+      mode: 'Edit'
+    });
+  };
+  const handleView = () => {
+    console.log('worked');
+    setView({
+      visible: true,
+      mode: 'View'
+    });
+  };
+
+  const table = useMaterialReactTable({
+    columns,
+    data: employeeData,
+    enableRowActions: true,
+    positionActionsColumn: 'last',
+    renderRowActions: ({ row }) => (
+      <div style={{ display: 'flex' }}>
+        <IconButton onClick={handleDelete}>
+          <DeleteRounded style={{ color: '#2196f3' }} />
+        </IconButton>
+        <IconButton onClick={handleView}>
+          <VisibilityRounded style={{ color: '#2196f3' }} />
+        </IconButton>
+        <IconButton onClick={handleEdit}>
+          <ModeEditRounded style={{ color: '#2196f3' }} />
+        </IconButton>
+      </div>
+    ),
+    enableRowSelection: true,
+    columnFilterDisplayMode: 'popover',
+    paginationDisplayMode: 'pages',
+    positionToolbarAlertBanner: 'bottom',
+    renderTopToolbarCustomActions: () => (
+      <>
+        <div style={{ marginLeft: '0.5rem' }}>
+          <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileUpload} accept=".xls,.xlsx" />
+          <Button
+            variant="contained"
+            style={{ marginRight: '1rem' }}
+            color="primary"
+            onClick={handleImportClick}
+            startIcon={<IconUpload />}
+          >
+            Import
+          </Button>
+          <Button onClick={handleExportData} variant="contained" color="primary" startIcon={<IconDownload />}>
+            Export
+          </Button>
         </div>
-    );
+      </>
+    )
+    // renderRowActions: ({ row, table }) => (
+    //   <Box sx={{ display: 'flex', gap: '1rem' }}>
+    //     <Tooltip title="Edit">
+    //       <IconButton onClick={() => table.setEditingRow(row)}>
+    //         <IconEdit />
+    //       </IconButton>
+    //     </Tooltip>
+    //     <Tooltip title="Delete">
+    //       <IconButton color="error" onClick={() => openDeleteConfirmModal(row)}>
+    //         <IconEdit />
+    //       </IconButton>
+    //     </Tooltip>
+    //   </Box>
+    // )
+  });
+  const editableForHistory = useMaterialReactTable({
+    columns: coumnsForHistory,
+    data: dataForHistory,
+    createDisplayMode: 'row', // ('modal', and 'custom' are also available)
+    editDisplayMode: 'row', // ('modal', 'cell', 'table', and 'custom' are also available)
+    enableEditing: true,
+    positionActionsColumn: 'last',
+    enableColumnFilters: false,
+    enableFilters: false,
+    enableDensityToggle: false,
+    enablePagination: false,
+    enableHiding: false,
+    enableFullScreenToggle: false,
+    getRowId: (row) => row.id,
+    onCreatingRowCancel: () => console.log('err'),
+    // onCreatingRowSave: handleCreateUser,
+    onEditingRowCancel: () => console.log('err'),
+    // onEditingRowSave: handleSaveUser,
+    renderRowActions: ({ row, table }) => (
+      <Box sx={{ display: 'flex', gap: '1rem' }}>
+        <Tooltip title="Edit">
+          <IconButton onClick={() => table.setEditingRow(row)}>
+            <ModeEditRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Delete">
+          <IconButton color="error" onClick={() => console.log('del')}>
+            <DeleteRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    ),
+    renderTopToolbarCustomActions: ({ table }) => (
+      // <Button
+      //   variant="contained"
+      //   onClick={() => {
+      //     table.setCreatingRow(true);
+      //   }}
+      // >
+      //   Create History
+      // </Button>
+      <div className="title-bar">
+        <div className="custum-header">
+          <p style={{ fontWeight: 'bold', fontSize: 'large' }}>History Creation</p>
+          <ButtonBase sx={{ borderRadius: '12px' }}>
+            <Avatar
+              variant="rounded"
+              sx={{
+                ...theme.typography.commonAvatar,
+                ...theme.typography.mediumAvatar,
+                transition: 'all .2s ease-in-out',
+                background: theme.palette.secondary.light,
+                color: theme.palette.secondary.dark,
+                '&[aria-controls="menu-list-grow"],&:hover': {
+                  background: theme.palette.secondary.dark,
+                  color: theme.palette.secondary.light
+                }
+              }}
+              onClick={() => {
+                table.setCreatingRow(true);
+              }}
+              color="inherit"
+            >
+              <IconPlus />
+            </Avatar>
+          </ButtonBase>
+        </div>
+      </div>
+    )
+  });
+  const editableForTask = useMaterialReactTable({
+    columns: coumnsForTask,
+    data: dataForHistory,
+    createDisplayMode: 'row',
+    editDisplayMode: 'row',
+    enableEditing: true,
+    positionActionsColumn: 'last',
+    enableColumnFilters: false,
+    enableFilters: false,
+    enableDensityToggle: false,
+    enablePagination: false,
+    enableHiding: false,
+    enableFullScreenToggle: false,
+    getRowId: (row) => row.id,
+    onCreatingRowCancel: () => console.log('err'),
+    // onCreatingRowSave: handleCreateUser,
+    onEditingRowCancel: () => console.log('err'),
+    // onEditingRowSave: handleSaveUser,
+    renderRowActions: ({ row, table }) => (
+      <Box sx={{ display: 'flex', gap: '1rem' }}>
+        <Tooltip title="Edit">
+          <IconButton onClick={() => table.setEditingRow(row)}>
+            <ModeEditRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Delete">
+          <IconButton color="error" onClick={() => console.log('del')}>
+            <DeleteRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    ),
+    renderTopToolbarCustomActions: ({ table }) => (
+      // <Button
+      //   variant="contained"
+      //   onClick={() => {
+      //     table.setCreatingRow(true);
+      //   }}
+      // >
+      //   Create History
+      // </Button>
+      <div className="title-bar">
+        <div className="custum-header">
+          <p style={{ fontWeight: 'bold', fontSize: 'large' }}>Task Creation</p>
+          <ButtonBase sx={{ borderRadius: '12px' }}>
+            <Avatar
+              variant="rounded"
+              sx={{
+                ...theme.typography.commonAvatar,
+                ...theme.typography.mediumAvatar,
+                transition: 'all .2s ease-in-out',
+                background: theme.palette.secondary.light,
+                color: theme.palette.secondary.dark,
+                '&[aria-controls="menu-list-grow"],&:hover': {
+                  background: theme.palette.secondary.dark,
+                  color: theme.palette.secondary.light
+                }
+              }}
+              onClick={() => {
+                table.setCreatingRow(true);
+              }}
+              color="inherit"
+            >
+              <IconPlus />
+            </Avatar>
+          </ButtonBase>
+        </div>
+      </div>
+    )
+  });
+
+  function createData(name, calories, fat, carbs) {
+    return { name, calories, fat, carbs };
+  }
+
+  const rows = [
+    createData('Frozen yoghurt', 159, 6.0, 24),
+    createData('Ice cream sandwich', 237, 9.0, 3),
+    createData('Eclair', 262, 16.0, 24),
+    createData('Cupcake', 305, 3.7, 67),
+    createData('Gingerbread', 356, 16.0, 49)
+  ];
+  const handleToggle = () => {
+    setView({
+      visible: true,
+      mode: 'Add'
+    });
+  };
+  const handleClose = () => {
+    setView({
+      visible: true,
+      mode: 'Initial'
+    });
+  };
+
+  const formik = useFormik({
+    initialValues: {
+      NameOfCandidate: '',
+      DateOfBirth: '',
+      Designation: '',
+      Team: '',
+      ContactNumber: '',
+      Role: ''
+    },
+    validationSchema,
+    onSubmit: async (values, { setSubmitting }) => {
+      console.log('worked');
+      try {
+        console.log('handle submit');
+        // Create leadDescription array from leadDescription field
+        await postData(PROFILES_CREATE, values, localData?.accessToken);
+        setView({
+          visible: true,
+          mode: 'Initial'
+        });
+        fetchAllData();
+      } catch (error) {
+        console.error('API error:', error);
+      }
+    }
+  });
+  const fetchAllData = async () => {
+    try {
+      const fetchProfiles = await fetchData(PROFILES_GET, localData?.accessToken);
+      // Set employee data in the state
+      setEmployeeData(fetchProfiles?.data);
+    } catch (error) {
+      console.log('error :', error);
+    }
+  };
+  useEffect(() => {
+    // Define an async function to fetch data
+    const fetchDataAsync = async () => {
+      try {
+        // Retrieve user data from local storage
+        const localStore = localStorage.getItem('userData');
+        const parsedData = JSON.parse(localStore);
+        // If user data exists, proceed to fetch teams and profiles
+        if (parsedData) {
+          // Fetch teams data using the access token
+          const fetchTeams = await fetchData(TEAMS_GET, parsedData?.accessToken);
+          // Set local data and teams data in the state
+          setLocalData(parsedData);
+          setTeamsData(fetchTeams);
+          // Fetch profiles data using the access token
+          const fetchProfiles = await fetchData(PROFILES_GET, parsedData?.accessToken);
+          // Set employee data in the state
+          setEmployeeData(fetchProfiles?.data);
+        }
+      } catch (error) {
+        // Handle errors during data fetching
+        console.error('Error fetching data:', error);
+      }
+      fetchAllData();
+    };
+    // Call the async function to fetch data when the component mounts
+    fetchDataAsync();
+  }, []); // Empty dependency array to mimic componentDidMount behavior
+
+  console.log(employeeData, 'fetchTeams');
+
+  return (
+    <div className="max">
+      {view.mode === 'Add' && (
+        <MainCard
+          title="Profile Creation"
+          secondary={
+            <Box
+              sx={{
+                ml: 2,
+                // mr: 3,
+                [theme.breakpoints.down('md')]: {
+                  mr: 2
+                }
+              }}
+            >
+              <ButtonBase sx={{ borderRadius: '12px' }}>
+                <Avatar
+                  variant="rounded"
+                  sx={{
+                    ...theme.typography.commonAvatar,
+                    ...theme.typography.mediumAvatar,
+                    transition: 'all .2s ease-in-out',
+                    background: theme.palette.secondary.light,
+                    color: theme.palette.secondary.dark,
+                    '&[aria-controls="menu-list-grow"],&:hover': {
+                      background: theme.palette.secondary.dark,
+                      color: theme.palette.secondary.light
+                    }
+                  }}
+                  aria-haspopup="true"
+                  onClick={handleClose}
+                  color="inherit"
+                >
+                  <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
+                </Avatar>
+              </ButtonBase>
+            </Box>
+          }
+        >
+          <form onSubmit={formik.handleSubmit}>
+            <Grid container>
+              <Grid xs={4} p={2}>
+                <TextField
+                  error={Boolean(formik.touched.NameOfCandidate && formik.errors.NameOfCandidate)}
+                  fullWidth
+                  type="text"
+                  variant="outlined"
+                  name="NameOfCandidate"
+                  label='Name of the Candidate'
+                  className="w-100"
+                  value={formik.values.NameOfCandidate}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                {formik.touched.NameOfCandidate && formik.errors.NameOfCandidate && (
+                  <FormHelperText error id="standard-weight-helper-text-Password-login">
+                    {formik.errors.NameOfCandidate}
+                  </FormHelperText>
+                )}
+              </Grid>
+              <Grid xs={4} p={2}>
+                <TextField
+                  fullWidth
+                  type="date"
+                  variant="outlined"
+                  name="dob"
+                  className="w-100"
+                  InputLabelProps={{ shrink: true }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputLabel htmlFor="outlined-adornment-dob" shrink>
+                        Date Of Birth
+                      </InputLabel>
+                    )
+                  }}
+                />
+              </Grid>
+              <Grid xs={4} p={2}>
+                <TextField fullWidth id="outlined-basic" label="Designation" variant="outlined" />
+              </Grid>
+              <Grid xs={4} p={2}>
+                <TextField fullWidth id="outlined-basic" label="Contact Number" variant="outlined" />
+              </Grid>
+              <Grid xs={4} p={2}>
+                <FormControl fullWidth>
+                  <InputLabel id="demo-simple-select-label">Team</InputLabel>
+                  <Select labelId="demo-simple-select-label" id="demo-simple-select" label="Role">
+                    {teamsOption.map((item) => (
+                      <MenuItem value={item.value}>{item.label}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid xs={4} p={2}>
+                <FormControl fullWidth>
+                  <InputLabel id="demo-simple-select-label">Role</InputLabel>
+                  <Select labelId="demo-simple-select-label" id="demo-simple-select" label="Role">
+                    <MenuItem value={'admin'}>Admin</MenuItem>
+                    <MenuItem value={'user'}>Employee</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+            <Button variant="contained" style={{ float: 'right', margin: '2rem' }} type="submit">
+              Save
+            </Button>
+          </form>
+        </MainCard>
+      )}
+      {view.mode === 'Initial' && (
+        <MainCard
+          title="Profiles"
+          secondary={
+            <Box
+              sx={{
+                ml: 2,
+                // mr: 3,
+                [theme.breakpoints.down('md')]: {
+                  mr: 2
+                }
+              }}
+            >
+              <ButtonBase sx={{ borderRadius: '12px' }}>
+                <Avatar
+                  variant="rounded"
+                  sx={{
+                    ...theme.typography.commonAvatar,
+                    ...theme.typography.mediumAvatar,
+                    transition: 'all .2s ease-in-out',
+                    background: theme.palette.secondary.light,
+                    color: theme.palette.secondary.dark,
+                    '&[aria-controls="menu-list-grow"],&:hover': {
+                      background: theme.palette.secondary.dark,
+                      color: theme.palette.secondary.light
+                    }
+                  }}
+                  aria-haspopup="true"
+                  onClick={handleToggle}
+                  color="inherit"
+                >
+                  <IconPlus stroke={2} size="1.3rem" />
+                </Avatar>
+              </ButtonBase>
+            </Box>
+          }
+        >
+          <MaterialReactTable table={table} />
+        </MainCard>
+      )}
+      {view.mode === 'Edit' && (
+        <MainCard
+          title="Profile Updations"
+          secondary={
+            <Box
+              sx={{
+                ml: 2,
+                // mr: 3,
+                [theme.breakpoints.down('md')]: {
+                  mr: 2
+                }
+              }}
+            >
+              <ButtonBase sx={{ borderRadius: '12px' }}>
+                <Avatar
+                  variant="rounded"
+                  sx={{
+                    ...theme.typography.commonAvatar,
+                    ...theme.typography.mediumAvatar,
+                    transition: 'all .2s ease-in-out',
+                    background: theme.palette.secondary.light,
+                    color: theme.palette.secondary.dark,
+                    '&[aria-controls="menu-list-grow"],&:hover': {
+                      background: theme.palette.secondary.dark,
+                      color: theme.palette.secondary.light
+                    }
+                  }}
+                  aria-haspopup="true"
+                  onClick={handleClose}
+                  color="inherit"
+                >
+                  <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
+                </Avatar>
+              </ButtonBase>
+            </Box>
+          }
+        >
+          <Grid container>
+            <Grid xs={4} p={2}>
+              <TextField fullWidth id="outlined-basic" label="Name Of Candidate" variant="outlined" />
+            </Grid>
+            <Grid xs={4} p={2}>
+              <TextField fullWidth type="date" variant="outlined" name="dob" className="w-100" />
+            </Grid>
+
+            <Grid xs={4} p={2}>
+              <TextField fullWidth id="outlined-basic" label="Designation" variant="outlined" />
+            </Grid>
+            <Grid xs={4} p={2}>
+              <TextField fullWidth id="outlined-basic" label="Contact Number" variant="outlined" />
+            </Grid>
+            <Grid xs={4} p={2}>
+              <TextField fullWidth id="outlined-basic" label="Team" variant="outlined" />
+            </Grid>
+            <Grid xs={4} p={2}>
+              <TextField fullWidth id="outlined-basic" label="Role" variant="outlined" />
+            </Grid>
+          </Grid>
+          {/* <Divider /> */}
+          <Box p={2} className="edit-table-container">
+            <MaterialReactTable table={editableForHistory} />
+          </Box>
+          <Box p={2} className="edit-table-container">
+            <MaterialReactTable table={editableForTask} />
+          </Box>
+          <Button variant="contained" style={{ float: 'right', margin: '2rem' }}>
+            Save
+          </Button>
+        </MainCard>
+      )}
+      {view.mode === 'View' && (
+        <>
+          <MainCard
+            title="Note"
+            secondary={
+              <Box
+                sx={{
+                  ml: 2,
+                  // mr: 3,
+                  [theme.breakpoints.down('md')]: {
+                    mr: 2
+                  }
+                }}
+              >
+                <ButtonBase sx={{ borderRadius: '12px' }}>
+                  <Avatar
+                    variant="rounded"
+                    sx={{
+                      ...theme.typography.commonAvatar,
+                      ...theme.typography.mediumAvatar,
+                      transition: 'all .2s ease-in-out',
+                      background: theme.palette.secondary.light,
+                      color: theme.palette.secondary.dark,
+                      '&[aria-controls="menu-list-grow"],&:hover': {
+                        background: theme.palette.secondary.dark,
+                        color: theme.palette.secondary.light
+                      }
+                    }}
+                    aria-haspopup="true"
+                    onClick={handleClose}
+                    color="inherit"
+                  >
+                    <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
+                  </Avatar>
+                </ButtonBase>
+              </Box>
+            }
+          >
+            <Grid container m={3}>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Employee Code</label>
+                <p>001</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Name Of Candidate</label>
+                <p>Thara</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Date Of Birth</label>
+                <p>27-09-2001</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Designation</label>
+                <p>Developer</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Team</label>
+                <p>ABC Team</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Contact Number</label>
+                <p>9876543278</p>
+              </Grid>
+            </Grid>
+          </MainCard>
+        </>
+      )}
+      <Dialog
+        fullWidth
+        open={open}
+        TransitionComponent={Transition}
+        keepMounted
+        // onClose={handleClose}
+        // aria-describedby="alert-dialog-slide-description"
+      >
+        <DialogTitle>
+          <Typography variant="h3">Delete Lead</Typography>
+        </DialogTitle>
+        <Divider />
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description" className="d-flex justify-content-center align-item-center">
+            <div className="bg-light rounded ">
+              <Delete style={{ fontSize: '32' }} />
+            </div>
+          </DialogContentText>
+          <Typography variant="h4" className="muted" display="block" gutterBottom style={{ textAlign: 'center' }} mt={2}>
+            Are you want to Delete ?
+          </Typography>
+        </DialogContent>
+        <DialogActions className="d-flex justify-content-center mb-1">
+          <Button variant="outlined" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          <Button variant="contained">Delete</Button>
+        </DialogActions>
+      </Dialog>
+    </div>
+  );
 };
 export default Profiles;

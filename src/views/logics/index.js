@@ -1045,7 +1045,6 @@ const BusinessLeads = () => {
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 />
-
                 {formik.touched.date && formik.errors.date && (
                   <FormHelperText error id="standard-weight-helper-text-Password-login">
                     {formik.errors.date}

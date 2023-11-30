@@ -21,10 +21,10 @@ const pages = {
 
       children: [
         {
-          id: 'login3',
+          id: 'default',
           title: 'Login',
           type: 'item',
-          url: '/pages/login/login3',
+          url: '/',
           target: true
         },
         {
