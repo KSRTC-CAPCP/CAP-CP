@@ -4,9 +4,10 @@ import { lazy } from 'react';
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
 import Access from 'views/access';
-import BusinessRFQ from 'views/logics/rfq';
 import Projects from 'views/logics/project';
+import BusinessRFQ from 'views/logics/rfq';
 import Profiles from 'views/profiles';
+import TaskPanel from 'views/task';
 
 // import BusinessLeads from 'views/logics';
 
@@ -118,6 +119,10 @@ const MainRoutes = {
     {
       path: '/roles-access',
       element: <Access />
+    },
+    {
+      path: '/task-panel',
+      element: <TaskPanel />,
     }
   ]
 };
