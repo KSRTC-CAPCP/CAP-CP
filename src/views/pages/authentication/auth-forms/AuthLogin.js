@@ -126,7 +126,7 @@ const FirebaseLogin = ({ ...others }) => {
           try {
             const endpoint = LOGIN;
             const response = await postData(endpoint, updatedvalues);
-            navigate('/');
+            navigate('/dashboard/default');
             // Handle the response based on your needs
             console.log(response, 'responce');
             // Store data in local storage when success is true
