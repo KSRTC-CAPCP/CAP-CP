@@ -14,6 +14,12 @@ export const LEAD_GET_ID = (id) => `${BASE_URL}/lead/getbyid/${id}`;
 export const LEAD_UPDATE = (id) => `${BASE_URL}/lead/update/${id}`;
 export const LEAD_DELETE = (id) => `${BASE_URL}/lead//delete/${id}`;
 
+//FOR RFQ API HERE
+export const RFQ_CREATION = `${BASE_URL}/rfq/create`;
+export const RFQ_GET = `${BASE_URL}/rfq/get`;
+export const RFQ_GET_ID = (id) => `${BASE_URL}/rfq/getbyid/${id}`;
+export const RFQ_UPDATE = (id) => `${BASE_URL}/rfq/update/${id}`;
+export const RFQ_DELETE = (id) => `${BASE_URL}/rfq/delete/${id}`;
 //FOR TEAMS
 export const TEAMS_GET = `${BASE_URL}/roleaccess/getall`;
 
