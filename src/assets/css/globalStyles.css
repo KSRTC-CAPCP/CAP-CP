@@ -145,11 +145,13 @@ main {
   display: flex;
   justify-content: space-between;
 }
-.card-hover {
-  border: 1px solid transparent !important;
-  box-shadow: none !important;
-}
+     
 .card-hover:hover {
+  border: 1px solid #5e35b18e !important;
+  background-color: #fff !important;
+}
+     
+.card-hovered {
   border: 1px solid #5e35b18e !important;
   background-color: #fff !important;
 }
@@ -277,4 +279,12 @@ hr{
 }
 .css-1vz8i7x-MuiTypography-root{
   padding-top: 10px;
+}
+.css-9lyone-MuiInputBase-input-MuiOutlinedInput-input
+{
+  /* color: transparent !important; */
+}
+.align-items-center
+{
+  align-items: center !important;
 }

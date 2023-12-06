@@ -29,3 +29,10 @@ export const PROFILES_GET_ID = (id) => `${BASE_URL}/employee/getbyid/${id}`;
 export const PROFILES_CREATE = `${BASE_URL}/employee/add`;
 export const PROFILES_UPDATE = (id) => `${BASE_URL}/employee/update/${id}`;
 export const PROFILES_DELETE = (id) => `${BASE_URL}/employee/delete/${id}`;
+
+
+//FOR PROJECT
+export const PROJECT_GET = `${BASE_URL}/project/get-all`;
+export const PROJECT_CREATE = `${BASE_URL}/project/create`;
+export const PROJECT_DELETE =(id) => `${BASE_URL}/project/delete/${id}`;
+export const PROJECT_UPDATE =(id) => `${BASE_URL}/project/update/${id}`;
