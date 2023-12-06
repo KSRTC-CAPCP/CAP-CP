@@ -1,5 +1,5 @@
 // assets
-import { IconTypography, IconPalette, IconBusinessplan, IconShadow, IconWindmill, IconUser, IconLockAccess } from '@tabler/icons';
+import { IconTypography, IconPalette, IconBusinessplan, IconShadow, IconWindmill, IconUser, IconLockAccess, IconUsers, IconUserX } from '@tabler/icons';
 
 // constant
 const icons = {
@@ -9,7 +9,9 @@ const icons = {
   IconWindmill,
   IconBusinessplan,
   IconUser,
-  IconLockAccess
+  IconLockAccess,
+  IconUsers,
+  IconUserX 
   
 };
 
@@ -100,6 +102,22 @@ const utilities = {
       type: 'item',
       url: '/roles-access',
       icon: icons.IconLockAccess,
+      breadcrumbs: false
+    },
+    {
+      id: 'EmployeePanel',
+      title: 'Employee Panel',
+      type: 'item',
+      url: '/Employee-Panel',
+      icon: icons.IconUsers,
+      breadcrumbs: false
+    },
+    {
+      id: 'ManagerPanel',
+      title: 'Manager Panel',
+      type: 'item',
+      url: '/Manager-Panel',
+      icon: icons.IconUserX  ,
       breadcrumbs: false
     }
   ]

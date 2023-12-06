@@ -1669,7 +1669,7 @@ const BusinessLeads = () => {
               </Grid>
               <Grid xs={3} p={2}>
                 <label className="text-muted">Category</label>
-                <p>{leadSummary?.category}</p>
+                <p>{leadSummary}</p>
               </Grid>
               <Grid xs={3} p={2}>
                 <label className="text-muted">Contact Name</label>
