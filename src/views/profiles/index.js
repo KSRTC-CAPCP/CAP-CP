@@ -29,7 +29,11 @@ import {
   DialogActions,
   Slide,
   Input,
-  FormHelperText
+  FormHelperText,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio
 } from '@mui/material';
 import React, { forwardRef } from 'react';
 import MainCard from 'ui-component/cards/MainCard';
@@ -67,11 +71,11 @@ import {
   TimelineOppositeContent,
   TimelineSeparator
 } from '@mui/lab';
-import { DateRangePicker } from 'rsuite';
-import { fetchData, postData } from 'utils/apiUtils';
+import { DatePicker, DateRangePicker } from 'rsuite';
+import { deleteData, fetchData, postData, updateData } from 'utils/apiUtils';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { PROFILES_CREATE, PROFILES_GET, TEAMS_GET } from 'api/apiEndPoint';
+import { PROFILES_CREATE, PROFILES_DELETE, PROFILES_GET, PROFILES_GET_ID, PROFILES_UPDATE, TEAMS_GET } from 'api/apiEndPoint';
 import { useEffect } from 'react';
 
 const columnHelper = createMRTColumnHelper();
@@ -212,6 +216,9 @@ const Profiles = () => {
   const [localData, setLocalData] = useState('');
   const [teamsData, setTeamsData] = useState([]);
   const [employeeData, setEmployeeData] = useState([]);
+  const [deleteId, setDeleteId] = useState('');
+  const [editId, setEditId] = useState('');
+  const [viewId, setViewId] = useState('');
   const teamsOption = teamsData.map((data) => ({
     label: data.Team,
     value: data.Team
@@ -237,11 +244,21 @@ const Profiles = () => {
     }
   ];
   const columns = [
+    {
+      accessorKey: 'EmployeeCode',
+      header: 'Employee Code',
+      Cell: ({ renderedCellValue, row }) => (
+        <Box component="span">
+          <p>{row.original.EmployeeCode}</p>
+        </Box>
+      )
+    },
     columnHelper.accessor('NameOfCandidate', {
       header: 'Name Of Candidate'
     }),
+
     columnHelper.accessor('DateOfBirth', {
-      header: 'Date Of Borth'
+      header: 'Date Of Birth'
     }),
     columnHelper.accessor('Designation', {
       header: 'Designation'
@@ -252,6 +269,15 @@ const Profiles = () => {
     columnHelper.accessor('Role', {
       header: 'Role'
     }),
+    {
+      accessorKey: 'status',
+      header: 'Status',
+      Cell: ({ renderedCellValue, row }) => (
+        <Box component="span">
+          <p>{row.original.status ? 'Active' : 'Inactive'}</p>
+        </Box>
+      )
+    },
     columnHelper.accessor('ContactNumber', {
       header: 'Contact Number'
     })
@@ -260,7 +286,12 @@ const Profiles = () => {
   const handleImportClick = () => {
     fileInputRef.current.click();
   };
+  const [selectedOption, setSelectedOption] = React.useState('active');
 
+  const handleOptionChange = (event) => {
+    console.log(event.target.value, 'event');
+    setSelectedOption(event.target.value);
+  };
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -319,30 +350,59 @@ const Profiles = () => {
     mode: 'Initial' // 'add', 'edit', 'view'
   });
   const [open, setOpen] = useState(false);
-  const handleDelete = () => {
+  const handleDelete = (id) => {
     setOpen(true);
-    console.log('open', open);
+    setDeleteId(id.original._id);
+    console.log('open', id.original._id);
   };
   const theme = useTheme();
   const handleExportData = () => {
     const csv = generateCsv(csvConfig)(data);
     download(csvConfig)(csv);
   };
-  const handleEdit = () => {
-    console.log('worked');
+  const handleEdit = async (id) => {
+    console.log(id.original._id, 'worked');
+    setEditId(id.original._id);
+    const endpoint = PROFILES_GET_ID(id.original._id);
+    const getByIdData = await fetchData(endpoint, localData?.accessToken);
+    console.log(getByIdData, 'ids');
+    // Assuming getByIdData?.DateOfBirth is in a format that can be interpreted by Date constructor
+    // If needed, adjust the format to match "YYYY-MM-DD"
+    // const formattedDateOfBirth = new Date(getByIdData?.DateOfBirth).toISOString().split('T')[0];
+
+    formik.setValues({
+      NameOfCandidate: getByIdData?.NameOfCandidate,
+      DateOfBirth: getByIdData?.DateOfBirth,
+      Designation: getByIdData?.Designation,
+      ContactNumber: getByIdData?.ContactNumber,
+      Team: getByIdData?.Team,
+      Role: getByIdData?.Role
+    });
+    setSelectedOption(getByIdData?.status ? 'active' : 'inActive');
+
     setView({
       visible: true,
       mode: 'Edit'
     });
   };
-  const handleView = () => {
-    console.log('worked');
+  const handleView = (id) => {
+    setViewId(id.original._id);
+    console.log(id.original._id, 'worked');
     setView({
       visible: true,
       mode: 'View'
     });
   };
-
+  const confirmDelete = async () => {
+    try {
+      const apiEndPoint = PROFILES_DELETE(deleteId);
+      await deleteData(apiEndPoint, localData?.accessToken);
+      fetchAllData();
+      setOpen(false);
+    } catch (error) {
+      console.log(error, 'error');
+    }
+  };
   const table = useMaterialReactTable({
     columns,
     data: employeeData,
@@ -350,13 +410,13 @@ const Profiles = () => {
     positionActionsColumn: 'last',
     renderRowActions: ({ row }) => (
       <div style={{ display: 'flex' }}>
-        <IconButton onClick={handleDelete}>
+        <IconButton onClick={() => handleDelete(row)}>
           <DeleteRounded style={{ color: '#2196f3' }} />
         </IconButton>
-        <IconButton onClick={handleView}>
+        <IconButton onClick={() => handleView(row)}>
           <VisibilityRounded style={{ color: '#2196f3' }} />
         </IconButton>
-        <IconButton onClick={handleEdit}>
+        <IconButton onClick={() => handleEdit(row)}>
           <ModeEditRounded style={{ color: '#2196f3' }} />
         </IconButton>
       </div>
@@ -399,146 +459,6 @@ const Profiles = () => {
     //   </Box>
     // )
   });
-  const editableForHistory = useMaterialReactTable({
-    columns: coumnsForHistory,
-    data: dataForHistory,
-    createDisplayMode: 'row', // ('modal', and 'custom' are also available)
-    editDisplayMode: 'row', // ('modal', 'cell', 'table', and 'custom' are also available)
-    enableEditing: true,
-    positionActionsColumn: 'last',
-    enableColumnFilters: false,
-    enableFilters: false,
-    enableDensityToggle: false,
-    enablePagination: false,
-    enableHiding: false,
-    enableFullScreenToggle: false,
-    getRowId: (row) => row.id,
-    onCreatingRowCancel: () => console.log('err'),
-    // onCreatingRowSave: handleCreateUser,
-    onEditingRowCancel: () => console.log('err'),
-    // onEditingRowSave: handleSaveUser,
-    renderRowActions: ({ row, table }) => (
-      <Box sx={{ display: 'flex', gap: '1rem' }}>
-        <Tooltip title="Edit">
-          <IconButton onClick={() => table.setEditingRow(row)}>
-            <ModeEditRounded style={{ color: '#2196f3' }} />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Delete">
-          <IconButton color="error" onClick={() => console.log('del')}>
-            <DeleteRounded style={{ color: '#2196f3' }} />
-          </IconButton>
-        </Tooltip>
-      </Box>
-    ),
-    renderTopToolbarCustomActions: ({ table }) => (
-      // <Button
-      //   variant="contained"
-      //   onClick={() => {
-      //     table.setCreatingRow(true);
-      //   }}
-      // >
-      //   Create History
-      // </Button>
-      <div className="title-bar">
-        <div className="custum-header">
-          <p style={{ fontWeight: 'bold', fontSize: 'large' }}>History Creation</p>
-          <ButtonBase sx={{ borderRadius: '12px' }}>
-            <Avatar
-              variant="rounded"
-              sx={{
-                ...theme.typography.commonAvatar,
-                ...theme.typography.mediumAvatar,
-                transition: 'all .2s ease-in-out',
-                background: theme.palette.secondary.light,
-                color: theme.palette.secondary.dark,
-                '&[aria-controls="menu-list-grow"],&:hover': {
-                  background: theme.palette.secondary.dark,
-                  color: theme.palette.secondary.light
-                }
-              }}
-              onClick={() => {
-                table.setCreatingRow(true);
-              }}
-              color="inherit"
-            >
-              <IconPlus />
-            </Avatar>
-          </ButtonBase>
-        </div>
-      </div>
-    )
-  });
-  const editableForTask = useMaterialReactTable({
-    columns: coumnsForTask,
-    data: dataForHistory,
-    createDisplayMode: 'row',
-    editDisplayMode: 'row',
-    enableEditing: true,
-    positionActionsColumn: 'last',
-    enableColumnFilters: false,
-    enableFilters: false,
-    enableDensityToggle: false,
-    enablePagination: false,
-    enableHiding: false,
-    enableFullScreenToggle: false,
-    getRowId: (row) => row.id,
-    onCreatingRowCancel: () => console.log('err'),
-    // onCreatingRowSave: handleCreateUser,
-    onEditingRowCancel: () => console.log('err'),
-    // onEditingRowSave: handleSaveUser,
-    renderRowActions: ({ row, table }) => (
-      <Box sx={{ display: 'flex', gap: '1rem' }}>
-        <Tooltip title="Edit">
-          <IconButton onClick={() => table.setEditingRow(row)}>
-            <ModeEditRounded style={{ color: '#2196f3' }} />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Delete">
-          <IconButton color="error" onClick={() => console.log('del')}>
-            <DeleteRounded style={{ color: '#2196f3' }} />
-          </IconButton>
-        </Tooltip>
-      </Box>
-    ),
-    renderTopToolbarCustomActions: ({ table }) => (
-      // <Button
-      //   variant="contained"
-      //   onClick={() => {
-      //     table.setCreatingRow(true);
-      //   }}
-      // >
-      //   Create History
-      // </Button>
-      <div className="title-bar">
-        <div className="custum-header">
-          <p style={{ fontWeight: 'bold', fontSize: 'large' }}>Task Creation</p>
-          <ButtonBase sx={{ borderRadius: '12px' }}>
-            <Avatar
-              variant="rounded"
-              sx={{
-                ...theme.typography.commonAvatar,
-                ...theme.typography.mediumAvatar,
-                transition: 'all .2s ease-in-out',
-                background: theme.palette.secondary.light,
-                color: theme.palette.secondary.dark,
-                '&[aria-controls="menu-list-grow"],&:hover': {
-                  background: theme.palette.secondary.dark,
-                  color: theme.palette.secondary.light
-                }
-              }}
-              onClick={() => {
-                table.setCreatingRow(true);
-              }}
-              color="inherit"
-            >
-              <IconPlus />
-            </Avatar>
-          </ButtonBase>
-        </div>
-      </div>
-    )
-  });
 
   function createData(name, calories, fat, carbs) {
     return { name, calories, fat, carbs };
@@ -556,6 +476,7 @@ const Profiles = () => {
       visible: true,
       mode: 'Add'
     });
+    formik.resetForm();
   };
   const handleClose = () => {
     setView({
@@ -571,20 +492,64 @@ const Profiles = () => {
       Designation: '',
       Team: '',
       ContactNumber: '',
-      Role: ''
+      Role: '',
+      status: ''
     },
     validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
-      console.log('worked');
+      console.log(editId, 'worked id');
       try {
-        console.log('handle submit');
-        // Create leadDescription array from leadDescription field
-        await postData(PROFILES_CREATE, values, localData?.accessToken);
-        setView({
-          visible: true,
-          mode: 'Initial'
-        });
-        fetchAllData();
+        if (editId) {
+          // Convert the date format to dd-mm-yyyy
+          const formattedDateOfBirth = new Date(values.DateOfBirth).toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          });
+          const formattedDate = formattedDateOfBirth.replace(/\//g, '-');
+          // Update the values with the formatted date
+          const formattedValues = {
+            ...values,
+            DateOfBirth: formattedDate,
+            status: selectedOption === 'active' ? true : false
+          };
+
+          console.log(formattedValues, 'worked');
+          // Create leadDescription array from leadDescription field
+          const endpoint = PROFILES_UPDATE(editId);
+          await updateData(endpoint, formattedValues, localData?.accessToken);
+          setView({
+            visible: true,
+            mode: 'Initial'
+          });
+          fetchAllData();
+          formik.resetForm();
+        } else {
+          console.log('create logged');
+          // Convert the date format to dd-mm-yyyy
+          const formattedDateOfBirth = new Date(values.DateOfBirth).toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          });
+          const formattedDate = formattedDateOfBirth.replace(/\//g, '-');
+          // Update the values with the formatted date
+          const formattedValues = {
+            ...values,
+            DateOfBirth: formattedDate,
+            status: selectedOption === 'active' ? true : false
+          };
+
+          console.log(formattedValues, 'worked');
+          // Create leadDescription array from leadDescription field
+          await postData(PROFILES_CREATE, formattedValues, localData?.accessToken);
+          setView({
+            visible: true,
+            mode: 'Initial'
+          });
+          fetchAllData();
+          formik.resetForm();
+        }
       } catch (error) {
         console.error('API error:', error);
       }
@@ -678,7 +643,7 @@ const Profiles = () => {
                   type="text"
                   variant="outlined"
                   name="NameOfCandidate"
-                  label='Name of the Candidate'
+                  label="Name of the Candidate"
                   className="w-100"
                   value={formik.values.NameOfCandidate}
                   onChange={formik.handleChange}
@@ -692,45 +657,112 @@ const Profiles = () => {
               </Grid>
               <Grid xs={4} p={2}>
                 <TextField
+                  error={Boolean(formik.touched.DateOfBirth && formik.errors.DateOfBirth)}
                   fullWidth
                   type="date"
                   variant="outlined"
-                  name="dob"
+                  name="DateOfBirth"
+                  placeholder="Date"
                   className="w-100"
-                  InputLabelProps={{ shrink: true }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputLabel htmlFor="outlined-adornment-dob" shrink>
-                        Date Of Birth
-                      </InputLabel>
-                    )
-                  }}
+                  value={formik.values.DateOfBirth}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                 />
+                {formik.touched.DateOfBirth && formik.errors.DateOfBirth && (
+                  <FormHelperText error id="standard-weight-helper-text-Password-login">
+                    {formik.errors.DateOfBirth}
+                  </FormHelperText>
+                )}
               </Grid>
               <Grid xs={4} p={2}>
-                <TextField fullWidth id="outlined-basic" label="Designation" variant="outlined" />
+                <TextField
+                  error={Boolean(formik.touched.Designation && formik.errors.Designation)}
+                  fullWidth
+                  type="text"
+                  variant="outlined"
+                  name="Designation"
+                  label="Designation"
+                  className="w-100"
+                  value={formik.values.Designation}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                {formik.touched.Designation && formik.errors.Designation && (
+                  <FormHelperText error id="standard-weight-helper-text-Password-login">
+                    {formik.errors.Designation}
+                  </FormHelperText>
+                )}
               </Grid>
               <Grid xs={4} p={2}>
-                <TextField fullWidth id="outlined-basic" label="Contact Number" variant="outlined" />
+                <TextField
+                  error={Boolean(formik.touched.ContactNumber && formik.errors.ContactNumber)}
+                  fullWidth
+                  type="number"
+                  variant="outlined"
+                  name="ContactNumber"
+                  label="Contact Number"
+                  className="w-100"
+                  value={formik.values.ContactNumber}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                {formik.touched.ContactNumber && formik.errors.ContactNumber && (
+                  <FormHelperText error id="standard-weight-helper-text-Password-login">
+                    {formik.errors.ContactNumber}
+                  </FormHelperText>
+                )}
               </Grid>
               <Grid xs={4} p={2}>
-                <FormControl fullWidth>
+                <FormControl fullWidth error={Boolean(formik.touched.Team && formik.errors.Team)}>
                   <InputLabel id="demo-simple-select-label">Team</InputLabel>
-                  <Select labelId="demo-simple-select-label" id="demo-simple-select" label="Role">
+                  <Select
+                    labelId="demo-simple-select-label"
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    id="demo-simple-select"
+                    label="Team"
+                    name="Team"
+                    value={formik.values.Team}
+                  >
                     {teamsOption.map((item) => (
                       <MenuItem value={item.value}>{item.label}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
+                {formik.touched.Team && formik.errors.Team && (
+                  <FormHelperText error id="standard-weight-helper-text-Password-login">
+                    {formik.errors.Team}
+                  </FormHelperText>
+                )}
               </Grid>
               <Grid xs={4} p={2}>
-                <FormControl fullWidth>
+                <FormControl fullWidth error={Boolean(formik.touched.Team && formik.errors.Team)}>
                   <InputLabel id="demo-simple-select-label">Role</InputLabel>
-                  <Select labelId="demo-simple-select-label" id="demo-simple-select" label="Role">
+                  <Select
+                    labelId="demo-simple-select-label"
+                    value={formik.values.Role}
+                    id="demo-simple-select"
+                    label="Role"
+                    name="Role"
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  >
                     <MenuItem value={'admin'}>Admin</MenuItem>
                     <MenuItem value={'user'}>Employee</MenuItem>
                   </Select>
                 </FormControl>
+                {formik.touched.Role && formik.errors.Role && (
+                  <FormHelperText error id="standard-weight-helper-text-Password-login">
+                    {formik.errors.Role}
+                  </FormHelperText>
+                )}
+              </Grid>
+              <Grid item xs={4} p={2}>
+                <FormLabel id="demo-row-radio-buttons-group-label">Status</FormLabel>
+                <RadioGroup aria-label="yesno" name="status" value={selectedOption} onChange={handleOptionChange} row>
+                  <FormControlLabel value="active" control={<Radio />} label="Active" />
+                  <FormControlLabel value="inActive" control={<Radio />} label="In Active" />
+                </RadioGroup>
               </Grid>
             </Grid>
             <Button variant="contained" style={{ float: 'right', margin: '2rem' }} type="submit">
@@ -816,37 +848,141 @@ const Profiles = () => {
             </Box>
           }
         >
-          <Grid container>
-            <Grid xs={4} p={2}>
-              <TextField fullWidth id="outlined-basic" label="Name Of Candidate" variant="outlined" />
+          <form onSubmit={formik.handleSubmit}>
+            <Grid container>
+              <Grid xs={4} p={2}>
+                <TextField
+                  error={Boolean(formik.touched.NameOfCandidate && formik.errors.NameOfCandidate)}
+                  fullWidth
+                  type="text"
+                  variant="outlined"
+                  name="NameOfCandidate"
+                  label="Name of the Candidate"
+                  className="w-100"
+                  value={formik.values.NameOfCandidate}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                {formik.touched.NameOfCandidate && formik.errors.NameOfCandidate && (
+                  <FormHelperText error id="standard-weight-helper-text-Password-login">
+                    {formik.errors.NameOfCandidate}
+                  </FormHelperText>
+                )}
+              </Grid>
+              <Grid xs={4} p={2}>
+                <TextField
+                  error={Boolean(formik.touched.DateOfBirth && formik.errors.DateOfBirth)}
+                  fullWidth
+                  type="date"
+                  variant="outlined"
+                  name="DateOfBirth"
+                  placeholder="Date"
+                  className="w-100"
+                  value={formik.values.DateOfBirth}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                {formik.touched.DateOfBirth && formik.errors.DateOfBirth && (
+                  <FormHelperText error id="standard-weight-helper-text-Password-login">
+                    {formik.errors.DateOfBirth}
+                  </FormHelperText>
+                )}
+              </Grid>
+              <Grid xs={4} p={2}>
+                <TextField
+                  error={Boolean(formik.touched.Designation && formik.errors.Designation)}
+                  fullWidth
+                  type="text"
+                  variant="outlined"
+                  name="Designation"
+                  label="Designation"
+                  className="w-100"
+                  value={formik.values.Designation}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                {formik.touched.Designation && formik.errors.Designation && (
+                  <FormHelperText error id="standard-weight-helper-text-Password-login">
+                    {formik.errors.Designation}
+                  </FormHelperText>
+                )}
+              </Grid>
+              <Grid xs={4} p={2}>
+                <TextField
+                  error={Boolean(formik.touched.ContactNumber && formik.errors.ContactNumber)}
+                  fullWidth
+                  type="number"
+                  variant="outlined"
+                  name="ContactNumber"
+                  label="Contact Number"
+                  className="w-100"
+                  value={formik.values.ContactNumber}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                {formik.touched.ContactNumber && formik.errors.ContactNumber && (
+                  <FormHelperText error id="standard-weight-helper-text-Password-login">
+                    {formik.errors.ContactNumber}
+                  </FormHelperText>
+                )}
+              </Grid>
+              <Grid xs={4} p={2}>
+                <FormControl fullWidth error={Boolean(formik.touched.Team && formik.errors.Team)}>
+                  <InputLabel id="demo-simple-select-label">Team</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    id="demo-simple-select"
+                    label="Team"
+                    name="Team"
+                    value={formik.values.Team}
+                  >
+                    {teamsOption.map((item) => (
+                      <MenuItem value={item.value}>{item.label}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                {formik.touched.Team && formik.errors.Team && (
+                  <FormHelperText error id="standard-weight-helper-text-Password-login">
+                    {formik.errors.Team}
+                  </FormHelperText>
+                )}
+              </Grid>
+              <Grid xs={4} p={2}>
+                <FormControl fullWidth error={Boolean(formik.touched.Team && formik.errors.Team)}>
+                  <InputLabel id="demo-simple-select-label">Role</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    value={formik.values.Role}
+                    id="demo-simple-select"
+                    label="Role"
+                    name="Role"
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  >
+                    <MenuItem value={'admin'}>Admin</MenuItem>
+                    <MenuItem value={'user'}>Employee</MenuItem>
+                  </Select>
+                </FormControl>
+                {formik.touched.Role && formik.errors.Role && (
+                  <FormHelperText error id="standard-weight-helper-text-Password-login">
+                    {formik.errors.Role}
+                  </FormHelperText>
+                )}
+              </Grid>
+              <Grid item xs={4} p={2}>
+                <FormLabel id="demo-row-radio-buttons-group-label">Status</FormLabel>
+                <RadioGroup aria-label="yesno" name="status" value={selectedOption} onChange={handleOptionChange} row>
+                  <FormControlLabel value="active" control={<Radio />} label="Active" />
+                  <FormControlLabel value="inActive" control={<Radio />} label="In Active" />
+                </RadioGroup>
+              </Grid>
             </Grid>
-            <Grid xs={4} p={2}>
-              <TextField fullWidth type="date" variant="outlined" name="dob" className="w-100" />
-            </Grid>
-
-            <Grid xs={4} p={2}>
-              <TextField fullWidth id="outlined-basic" label="Designation" variant="outlined" />
-            </Grid>
-            <Grid xs={4} p={2}>
-              <TextField fullWidth id="outlined-basic" label="Contact Number" variant="outlined" />
-            </Grid>
-            <Grid xs={4} p={2}>
-              <TextField fullWidth id="outlined-basic" label="Team" variant="outlined" />
-            </Grid>
-            <Grid xs={4} p={2}>
-              <TextField fullWidth id="outlined-basic" label="Role" variant="outlined" />
-            </Grid>
-          </Grid>
-          {/* <Divider /> */}
-          <Box p={2} className="edit-table-container">
-            <MaterialReactTable table={editableForHistory} />
-          </Box>
-          <Box p={2} className="edit-table-container">
-            <MaterialReactTable table={editableForTask} />
-          </Box>
-          <Button variant="contained" style={{ float: 'right', margin: '2rem' }}>
-            Save
-          </Button>
+            <Button variant="contained" style={{ float: 'right', margin: '2rem' }} type="submit">
+              Save
+            </Button>
+          </form>
         </MainCard>
       )}
       {view.mode === 'View' && (
@@ -942,7 +1078,9 @@ const Profiles = () => {
           <Button variant="outlined" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button variant="contained">Delete</Button>
+          <Button variant="contained" onClick={confirmDelete}>
+            Delete
+          </Button>
         </DialogActions>
       </Dialog>
     </div>

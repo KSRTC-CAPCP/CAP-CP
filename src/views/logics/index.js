@@ -251,6 +251,11 @@ const BusinessLeads = () => {
       accessorKey: 'statusRequest',
       header: 'Request Status',
       editVariant: 'select',
+      Cell: ({ renderedCellValue, row }) => (
+        <Box component="span">
+          <p>{row.original.statusRequest}&nbsp;{row.original.status}</p>
+        </Box>
+      ),
       editSelectOptions: optionsForHistoryStatus,
       muiEditTextFieldProps: {
         select: true
