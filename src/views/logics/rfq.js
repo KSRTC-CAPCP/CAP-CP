@@ -539,7 +539,6 @@ const BusinessRFQ = () => {
   };
   const handleView = async (e) => {
     console.log('worked');
-
     const endpoint = RFQ_GET_ID(e.original._id);
     const getByIdData = await fetchData(endpoint, localData?.accessToken);
     setrfqSummary(getByIdData.data);

@@ -253,7 +253,9 @@ const BusinessLeads = () => {
       editVariant: 'select',
       Cell: ({ renderedCellValue, row }) => (
         <Box component="span">
-          <p>{row.original.statusRequest}&nbsp;{row.original.status}</p>
+          <p>
+            {row.original.statusRequest}&nbsp;{row.original.status}
+          </p>
         </Box>
       ),
       editSelectOptions: optionsForHistoryStatus,
