@@ -8,6 +8,8 @@ import Projects from 'views/logics/project';
 import BusinessRFQ from 'views/logics/rfq';
 import Profiles from 'views/profiles';
 import TaskPanel from 'views/task';
+import Employee from 'views/Employee/Employee';
+import ManagerPanel from 'views/Manager/ManagerPanel';
 
 // import BusinessLeads from 'views/logics';
 
@@ -123,6 +125,14 @@ const MainRoutes = {
     {
       path: '/task-panel',
       element: <TaskPanel />,
+    },
+    {
+      path: '/Employee-Panel',
+      element: <Employee />,
+    },
+    {
+      path: '/Manager-Panel',
+      element: <ManagerPanel />,
     }
   ]
 };
