@@ -112,13 +112,11 @@ const TaskPanel = () => {
   const [items, setItems] = useState([{ id: 'mainRepo', title: 'Main-Repo', description: 'Project for the Employee', color: '#008000' }]);
 
   const onDragEnd = (result) => {
-    if (!result.destination) return;
-
-    const newItems = Array.from(items);
-    const [reorderedItem] = newItems.splice(result.source.index, 1);
-    newItems.splice(result.destination.index, 0, reorderedItem);
-
-    setItems(newItems);
+    if (!result.destination) return; // dropped outside the droppable area
+    const reorderedItems = Array.from(items);
+    const [reorderedItem] = reorderedItems.splice(result.source.index, 1);
+    reorderedItems.splice(result.destination.index, 0, reorderedItem);
+    setItems(reorderedItems);
   };
 
   return (
@@ -332,7 +330,7 @@ const TaskPanel = () => {
                             {...provided.dragHandleProps}
                             ref={provided.innerRef}
                             sx={{ margin: 'auto', marginTop: -15, height: '100px' }}
-                          >
+                          >                                    
                             <AdjustIcon style={{ color: item.color }} />
                             <Typography variant="h5" id="child-modal-title">
                               {item.title}

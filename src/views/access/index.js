@@ -1,5 +1,219 @@
-import React from 'react';
 
+/*eslint-disable */
+import {
+  Avatar,
+  Box,
+  ButtonBase,
+  Button,
+  Tooltip,
+  IconButton,
+  MenuItem,
+  Grid,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  Divider,
+  Typography,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableBody,
+  TableCell,
+  Paper,
+  tableCellClasses,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Slide,
+  Input
+} from '@mui/material';
+import React, { forwardRef } from 'react';
+import MainCard from 'ui-component/cards/MainCard';
+import { useTheme } from '@mui/material/styles';
+import { IconDownload, IconEdit, IconEye, IconHistoryToggle, IconPlus, IconTrash, IconUpload } from '@tabler/icons';
+import { MaterialReactTable, createMRTColumnHelper, useMaterialReactTable } from 'material-react-table';
+import { mkConfig, generateCsv, download } from 'export-to-csv';
+import * as XLSX from 'xlsx';
+ 
+import {
+  ConnectWithoutContact,
+  Delete,
+  DeleteRounded,
+  Group,
+  History,
+  KeyboardBackspaceRounded,
+  Label,
+  ModeEditRounded,
+  NotStarted,
+  PersonAdd,
+  TaskAlt,
+  ThumbDown,
+  ThumbDownAltSharp,
+  ThumbUpSharp,
+  VisibilityRounded
+} from '@mui/icons-material';
+import { useState } from 'react';
+import styled from '@emotion/styled';
+import {
+  Timeline,
+  TimelineConnector,
+  TimelineContent,
+  TimelineDot,
+  TimelineItem,
+  TimelineOppositeContent,
+  TimelineSeparator
+} from '@mui/lab';
+import { DateRangePicker } from 'rsuite';
+ 
+const columnHelper = createMRTColumnHelper();
+const data = [
+  {
+   Access: 'Admin',
+      Team: 'IT',
+     },
+  {
+ Access: 'User',
+      Team: 'HR',
+     }
+];
+const columns = [
+ columnHelper.accessor('Access', {
+      header: 'Access'
+  }),
+  columnHelper.accessor('Team', {
+      header: 'Team'
+  }),
+];
+// const optionsForHistoryApproval = ['Pending', 'Approval', 'Reject'];
+// const optionsForHistoryStatus = ['Contact Establish'];
+// const optionsForTaskStatus = ['Not Started', 'On Going', 'Completed'];
+// const coumnsForHistory = [
+//   // {
+//   //     accessorKey: 'NameOfCandidate',
+//   //     header: 'Name Of Candidate'
+//   // },
+//   // {
+//   //     accessorKey: 'DateOfBirth',
+//   //     header: 'Date Of Borth',
+//   //     muiEditTextFieldProps: {
+//   //         type: 'date',
+//   //         required: true
+//   //     }
+//   // },
+//   {
+//       accessorKey: ' Access',
+//       header: ' Access',
+//       enableEditing: true
+//   },
+//   {
+//       accessorKey: 'requeststatus',
+//       header: 'Request Status',
+//       editVariant: 'select',
+//       editSelectOptions: optionsForHistoryStatus,
+//       muiEditTextFieldProps: {
+//           select: true
+//       },
+//       enableEditing: true
+//   },
+//   {
+//       accessorKey: 'approvalstatus',
+//       header: 'Approval Status',
+//       editVariant: 'select',
+//       editSelectOptions: optionsForHistoryApproval,
+//       muiEditTextFieldProps: {
+//           select: true
+//       },
+//       enableEditing: true
+//   },
+//   {
+//       accessorKey: 'Team',
+//       header: 'Team',
+//       enableEditing: true
+//   },
+//   // {
+//   //     accessorKey: 'ContactNumber',
+//   //     header: 'Contact Number',
+//   //     enableEditing: true
+//   // },
+// ];
+// const coumnsForTask = [
+//   // {
+//   //     accessorKey: 'NameOfCandidate',
+//   //     header: 'Name Of Candidate'
+//   // },
+//   // {
+//   //     accessorKey: 'DateOfBirth',
+//   //     header: 'Date Of Birth'
+//   // },
+//   {
+//       accessorKey: 'Designation',
+//       header: 'Designation',
+//       enableEditing: true
+//   },
+//   {
+//       accessorKey: 'Team',
+//       header: 'Team',
+//       enableEditing: true
+//   },
+//   // {
+//   //     accessorKey: 'ContactNumber',
+//   //     header: 'Contact Number',
+//   //     enableEditing: true
+//   // },
+//   // {
+//   //     accessorKey: 'assigneddate',
+//   //     header: 'Assigned Date',
+//   //     muiEditTextFieldProps: {
+//   //         type: 'date',
+//   //         required: true
+//   //     }
+//   // },
+//   // {
+//   //     accessorKey: 'targetdate',
+//   //     header: 'Target Date',
+//   //     muiEditTextFieldProps: {
+//   //         type: 'date',
+//   //         required: true
+//   //     }
+//   // },
+ 
+// ];
+const csvConfig = mkConfig({
+  fieldSeparator: ',',
+  decimalSeparator: '.',
+  useKeysAsHeaders: true
+});
+// const dataForHistory = [
+//   {
+//       NameOfCandidate: 'Thara',
+//       DateOfBirth: '27-04-2001',
+//       Designation: 'Developer',
+//       Team: 'Abc Team',
+//       ContactNumber: '9876543293',
+//       assigneddate: '2-04-2001',
+//       targetdate: '27-04-2001'
+//   },
+//   {
+//       NameOfCandidate: 'Thara',
+//       DateOfBirth: '27-04-2001',
+//       Designation: 'Developer',
+//       Team: 'Abc Team',
+//       ContactNumber: '9876543293',
+//       assigneddate: '2-04-2001',
+//       targetdate: '27-04-2001'
+ 
+//   }
+// ];
+ 
+const Transition = forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
+ 
+ 
 const Access = () => {
  
  
@@ -184,9 +398,271 @@ const Access = () => {
   };
  
   return (
-    <div>
-      <p>hhhhhhhhhhhhhhhh</p>
-    </div>
+      <div className="max">
+          {view.mode === 'Add' && (
+              <MainCard
+                  title="Access Creation"
+                  secondary={
+                      <Box
+                          sx={{
+                              ml: 2,
+                              // mr: 3,
+                              [theme.breakpoints.down('md')]: {
+                                  mr: 2
+                              }
+                          }}
+                      >
+                          <ButtonBase sx={{ borderRadius: '12px' }}>
+                              <Avatar
+                                  variant="rounded"
+                                  sx={{
+                                      ...theme.typography.commonAvatar,
+                                      ...theme.typography.mediumAvatar,
+                                      transition: 'all .2s ease-in-out',
+                                      background: theme.palette.secondary.light,
+                                      color: theme.palette.secondary.dark,
+                                      '&[aria-controls="menu-list-grow"],&:hover': {
+                                          background: theme.palette.secondary.dark,
+                                          color: theme.palette.secondary.light
+                                      }
+                                  }}
+                                  aria-haspopup="true"
+                                  onClick={handleClose}
+                                  color="inherit"
+                              >
+                                  <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
+                              </Avatar>
+                          </ButtonBase>
+                      </Box>
+                  }
+              >
+                  <Grid container>
+                      <Grid xs={4} p={2}>
+                          <TextField fullWidth id="outlined-basic" label="Team" variant="outlined" />
+                      </Grid>
+                      <Grid xs={4} p={2}>
+              <FormControl fullWidth>
+                <InputLabel id="demo-simple-select-label">Access</InputLabel>
+                <Select labelId="demo-simple-select-label" id="demo-simple-select" label="status">
+                  <MenuItem value={'admin'}>Admin</MenuItem>
+                  <MenuItem value={'manager'}>Manager</MenuItem>
+                  <MenuItem value={'user'}>User</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+                  </Grid>
+                  <Button variant="contained" style={{ float: 'right', margin: '2rem' }}>
+                      Save
+                  </Button>
+              </MainCard>
+          )}
+          {view.mode === 'Initial' && (
+              <MainCard
+                  title="Role&Access"
+                  secondary={
+                      <Box
+                          sx={{
+                              ml: 2,
+                              // mr: 3,
+                              [theme.breakpoints.down('md')]: {
+                                  mr: 2
+                              }
+                          }}
+                      >
+                          <ButtonBase sx={{ borderRadius: '12px' }}>
+                              <Avatar
+                                  variant="rounded"
+                                  sx={{
+                                      ...theme.typography.commonAvatar,
+                                      ...theme.typography.mediumAvatar,
+                                      transition: 'all .2s ease-in-out',
+                                      background: theme.palette.secondary.light,
+                                      color: theme.palette.secondary.dark,
+                                      '&[aria-controls="menu-list-grow"],&:hover': {
+                                          background: theme.palette.secondary.dark,
+                                          color: theme.palette.secondary.light
+                                      }
+                                  }}
+                                  aria-haspopup="true"
+                                  onClick={handleToggle}
+                                  color="inherit"
+                              >
+                                  <IconPlus stroke={2} size="1.3rem" />
+                              </Avatar>
+                          </ButtonBase>
+                      </Box>
+                  }
+              >
+                  <MaterialReactTable table={table} />
+              </MainCard>
+          )}
+          {view.mode === 'Edit' && (
+              <MainCard
+                  title="Role Updations"
+                  secondary={
+                      <Box
+                          sx={{
+                              ml: 2,
+                              // mr: 3,
+                              [theme.breakpoints.down('md')]: {
+                                  mr: 2
+                              }
+                          }}
+                      >
+                          <ButtonBase sx={{ borderRadius: '12px' }}>
+                              <Avatar
+                                  variant="rounded"
+                                  sx={{
+                                      ...theme.typography.commonAvatar,
+                                      ...theme.typography.mediumAvatar,
+                                      transition: 'all .2s ease-in-out',
+                                      background: theme.palette.secondary.light,
+                                      color: theme.palette.secondary.dark,
+                                      '&[aria-controls="menu-list-grow"],&:hover': {
+                                          background: theme.palette.secondary.dark,
+                                          color: theme.palette.secondary.light
+                                      }
+                                  }}
+                                  aria-haspopup="true"
+                                  onClick={handleClose}
+                                  color="inherit"
+                              >
+                                  <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
+                              </Avatar>
+                          </ButtonBase>
+                      </Box>
+                  }
+              >
+                  <Grid container>
+                      {/* <Grid xs={4} p={2}>
+                          <TextField fullWidth id="outlined-basic" label="Name Of Candidate" variant="outlined" />
+                      </Grid>
+                      <Grid xs={4} p={2}>
+                          <TextField fullWidth type="date" variant="outlined" name="dob" className="w-100" />
+                      </Grid> */}
+ 
+                      <Grid xs={4} p={2}>
+                          <TextField fullWidth id="outlined-basic" label="Designation" variant="outlined" />
+                      </Grid>
+                      <Grid xs={4} p={2}>
+                          <TextField fullWidth id="outlined-basic" label="Team" variant="outlined" />
+                      </Grid>
+                      {/* <Grid xs={4} p={2}>
+                          <TextField fullWidth id="outlined-basic" label="Contact Number" variant="outlined" />
+                      </Grid> */}
+                  </Grid>
+                  {/* <Divider /> */}
+                  {/* <Box p={2} className="edit-table-container">
+                      <MaterialReactTable table={editableForHistory} />
+                  </Box> */}
+                  {/* <Box p={2} className="edit-table-container">
+                      <MaterialReactTable table={editableForTask} />
+                  </Box> */}
+                  <Button variant="contained" style={{ float: 'right', margin: '2rem' }}>
+                      Save
+                  </Button>
+              </MainCard>
+          )}
+          {/* {view.mode === 'View' && (
+              <>
+                  <MainCard
+                      title="Note"
+                      secondary={
+                          <Box
+                              sx={{
+                                  ml: 2,
+                                  // mr: 3,
+                                  [theme.breakpoints.down('md')]: {
+                                      mr: 2
+                                  }
+                              }}
+                          >
+                              <ButtonBase sx={{ borderRadius: '12px' }}>
+                                  <Avatar
+                                      variant="rounded"
+                                      sx={{
+                                          ...theme.typography.commonAvatar,
+                                          ...theme.typography.mediumAvatar,
+                                          transition: 'all .2s ease-in-out',
+                                          background: theme.palette.secondary.light,
+                                          color: theme.palette.secondary.dark,
+                                          '&[aria-controls="menu-list-grow"],&:hover': {
+                                              background: theme.palette.secondary.dark,
+                                              color: theme.palette.secondary.light
+                                          }
+                                      }}
+                                      aria-haspopup="true"
+                                      onClick={handleClose}
+                                      color="inherit"
+                                  >
+                                      <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
+                                  </Avatar>
+                              </ButtonBase>
+                          </Box>
+                      }
+                  >
+                      <Grid container m={3}>
+                          <Grid xs={3} p={2}>
+                              <label className="text-muted">Employee Code</label>
+                              <p>001</p>
+                          </Grid>
+                          <Grid xs={3} p={2}>
+                              <label className="text-muted">Name Of Candidate</label>
+                              <p>Thara</p>
+                          </Grid>
+                          <Grid xs={3} p={2}>
+                              <label className="text-muted">Date Of Birth</label>
+                              <p>27-09-2001</p>
+                          </Grid>
+                          <Grid xs={3} p={2}>
+                              <label className="text-muted">Designation</label>
+                              <p>Developer</p>
+                          </Grid>
+                          <Grid xs={3} p={2}>
+                              <label className="text-muted">Team</label>
+                              <p>ABC Team</p>
+                          </Grid>
+                          <Grid xs={3} p={2}>
+                              <label className="text-muted">Contact Number</label>
+                              <p>9876543278</p>
+                          </Grid>
+                      </Grid>
+                  </MainCard>
+              </>
+          )} */}
+          <Dialog
+              fullWidth
+              open={open}
+              TransitionComponent={Transition}
+              keepMounted
+          // onClose={handleClose}
+          // aria-describedby="alert-dialog-slide-description"
+          >
+              <DialogTitle>
+                  <Typography variant="h3">Delete Lead</Typography>
+              </DialogTitle>
+              <Divider />
+              <DialogContent>
+                  <DialogContentText id="alert-dialog-slide-description" className="d-flex justify-content-center align-item-center">
+                      <div className="bg-light rounded ">
+                          <Delete style={{ fontSize: '32' }} />
+                      </div>
+                  </DialogContentText>
+                  <Typography variant="h4" className="muted" display="block" gutterBottom style={{ textAlign: 'center' }} mt={2}>
+                      Are you want to Delete ?
+                  </Typography>
+              </DialogContent>
+              <DialogActions className="d-flex justify-content-center mb-1">
+                  <Button variant="outlined" onClick={() => setOpen(false)}>
+                      Cancel
+                  </Button>
+                  <Button variant="contained">Delete</Button>
+              </DialogActions>
+          </Dialog>
+      </div>
   );
 };
 export default Access;
+ 
+ 
+ 
