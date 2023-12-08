@@ -75,7 +75,7 @@ import {
 } from '@mui/lab';
 import { useMemo } from 'react';
 import { deleteData, fetchData, getById, postData, updateData } from 'utils/apiUtils';
-import { RFQ_CREATION, RFQ_DELETE, RFQ_GET, RFQ_GET_ID, RFQ_UPDATE } from 'api/apiEndPoint';
+import { CATEGORY_CREATE, CATEGORY_GET, RFQ_CREATION, RFQ_DELETE, RFQ_GET, RFQ_GET_ID, RFQ_UPDATE } from 'api/apiEndPoint';
 import { LEAD_CREATION, LEAD_DELETE, LEAD_GET, LEAD_GET_ID, LEAD_UPDATE } from 'api/apiEndPoint';
 import { useEffect } from 'react';
 
@@ -354,6 +354,8 @@ const BusinessRFQ = () => {
   const [selectedOption, setSelectedOption] = useState('');
   const [showSelect, setShowSelect] = useState(true);
   const [customOption, setCustomOption] = useState('');
+  const [category, setCategory] = useState([]);
+
   const [options, setOptions] = useState([]);
   const [selectedValue, setSelectedValue] = useState('');
   const generateTempId = () => `temp_${Math.random().toString(36).substr(2, 9)}`;
@@ -411,14 +413,20 @@ const BusinessRFQ = () => {
   const handleSelectInputChange = (event) => {
     setCustomOption(event.target.value);
   };
-  const handleSaveCustomOption = () => {
-    if (customOption.trim() !== '') {
-      const newOption = { value: customOption, label: customOption };
-      setCategoryOptions([...categoryOptions, newOption]);
-      setSelectedOption(customOption);
-      setCustomOption('');
-      setShowSelect(true);
-    }
+  const handleSaveCustomOption = async () => {
+    await postData(CATEGORY_CREATE, { name: customOption });
+    // if (customOption.trim() !== '') {
+    // const newOption = { value: customOption, label: customOption };
+    // console.log(newOption, 'newOption');
+    // setCategoryOptions([...categoryOptions, newOption]);
+    // setSelectedOption(customOption);
+    // setCustomOption('');
+    const categoryData = await fetchData(CATEGORY_GET);
+    setCategory(categoryData);
+    console.log(categoryData, 'fetched using categoryData db');
+    setShowSelect(true);
+
+    // }
   };
 
   const [leadData, setLeadData] = useState([]);
@@ -466,7 +474,11 @@ const BusinessRFQ = () => {
       status: value.leadDescription[value.leadDescription.length - 1]?.statusRequest
     });
   };
-  const customOptions = [...categoryOptions, { value: 'addMore', label: 'Add More Option' }];
+  const categoryOption = category?.map((data) => ({
+    label: data.name,
+    value: data.name
+  }));
+  const customOptions = [...categoryOption, { value: 'addMore', label: 'Add More Option' }];
   const [view, setView] = useState({
     visible: false,
     mode: 'Initial' // 'add', 'edit', 'view'
@@ -538,10 +550,11 @@ const BusinessRFQ = () => {
     });
   };
   const handleView = async (e) => {
-    console.log('worked');
+    console.log('worked', e);
     const endpoint = RFQ_GET_ID(e.original._id);
     const getByIdData = await fetchData(endpoint, localData?.accessToken);
     setrfqSummary(getByIdData.data);
+    console.log('worked', getByIdData.data);
     setView({
       visible: true,
       mode: 'View'
@@ -688,7 +701,6 @@ const BusinessRFQ = () => {
       </>
     )
   });
-
   const handleSaveRowTask = (newData, oldData) => {
     console.log('handleSaveRowtask - newData:', newData);
     console.log('handleSaveRowtask - oldData:', oldData);
@@ -969,6 +981,11 @@ const BusinessRFQ = () => {
           console.log(data.data, 'fetched using db');
           const response = await fetchData(LEAD_GET, parsedData?.accessToken);
           setLeadData(response?.data);
+
+          // Fetch leads data
+          const categoryData = await fetchData(CATEGORY_GET);
+          setCategory(categoryData);
+          console.log(categoryData, 'fetched using categoryData db');
           // Fetch updateId data
           if (updateId) {
             const endPointId = RFQ_GET_ID(updateId);
@@ -1696,7 +1713,11 @@ const BusinessRFQ = () => {
                   </FormHelperText>
                 )}
               </Grid>
-              {filteredStatusArray[0] === 'TCO Submitted' ? <Grid xs={4} p={2}>tco</Grid> : null}
+              {filteredStatusArray[0] === 'TCO Submitted' ? (
+                <Grid xs={4} p={2}>
+                  tco
+                </Grid>
+              ) : null}
             </Grid>
             {/* <Divider /> */}
             <Box p={2} className="edit-table-container">
@@ -1899,7 +1920,7 @@ const BusinessRFQ = () => {
                       </Box>
                     }
                   >
-                    {rfqSummary?.tasks.map((data) => (
+                    {rfqSummary?.tasks?.map((data) => (
                       <Card sx={{ margin: '1rem', padding: '1rem' }} className="card-hover">
                         <div className="d-flex justify-content-between">
                           <div className="d-flex">
@@ -1980,3 +2001,4 @@ const BusinessRFQ = () => {
   );
 };
 export default BusinessRFQ;
+ 

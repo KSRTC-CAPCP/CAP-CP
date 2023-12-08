@@ -1516,7 +1516,7 @@ const Projects = () => {
       )}
       <Dialog fullWidth open={open} TransitionComponent={Transition} keepMounted>
         <DialogTitle>
-          <Typography variant="h3">Delete Lead</Typography>
+          <Typography variant="h3">Delete Project</Typography>
         </DialogTitle>
         <Divider />
         <DialogContent>
