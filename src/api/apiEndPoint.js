@@ -36,3 +36,7 @@ export const PROJECT_GET = `${BASE_URL}/project/get-all`;
 export const PROJECT_CREATE = `${BASE_URL}/project/create`;
 export const PROJECT_DELETE =(id) => `${BASE_URL}/project/delete/${id}`;
 export const PROJECT_UPDATE =(id) => `${BASE_URL}/project/update/${id}`;
+
+//FOR CATEGORY
+export const CATEGORY_CREATE = `${BASE_URL}/categories`;
+export const CATEGORY_GET = `${BASE_URL}/categories`;

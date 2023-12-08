@@ -75,7 +75,7 @@ import {
 } from '@mui/lab';
 import { useMemo } from 'react';
 import { deleteData, fetchData, getById, postData, updateData } from 'utils/apiUtils';
-import { LEAD_CREATION, LEAD_DELETE, LEAD_GET, LEAD_GET_ID, LEAD_UPDATE } from 'api/apiEndPoint';
+import { CATEGORY_CREATE, CATEGORY_GET, LEAD_CREATION, LEAD_DELETE, LEAD_GET, LEAD_GET_ID, LEAD_UPDATE } from 'api/apiEndPoint';
 import { useEffect } from 'react';
 
 const columnHelper = createMRTColumnHelper();
@@ -334,14 +334,10 @@ const BusinessLeads = () => {
     }
   ];
   const [inputValue, setInputValue] = useState('');
-  const [categoryOptions, setCategoryOptions] = useState([
-    { value: 'Option 1', label: 'Option 1' },
-    { value: 'Option 2', label: 'Option 2' },
-    { value: 'Option 3', label: 'Option 3' }
-  ]);
   const [leadSummary, setLeadSummary] = useState('');
   const [leadData, setLeadData] = useState([]);
   const [deleteId, setDeleteId] = useState('');
+  const [category, setCategory] = useState([]);
   const [updateId, setUpdateId] = useState('');
   const [updatedValue, setUpdatedValue] = useState([]);
   const [selectedOption, setSelectedOption] = useState('');
@@ -403,14 +399,20 @@ const BusinessLeads = () => {
   const handleSelectInputChange = (event) => {
     setCustomOption(event.target.value);
   };
-  const handleSaveCustomOption = () => {
-    if (customOption.trim() !== '') {
-      const newOption = { value: customOption, label: customOption };
-      setCategoryOptions([...categoryOptions, newOption]);
-      setSelectedOption(customOption);
-      setCustomOption('');
-      setShowSelect(true);
-    }
+  const handleSaveCustomOption = async () => {
+    await postData(CATEGORY_CREATE, { name: customOption });
+    // if (customOption.trim() !== '') {
+    // const newOption = { value: customOption, label: customOption };
+    // console.log(newOption, 'newOption');
+    // setCategoryOptions([...categoryOptions, newOption]);
+    // setSelectedOption(customOption);
+    // setCustomOption('');
+    const categoryData = await fetchData(CATEGORY_GET);
+    setCategory(categoryData);
+    console.log(categoryData, 'fetched using categoryData db');
+    setShowSelect(true);
+
+    // }
   };
   const handleAddOption = () => {
     if (inputValue.trim() !== '') {
@@ -421,8 +423,11 @@ const BusinessLeads = () => {
   const handleSelectChange = (event) => {
     setSelectedValue(event.target.value);
   };
-
-  const customOptions = [...categoryOptions, { value: 'addMore', label: 'Add More Option' }];
+  const categoryOption = category?.map((data) => ({
+    label: data.name,
+    value: data.name
+  }));
+  const customOptions = [...categoryOption, { value: 'addMore', label: 'Add More Option' }];
 
   const [view, setView] = useState({
     visible: false,
@@ -495,16 +500,20 @@ const BusinessLeads = () => {
     });
   };
   const handleView = async (e) => {
-    console.log('worked');
+    console.log('worked', localData, e.original._id);
     // setLeadSummary(e.original._id);
     const endpoint = LEAD_GET_ID(e.original._id);
     const getByIdData = await fetchData(endpoint, localData?.accessToken);
     setLeadSummary(getByIdData.data);
+    console.log('worked', getByIdData.data);
+
     setView({
       visible: true,
       mode: 'View'
     });
   };
+  console.log('getByIdData', leadSummary);
+
   const fetchFun = async () => {
     const data = await fetchData(LEAD_GET, localData?.accessToken);
     setLeadData(data.data);
@@ -915,7 +924,11 @@ const BusinessLeads = () => {
           // Fetch leads data
           const data = await fetchData(LEAD_GET, parsedData?.accessToken);
           setLeadData(data.data);
-          console.log(data.data, 'fetched using db');
+          console.log(data.data, 'fetched');
+          // Fetch leads data
+          const categoryData = await fetchData(CATEGORY_GET);
+          setCategory(categoryData);
+          console.log(categoryData, 'fetched using categoryData db');
 
           // Fetch updateId data
           if (updateId) {
@@ -1671,7 +1684,7 @@ const BusinessLeads = () => {
               </Grid>
               <Grid xs={3} p={2}>
                 <label className="text-muted">Category</label>
-                <p>{leadSummary}</p>
+                <p>{leadSummary?.category}</p>
               </Grid>
               <Grid xs={3} p={2}>
                 <label className="text-muted">Contact Name</label>
@@ -1798,7 +1811,7 @@ const BusinessLeads = () => {
                       </Box>
                     }
                   >
-                    {leadSummary?.tasks.map((data) => (
+                    {leadSummary?.tasks?.map((data) => (
                       <Card sx={{ margin: '1rem', padding: '1rem' }} className="card-hover">
                         <div className="d-flex justify-content-between">
                           <div className="d-flex">
