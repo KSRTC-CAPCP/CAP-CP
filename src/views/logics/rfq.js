@@ -57,6 +57,7 @@ import {
   ThumbDown,
   ThumbDownAltSharp,
   ThumbUpSharp,
+  CurrencyExchange,
   VisibilityRounded,
   VisibilityTwoTone
 } from '@mui/icons-material';
@@ -75,9 +76,10 @@ import {
 } from '@mui/lab';
 import { useMemo } from 'react';
 import { deleteData, fetchData, getById, postData, updateData } from 'utils/apiUtils';
-import { CATEGORY_CREATE, CATEGORY_GET, RFQ_CREATION, RFQ_DELETE, RFQ_GET, RFQ_GET_ID, RFQ_UPDATE } from 'api/apiEndPoint';
+import { CATEGORY_CREATE, CATEGORY_GET, PROFILES_GET, RFQ_CREATION, RFQ_DELETE, RFQ_GET, RFQ_GET_ID, RFQ_UPDATE } from 'api/apiEndPoint';
 import { LEAD_CREATION, LEAD_DELETE, LEAD_GET, LEAD_GET_ID, LEAD_UPDATE } from 'api/apiEndPoint';
 import { useEffect } from 'react';
+import { toast } from 'react-toastify';
 
 const columnHelper = createMRTColumnHelper();
 const validationSchema = Yup.object({
@@ -135,13 +137,19 @@ const columns = [
       </Box>
     )
   }),
+  columnHelper.accessor('leadNumber', {
+    header: 'Lead Number',
+    Cell: ({ renderedCellValue, row }) => (
+      <Box component="span">{row.original.leadNumber !== null ? <p>{row.original.leadNumber}</p> : <p>-</p>}</Box>
+    )
+  }),
 
   columnHelper.accessor('date', {
     header: 'Date',
     Cell: ({ row }) => (
       <Box component="span">
         {row.original && row.original.date && typeof row.original.date === 'string' && row.original.date.length >= 10 ? (
-          <p>{row.original.date}</p>
+          <p>{row.original.date?.slice(0, 10)}</p>
         ) : (
           <p>Invalid Date</p>
         )}
@@ -198,7 +206,7 @@ const columns = [
   })
 ];
 const optionsForHistoryApproval = ['Pending', 'Approval', 'Reject'];
-const optionsForHistoryStatus = ['Tech Meet Done', 'TCO Submitted', 'Negotiation', 'Business Award', 'Lost']; //
+const optionsForHistoryStatus = ['New RFQ', 'Technical Meet Done', 'TCO Submitted', 'Negotiation', 'Business Award', 'Lost']; //
 const optionsForTaskStatus = ['Not Started', 'On Going', 'Completed'];
 
 const csvConfig = mkConfig({
@@ -233,7 +241,16 @@ const Transition = forwardRef(function Transition(props, ref) {
 
 const BusinessRFQ = () => {
   const [localData, setLocalData] = useState('');
-
+  const [tcoNumberView, setTcoNumberView] = useState(false);
+  const handleChangeStatus = (e) => {
+    console.log(e.target.value, 'eeee');
+    if (e.target.value === 'TCO Submitted') {
+      toast.info('Enter TCO Number & Approximate Value');
+      setTcoNumberView(true);
+    } else {
+      setTcoNumberView(false);
+    }
+  };
   const coumnsForHistory = [
     {
       accessorKey: 'date',
@@ -244,7 +261,7 @@ const BusinessRFQ = () => {
       },
       Cell: ({ renderedCellValue, row }) => (
         <Box component="span">
-          <p>{row.original.date}</p>
+          <p>{row.original.date?.slice(0, 10)}</p>
         </Box>
       )
     },
@@ -259,13 +276,14 @@ const BusinessRFQ = () => {
       editVariant: 'select',
       editSelectOptions: optionsForHistoryStatus,
       muiEditTextFieldProps: {
-        select: true
+        select: true,
+        onChange: (e) => handleChangeStatus(e)
       },
       enableEditing: true
     }
   ];
   const [historyTableColumns, setHistoryTableColumns] = useState(coumnsForHistory);
-
+  const [profilesData, setProfilesData] = useState([]);
   const coumnsForTask = [
     // {
     //   accessorKey: 'id',
@@ -283,6 +301,11 @@ const BusinessRFQ = () => {
     {
       accessorKey: 'responsible',
       header: 'Responsible',
+      editVariant: 'select',
+      editSelectOptions: profilesData.map((item) => item.EmployeeCode + '-' + item.NameOfCandidate),
+      muiEditTextFieldProps: {
+        select: true
+      },
       enableEditing: true
     },
     {
@@ -299,7 +322,7 @@ const BusinessRFQ = () => {
       },
       Cell: ({ renderedCellValue, row }) => (
         <Box component="span">
-          <p>{row.original.assignedDate}</p>
+          <p>{row.original.assignedDate?.slice(0, 10)}</p>
         </Box>
       )
     },
@@ -312,7 +335,7 @@ const BusinessRFQ = () => {
       },
       Cell: ({ renderedCellValue, row }) => (
         <Box component="span">
-          <p>{row.original.targetDate}</p>
+          <p>{row.original.targetDate?.slice(0, 10)}</p>
         </Box>
       )
     },
@@ -355,7 +378,6 @@ const BusinessRFQ = () => {
   const [showSelect, setShowSelect] = useState(true);
   const [customOption, setCustomOption] = useState('');
   const [category, setCategory] = useState([]);
-
   const [options, setOptions] = useState([]);
   const [selectedValue, setSelectedValue] = useState('');
   const generateTempId = () => `temp_${Math.random().toString(36).substr(2, 9)}`;
@@ -407,6 +429,7 @@ const BusinessRFQ = () => {
       setShowSelect(false);
     } else {
       setSelectedOption(value);
+
       setShowSelect(true);
     }
   };
@@ -414,19 +437,25 @@ const BusinessRFQ = () => {
     setCustomOption(event.target.value);
   };
   const handleSaveCustomOption = async () => {
-    await postData(CATEGORY_CREATE, { name: customOption });
-    // if (customOption.trim() !== '') {
-    // const newOption = { value: customOption, label: customOption };
-    // console.log(newOption, 'newOption');
-    // setCategoryOptions([...categoryOptions, newOption]);
-    // setSelectedOption(customOption);
-    // setCustomOption('');
-    const categoryData = await fetchData(CATEGORY_GET);
-    setCategory(categoryData);
-    console.log(categoryData, 'fetched using categoryData db');
-    setShowSelect(true);
+    if (customOption.trim() !== '') {
+      if (selectedOption === 'addMore') {
+        // If "Add More Option" is selected, set selectedOption to the customOption value
+        setSelectedOption(customOption);
+      }
 
-    // }
+      // Save the custom option to the backend
+      await postData(CATEGORY_CREATE, { name: customOption });
+
+      // Fetch the updated category data
+      const categoryData = await fetchData(CATEGORY_GET);
+      setCategory(categoryData);
+
+      // Reset the customOption state
+      setCustomOption('');
+
+      // Show the select input
+      setShowSelect(true);
+    }
   };
 
   const [leadData, setLeadData] = useState([]);
@@ -437,18 +466,6 @@ const BusinessRFQ = () => {
   }));
 
   console.log(leadData, 'leads');
-  const handleserialNumberChange = (event) => {
-    const selectedSerialNumber = event.target.value;
-    // Find the corresponding lead based on the selected serial number
-    const selectedLead = leadData.find((lead) => lead.serialNumber === selectedSerialNumber);
-    // Do something with the selected lead data
-  };
-  const handleAddOption = () => {
-    if (inputValue.trim() !== '') {
-      setOptions([...options, inputValue]);
-      setInputValue('');
-    }
-  };
   const handleSelectChange = async (event) => {
     setSelectedValue(event.target.value);
     console.log(event.target.value, 'dATA');
@@ -457,11 +474,12 @@ const BusinessRFQ = () => {
     console.log(fetchedLead, 'ffff');
     setSelectedLead(fetchedLead?.data);
     const value = fetchedLead?.data;
-    console.log(value.businessVertical, '123123');
-    console.log(value.leadDescription[value.leadDescription.length - 1]?.statusRequest, '123123');
+    console.log(value.leadDescription[value.leadDescription.length - 1]?.statusRequest, '<----------123123');
+    setSelectedOption(value.category);
     formik.setValues({
-      date: value.date,
+      date: value?.date?.slice(0, 10),
       Source: value.Source,
+      leadNumber: value.serialNumber,
       Pilot: value.Pilot,
       companyName: value.companyName,
       category: value.category,
@@ -469,9 +487,11 @@ const BusinessRFQ = () => {
       departmentName: value.departmentName,
       phoneNumber: value.phoneNumber,
       email: value.email,
+      tcoNumber: value.tcoNumber,
+      approximateValue: value.approximateValue,
       businessVertical: value.businessVertical,
       rfqDescription: value.leadDescription[value.leadDescription.length - 1]?.description,
-      status: value.leadDescription[value.leadDescription.length - 1]?.statusRequest
+      status: null
     });
   };
   const categoryOption = category?.map((data) => ({
@@ -509,7 +529,7 @@ const BusinessRFQ = () => {
   const populateFormFields = (rfqData) => {
     console.log(rfqData, 'populateFormFields');
     formik.setValues({
-      date: rfqData.date,
+      date: rfqData?.date?.slice(0, 10),
       Source: rfqData.Source,
       Pilot: rfqData.Pilot,
       companyName: rfqData.companyName,
@@ -518,6 +538,8 @@ const BusinessRFQ = () => {
       departmentName: rfqData.departmentName,
       phoneNumber: rfqData.phoneNumber,
       email: rfqData.email,
+      tcoNumber: rfqData.tcoNumber,
+      approximateValue: rfqData.approximateValue,
       businessVertical: rfqData.businessVertical // ... Other fields
       // ...populate other fields
     });
@@ -529,19 +551,27 @@ const BusinessRFQ = () => {
     const getByIdData = await fetchData(endpoint, localData?.accessToken);
     // setUpdatedValue(getByIdData)
     setUpdateId(e.original._id);
+    setSelectedOption(getByIdData?.data.category);
     console.log(getByIdData?.data, 'getby');
     formik.setValues({
       date: getByIdData?.data.date,
       Source: getByIdData?.data.Source,
       Pilot: getByIdData?.data.Pilot,
       companyName: getByIdData?.data.companyName,
-      category: getByIdData?.data.category,
       contactName: getByIdData?.data.contactName,
       departmentName: getByIdData?.data.departmentName,
       phoneNumber: getByIdData?.data.phoneNumber,
       email: getByIdData?.data.email,
+      tcoNumber: getByIdData?.data?.tcoNumber,
+      approximateValue: getByIdData?.data?.approximateValue,
       businessVertical: getByIdData?.data.businessVertical // ... Other fields
     });
+    if (getByIdData?.data?.tcoNumber) {
+      setTcoNumberView(true);
+    } else {
+      setTcoNumberView(false);
+    }
+
     populateFormFields(getByIdData?.data);
     // setUpdatedValue(e.original);
     setView({
@@ -578,6 +608,8 @@ const BusinessRFQ = () => {
         departmentName: values.departmentName,
         phoneNumber: values?.phoneNumber,
         email: values?.email,
+        tcoNumber: values?.tcoNumber,
+        approximateValue: values?.approximateValue,
         businessVertical: values?.businessVertical,
         rfqDescription: historyTableData,
         tasks: taskTableData
@@ -608,6 +640,7 @@ const BusinessRFQ = () => {
       Source: '',
       Pilot: '',
       companyName: '',
+      leadNumber: '',
       category: '',
       contactName: '',
       departmentName: '',
@@ -616,6 +649,7 @@ const BusinessRFQ = () => {
       businessVertical: '',
       rfqDescription: [], // Initialize as an array
       tasks: [],
+      tcoNumber: '',
       approximateValue: '',
       status: ''
       // Add initial values for other fields
@@ -626,17 +660,17 @@ const BusinessRFQ = () => {
       console.log('worked');
       try {
         if (updateId) {
-          console.log('handle update');
+          console.log('handle update', values);
           handleUpdate(values);
         } else {
           console.log('handle submit');
 
           const rfqDescriptionArray = values.rfqDescription
             ? values.rfqDescription.split('\n').map((item) => ({
-                date: values.date,
+                date: values.date?.slice(0, 10),
                 description: item.trim(),
                 status: 'pending', // Set your default status here
-                statusRequest: 'contact establish' // Set your default statusRequest here
+                statusRequest: values.status // Set your default statusRequest here
               }))
             : [];
 
@@ -718,7 +752,7 @@ const BusinessRFQ = () => {
     setTaskTableData(updatedData);
     setEditingRowId(null);
   };
-
+  console.log(tcoNumberView, 'tcoNumberView');
   const handleCancelEditTask = () => {
     setEditingRowId(null);
   };
@@ -933,12 +967,17 @@ const BusinessRFQ = () => {
       </div>
     )
   });
-
+  console.log(formik.values, 'changed');
   const [showAdditionalInput, setShowAdditionalInput] = useState(false);
-
+  const [rfqFrom, setRfqFrom] = useState('');
   const handleChange = (event) => {
     const selectedValue = event.target.value;
+    setRfqFrom(selectedValue);
     setShowAdditionalInput(selectedValue === 'rfqfromlead');
+    if (selectedValue === 'createnewrfq') {
+      formik.resetForm();
+      setSelectedOption('');
+    }
   };
 
   function createData(name, calories, fat, carbs) {
@@ -958,6 +997,8 @@ const BusinessRFQ = () => {
       mode: 'Add'
     });
     formik.resetForm();
+    setUpdateId('');
+    setSelectedOption('');
   };
   const handleClose = () => {
     setView({
@@ -986,6 +1027,10 @@ const BusinessRFQ = () => {
           const categoryData = await fetchData(CATEGORY_GET);
           setCategory(categoryData);
           console.log(categoryData, 'fetched using categoryData db');
+
+          const data4Employee = await fetchData(PROFILES_GET, parsedData?.accessToken);
+          console.log(data, 'parsedddd');
+          setProfilesData(data4Employee?.data);
           // Fetch updateId data
           if (updateId) {
             const endPointId = RFQ_GET_ID(updateId);
@@ -1035,7 +1080,7 @@ const BusinessRFQ = () => {
   );
   const statusFilter = historyTableData.map((item) => item.statusRequest);
   const filteredStatusArray = statusFilter.filter((statusRequest) => statusRequest === 'TCO Submitted Approved');
-  console.log(filteredStatusArray[0] === 'TCO Submitted', 'filteredStatusArray');
+  console.log(rfqSummary, 'filteredStatusArray');
   return (
     <div className="max">
       {view.mode === 'Initial' && (
@@ -1125,27 +1170,21 @@ const BusinessRFQ = () => {
                     id="demo-simple-select"
                     label="rfq"
                     name="Source"
-                    value={formik.values.Source}
+                    value={rfqFrom}
                     onChange={(e) => {
-                      formik.handleChange(e);
+                      // formik.handleChange(e);
                       handleChange(e);
                     }}
-                    onBlur={formik.handleBlur}
                   >
                     <MenuItem value={'rfqfromlead'}>RFQ From Lead</MenuItem>
                     <MenuItem value={'createnewrfq'}>Create New RFQ</MenuItem>
                   </Select>
-                  {formik.touched.Source && formik.errors.Source && (
-                    <FormHelperText error id="standard-weight-helper-text-Password-login">
-                      {formik.errors.Source}
-                    </FormHelperText>
-                  )}
                 </FormControl>
               </Grid>
               {showAdditionalInput && (
                 <Grid item xs={4} p={2}>
                   <FormControl fullWidth>
-                    <InputLabel id="additional-select-label">Number</InputLabel>
+                    <InputLabel id="additional-select-label">Lead Number</InputLabel>
                     <Select onChange={handleSelectChange}>
                       {leadNumber.map((lead, index) => (
                         <MenuItem key={index} value={lead.value}>
@@ -1164,6 +1203,7 @@ const BusinessRFQ = () => {
                   variant="outlined"
                   name="date"
                   className="w-100"
+                  // date={formik.values.date}
                   value={formik.values.date}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -1713,11 +1753,34 @@ const BusinessRFQ = () => {
                   </FormHelperText>
                 )}
               </Grid>
-              {filteredStatusArray[0] === 'TCO Submitted' ? (
+              {tcoNumberView && (
                 <Grid xs={4} p={2}>
-                  tco
+                  <TextField
+                    type="text"
+                    name="tcoNumber"
+                    value={formik.values.tcoNumber}
+                    onChange={formik.handleChange}
+                    fullWidth
+                    id="outlined-basic"
+                    label="TCO Number"
+                    variant="outlined"
+                  />
                 </Grid>
-              ) : null}
+              )}
+              {tcoNumberView && (
+                <Grid xs={4} p={2}>
+                  <TextField
+                    type="number"
+                    name="approximateValue"
+                    value={formik.values.approximateValue}
+                    onChange={formik.handleChange}
+                    fullWidth
+                    id="outlined-basic"
+                    label="Approximate Value"
+                    variant="outlined"
+                  />
+                </Grid>
+              )}
             </Grid>
             {/* <Divider /> */}
             <Box p={2} className="edit-table-container">
@@ -1775,9 +1838,15 @@ const BusinessRFQ = () => {
                 <label className="text-muted">RFQ Number</label>
                 <p>{rfqSummary?.serialNumber}</p>
               </Grid>
+              {rfqSummary.leadNumber !== null && (
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Lead Number</label>
+                  <p>{rfqSummary?.leadNumber}</p>
+                </Grid>
+              )}
               <Grid xs={3} p={2}>
                 <label className="text-muted">Date</label>
-                <p>{rfqSummary?.date}</p>
+                <p>{rfqSummary?.date?.slice(0, 10)}</p>
               </Grid>
               <Grid xs={3} p={2}>
                 <label className="text-muted">Source</label>
@@ -1815,6 +1884,18 @@ const BusinessRFQ = () => {
                 <label className="text-muted">Business Verticle</label>
                 <p>{rfqSummary?.businessVertical}</p>
               </Grid>
+              {rfqSummary?.tcoNumber && (
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">TCO Number</label>
+                  <p>{rfqSummary?.tcoNumber}</p>
+                </Grid>
+              )}
+              {rfqSummary?.approximateValue && (
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Approximate Value</label>
+                  <p>{rfqSummary?.approximateValue}</p>
+                </Grid>
+              )}
             </Grid>
             <Grid container p={3}>
               <Grid xs={4} p={2}>
@@ -1859,21 +1940,26 @@ const BusinessRFQ = () => {
                         <TimelineItem>
                           <TimelineOppositeContent style={{ display: 'none' }}></TimelineOppositeContent>
                           <TimelineSeparator>
-                            <Tooltip title="New RFQ" placement="top" arrow>
+                            <Tooltip title="New Lead" placement="top" arrow>
                               <TimelineDot color="secondary">
+                                {/* 'New RFQ', 'Tech Meet Done', 'TCO Submitted', 'Negotiation', 'Business Award', 'Lost' */}
                                 {item.statusRequest === 'New RFQ' && <PersonAdd />}
-                                {item.statusRequest === 'Contact Establish' && <ConnectWithoutContact />}
-                                {item.statusRequest === 'Technicle Meeting' && <Group />}
-                                {item.statusRequest === 'Hold' && <NotStarted />}
-                                {item.statusRequest === 'Reject' && <ThumbDown />}
-                                {item.statusRequest === 'Conform' && <ThumbUpSharp />}
+                                {item.statusRequest === 'Technical Meet Done' && <ConnectWithoutContact />}
+                                {item.statusRequest === 'TCO Submitted' && <Group />}
+                                {item.statusRequest === 'Negotiation' && <CurrencyExchange />}
+                                {item.statusRequest === 'Lost' && <ThumbDown />}
+                                {item.statusRequest === 'Business Award' && <ThumbUpSharp />}
                               </TimelineDot>
                             </Tooltip>
                             <TimelineConnector />
                           </TimelineSeparator>
                           <TimelineContent>
                             <Typography variant="h6" component="span" className="text-muted">
-                              {item.date}
+                              {item.date?.slice(0, 10)}
+                            </Typography>
+                            <br />
+                            <Typography variant="h6" component="span" className="strong">
+                              {item.statusRequest}
                             </Typography>
                             <li> {item.description}</li>
                           </TimelineContent>
@@ -1934,8 +2020,8 @@ const BusinessRFQ = () => {
                             </div>
                           </div>
                           <div className="float-end">
-                            <p className="text-muted-light m-0 text-end">Assigned Date : &nbsp; {data?.assignedDate}</p>
-                            <p className="text-muted-light m-0 text-end">Target Date : &nbsp; {data?.targetDate}</p>
+                            <p className="text-muted-light m-0 text-end">Assigned Date : &nbsp; {data?.assignedDate?.slice(0, 10)}</p>
+                            <p className="text-muted-light m-0 text-end">Target Date : &nbsp; {data?.targetDate?.slice(0, 10)}</p>
                             <div className="d-flex justify-content-end">
                               <p
                                 className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${
@@ -2001,4 +2087,3 @@ const BusinessRFQ = () => {
   );
 };
 export default BusinessRFQ;
- 

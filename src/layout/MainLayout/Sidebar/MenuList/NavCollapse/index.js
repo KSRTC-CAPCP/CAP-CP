@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useLocation, useNavigate } from 'react-router';
+import { useLocation } from 'react-router';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -19,7 +19,7 @@ import { IconChevronDown, IconChevronUp } from '@tabler/icons';
 const NavCollapse = ({ menu, level }) => {
   const theme = useTheme();
   const customization = useSelector((state) => state.customization);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -27,9 +27,9 @@ const NavCollapse = ({ menu, level }) => {
   const handleClick = () => {
     setOpen(!open);
     setSelected(!selected ? menu.id : null);
-    if (menu?.id !== 'authentication') {
-      navigate(menu.children[0]?.url);
-    }
+    // if (menu?.id !== 'authentication') {
+    //   navigate(menu.children[0]?.url);
+    // }
   };
 
   const { pathname } = useLocation();
@@ -44,12 +44,13 @@ const NavCollapse = ({ menu, level }) => {
 
   // menu collapse for sub-levels
   useEffect(() => {
-    setOpen(false);
+    // setOpen(false);
     setSelected(null);
     if (menu.children) {
       menu.children.forEach((item) => {
         if (item.children?.length) {
           checkOpenForParent(item.children, menu.id);
+          // setOpen(false);
         }
         if (item.url === pathname) {
           setSelected(menu.id);
@@ -98,7 +99,7 @@ const NavCollapse = ({ menu, level }) => {
           mb: 0.5,
           alignItems: 'flex-start',
           backgroundColor: level > 1 ? 'transparent !important' : 'inherit',
-          py: level > 1 ? 1 : 1.25,
+          // py: level > 1 ? 1 : 1.25,
           pl: `${level * 24}px`
         }}
         selected={selected === menu.id}

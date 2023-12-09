@@ -75,7 +75,16 @@ import {
 } from '@mui/lab';
 import { useMemo } from 'react';
 import { deleteData, fetchData, getById, postData, updateData } from 'utils/apiUtils';
-import { CATEGORY_CREATE, CATEGORY_GET, LEAD_CREATION, LEAD_DELETE, LEAD_GET, LEAD_GET_ID, LEAD_UPDATE } from 'api/apiEndPoint';
+import {
+  CATEGORY_CREATE,
+  CATEGORY_GET,
+  LEAD_CREATION,
+  LEAD_DELETE,
+  LEAD_GET,
+  LEAD_GET_ID,
+  LEAD_UPDATE,
+  PROFILES_GET
+} from 'api/apiEndPoint';
 import { useEffect } from 'react';
 
 const columnHelper = createMRTColumnHelper();
@@ -192,7 +201,7 @@ const columns = [
   })
 ];
 const optionsForHistoryApproval = ['Pending', 'Approval', 'Reject'];
-const optionsForHistoryStatus = ['Contact Establish', 'Technicle Meeting', 'Hold', 'Reject', 'Conform']; //
+const optionsForHistoryStatus = ['newlead', 'Contact Establish', 'Technicle Meeting', 'Hold', 'Reject', 'Conform']; //
 const optionsForTaskStatus = ['Not Started', 'On Going', 'Completed'];
 
 const csvConfig = mkConfig({
@@ -266,6 +275,7 @@ const BusinessLeads = () => {
     }
   ];
   const [historyTableColumns, setHistoryTableColumns] = useState(coumnsForHistory);
+  const [profilesData, setProfilesData] = useState([]);
 
   const coumnsForTask = [
     // {
@@ -284,6 +294,11 @@ const BusinessLeads = () => {
     {
       accessorKey: 'responsible',
       header: 'Responsible',
+      editVariant: 'select',
+      editSelectOptions: profilesData.map((item) => item.EmployeeCode + '-' + item.NameOfCandidate),
+      muiEditTextFieldProps: {
+        select: true
+      },
       enableEditing: true
     },
     {
@@ -393,6 +408,7 @@ const BusinessLeads = () => {
       setShowSelect(false);
     } else {
       setSelectedOption(value);
+
       setShowSelect(true);
     }
   };
@@ -400,19 +416,25 @@ const BusinessLeads = () => {
     setCustomOption(event.target.value);
   };
   const handleSaveCustomOption = async () => {
-    await postData(CATEGORY_CREATE, { name: customOption });
-    // if (customOption.trim() !== '') {
-    // const newOption = { value: customOption, label: customOption };
-    // console.log(newOption, 'newOption');
-    // setCategoryOptions([...categoryOptions, newOption]);
-    // setSelectedOption(customOption);
-    // setCustomOption('');
-    const categoryData = await fetchData(CATEGORY_GET);
-    setCategory(categoryData);
-    console.log(categoryData, 'fetched using categoryData db');
-    setShowSelect(true);
+    if (customOption.trim() !== '') {
+      if (selectedOption === 'addMore') {
+        // If "Add More Option" is selected, set selectedOption to the customOption value
+        setSelectedOption(customOption);
+      }
 
-    // }
+      // Save the custom option to the backend
+      await postData(CATEGORY_CREATE, { name: customOption });
+
+      // Fetch the updated category data
+      const categoryData = await fetchData(CATEGORY_GET);
+      setCategory(categoryData);
+
+      // Reset the customOption state
+      setCustomOption('');
+
+      // Show the select input
+      setShowSelect(true);
+    }
   };
   const handleAddOption = () => {
     if (inputValue.trim() !== '') {
@@ -452,14 +474,14 @@ const BusinessLeads = () => {
   };
   const theme = useTheme();
   const handleExportData = () => {
-    const csv = generateCsv(csvConfig)(data);
+    const csv = generateCsv(csvConfig)(leadData);
     download(csvConfig)(csv);
   };
 
   const populateFormFields = (leadData) => {
     console.log(leadData, 'populateFormFields');
     formik.setValues({
-      date: leadData.date,
+      date: leadData?.date?.slice(0, 10),
       Source: leadData.Source,
       Pilot: leadData.Pilot,
       companyName: leadData.companyName,
@@ -480,12 +502,13 @@ const BusinessLeads = () => {
     // setUpdatedValue(getByIdData)
     setUpdateId(e.original._id);
     console.log(getByIdData?.data, 'getby');
+    setSelectedOption(getByIdData?.data?.category);
     formik.setValues({
-      date: getByIdData?.data.date,
+      date: getByIdData?.data.date?.slice(0, 10),
       Source: getByIdData?.data.Source,
       Pilot: getByIdData?.data.Pilot,
       companyName: getByIdData?.data.companyName,
-      category: getByIdData?.data.category,
+      // category: getByIdData?.data.category,
       contactName: getByIdData?.data.contactName,
       departmentName: getByIdData?.data.departmentName,
       phoneNumber: getByIdData?.data.phoneNumber,
@@ -582,13 +605,14 @@ const BusinessLeads = () => {
           handleUpdate(values);
         } else {
           console.log('handle submit');
+          console.log(values, 'sts');
           // Create leadDescription array from leadDescription field
           const leadDescriptionArray = values.leadDescription
             ? values.leadDescription.split('\n').map((item) => ({
                 date: values.date,
                 description: item.trim(),
                 status: 'pending', // Set your default status here
-                statusRequest: 'contact establish' // Set your default statusRequest here
+                statusRequest: values.status // Set your default statusRequest here
               }))
             : [];
 
@@ -668,8 +692,8 @@ const BusinessLeads = () => {
       }
     });
     console.log('handleSaveRowHistory - updatedData:', updatedData);
-    setTaskTableData(updatedData);
     setEditingRowId(null);
+    setTaskTableData(updatedData);
   };
 
   const handleCancelEditTask = () => {
@@ -903,6 +927,9 @@ const BusinessLeads = () => {
       visible: true,
       mode: 'Add'
     });
+    formik.resetForm();
+    setUpdateId('');
+    setSelectedOption('');
   };
   const handleClose = () => {
     setView({
@@ -930,6 +957,9 @@ const BusinessLeads = () => {
           setCategory(categoryData);
           console.log(categoryData, 'fetched using categoryData db');
 
+          const data4Employee = await fetchData(PROFILES_GET, parsedData?.accessToken);
+          console.log(data, 'parsedddd');
+          setProfilesData(data4Employee?.data);
           // Fetch updateId data
           if (updateId) {
             const endPointId = LEAD_GET_ID(updateId);
@@ -1668,7 +1698,7 @@ const BusinessLeads = () => {
               </Grid>
               <Grid xs={3} p={2}>
                 <label className="text-muted">Date</label>
-                <p>{leadSummary?.date}</p>
+                <p>{leadSummary?.date?.slice(0, 10)}</p>
               </Grid>
               <Grid xs={3} p={2}>
                 <label className="text-muted">Source</label>
@@ -1752,7 +1782,7 @@ const BusinessLeads = () => {
                           <TimelineSeparator>
                             <Tooltip title="New Lead" placement="top" arrow>
                               <TimelineDot color="secondary">
-                                {item.statusRequest === 'New Lead' && <PersonAdd />}
+                                {item.statusRequest === 'newlead' && <PersonAdd />}
                                 {item.statusRequest === 'Contact Establish' && <ConnectWithoutContact />}
                                 {item.statusRequest === 'Technicle Meeting' && <Group />}
                                 {item.statusRequest === 'Hold' && <NotStarted />}
@@ -1764,7 +1794,11 @@ const BusinessLeads = () => {
                           </TimelineSeparator>
                           <TimelineContent>
                             <Typography variant="h6" component="span" className="text-muted">
-                              {item.date}
+                              {item.date?.slice(0, 10)}
+                            </Typography>
+                            <br />
+                            <Typography variant="h6" component="span" className="strong">
+                              {item.statusRequest === 'newlead' ? 'New Lead' : item.statusRequest}
                             </Typography>
                             <li> {item.description}</li>
                           </TimelineContent>
