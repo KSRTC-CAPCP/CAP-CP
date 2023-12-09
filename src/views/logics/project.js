@@ -101,6 +101,7 @@ const data = [
     projectTeamAllocation: 'Rose Team',
     PONO: 'yes',
     No: '1234',
+
     companyname: 'abc'
   },
   {
@@ -110,6 +111,7 @@ const data = [
     projectTeamAllocation: 'Rose Team',
     PONO: 'yes',
     No: '1234',
+
     companyname: 'abc'
   }
 ];
@@ -138,6 +140,12 @@ const columns = [
   }),
   columnHelper.accessor('status', {
     header: 'Status'
+  }),
+  columnHelper.accessor('manager', {
+    header: 'Manager'
+  }),
+  columnHelper.accessor('milestone', {
+    header: 'MileStone'
   }),
   columnHelper.accessor('companyName', {
     header: 'Company Name'
@@ -430,6 +438,35 @@ const Projects = () => {
     }
   };
 
+
+  const [showSelects, setShowSelects] = useState(true);
+  const [selectedOptions, setSelectedOptions] = useState('');
+  const [customOptiones, setCustomOptions] = useState('');
+  const [descriptionValues, setDescriptionValues] = useState({}); // State to store descriptions for options
+
+  const customOptions1 = [
+    { value: 'MileStone1', label: 'MileStone 1' },
+    { value: 'MileStone2', label: 'MileStone 2' },
+    { value: 'MileStone3', label: 'MileStone 3' },
+    // Add other options as needed
+  ];
+
+  const handleSelectOnChanged = (event) => {
+    setSelectedOptions(event.target.value);
+  };
+
+  const handleSelectInputChanged = (event) => {
+    setCustomOptions(event.target.value);
+  };
+
+  const handleDescriptionChange = (optionValue, description) => {
+    setDescriptionValues({ ...descriptionValues, [optionValue]: description });
+  };
+
+  const handleSaveCustomOptions = () => {
+    // Logic for saving custom options and descriptions
+  };
+
   const [inputValue, setInputValue] = useState('');
   const [options, setOptions] = useState([]);
   const [selectedValue, setSelectedValue] = useState('');
@@ -548,6 +585,8 @@ const Projects = () => {
       targetDate: '',
       companyName: '',
       description: '',
+      manager: '',
+      milestone: '',
       requirePO: '',
       // poNumber: '',
       projectAllocation: [],
@@ -625,6 +664,13 @@ const Projects = () => {
       console.log(error, 'error');
     }
   };
+
+  const [milestoneOptions, setMilestoneOptions] = useState([
+    { value: 'Milestone 1', label: 'Milestone 1' },
+    { value: 'Milestone 2', label: 'Milestone 2' },
+    { value: 'Milestone 3', label: 'Milestone 3' }
+  ]);
+
   const theme = useTheme();
   const handleExportData = () => {
     const csv = generateCsv(csvConfig)(data);
@@ -919,6 +965,36 @@ const Projects = () => {
     });
   };
 
+  const [showSelect, setShowSelect] = useState(true);
+  const [customOption, setCustomOption] = useState('');
+  const customOptions = [...milestoneOptions, { value: 'addMore', label: 'Add More Option' }];
+
+
+  const handleSelectOnChange = (event) => {
+    const value = event.target.value;
+    formik.handleChange(event);
+    formik.setFieldTouched('milestone', true, false); // Manually mark the field as touched
+    // If "Add More Option" is selected, hide the select input and show the text input
+    if (value === 'addMore') {
+      setShowSelect(false);
+    } else {
+      setSelectedOption(value);
+      setShowSelect(true);
+    }
+  };
+  const handleSelectInputChange = (event) => {
+    setCustomOption(event.target.value);
+  };
+  const handleSaveCustomOption = () => {
+    if (customOption.trim() !== '') {
+      const newOption = { value: customOption, label: customOption };
+      setMilestoneOptions([...milestoneOptions, newOption]);
+      setSelectedOption(customOption);
+      setCustomOption('');
+      setShowSelect(true);
+    }
+  };
+
   const rfqNumber = rfqData.map((item) => ({
     label: item.serialNumber + '  ' + item.companyName,
     value: item.serialNumber
@@ -1076,7 +1152,7 @@ const Projects = () => {
                   placeholder="Assigned Date"
                   name="assignedDate"
                   onChange={(e) => handleStartDateChange(e)}
-                  // value={formik.values.assignedDate}
+                // value={formik.values.assignedDate}
                 />
                 {/* {formik.touched.assignedDate && formik.errors.assignedDate && (
                   <FormHelperText error id="standard-weight-helper-text-Password-login">
@@ -1137,6 +1213,67 @@ const Projects = () => {
                   </FormHelperText>
                 )}
               </Grid>
+              <Grid xs={4} p={2}>
+                <FormControl fullWidth error={Boolean(formik.touched.manager && formik.errors.manager)}>
+                  <InputLabel id="demo-simple-select-label">Manager</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    label="manager"
+                    name="manager"
+                    value={formik.values.manager}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  >
+                    <MenuItem value={'manager1'}>Manager1</MenuItem>
+                    <MenuItem value={'manager2'}>Manager2</MenuItem>
+                    <MenuItem value={'manager3'}>Manager3</MenuItem>
+
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={4} p={2}>
+                <FormControl fullWidth>
+                  <InputLabel id="demo-simple-select-label">Milestone</InputLabel>
+                  <Select
+                    value={selectedOptions}
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    fullWidth
+                    onChange={handleSelectOnChanged}
+                    placeholder="Select"
+                  >
+                    {customOptions1.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={4} p={2}>
+
+                {customOptions1.map((option) => (
+                  <div key={option.value} style={{ marginTop: '10px' }}>
+                    {selectedOptions === option.value && (
+                      <TextField
+                        type="text"
+                        fullWidth
+                        value={descriptionValues[option.value] || ''}
+                        onChange={(event) => handleDescriptionChange(option.value, event.target.value)}
+                        placeholder={`Enter description for ${option.label}`}
+                      />
+                    )}
+                  </div>
+                ))}
+              </Grid>
+
+
+
+
+
 
               <Grid item xs={4} p={2}>
                 <FormLabel id="demo-row-radio-buttons-group-label">P0.NO</FormLabel>
@@ -1359,6 +1496,46 @@ const Projects = () => {
                   </FormHelperText>
                 )}
               </Grid>
+              <Grid xs={4} p={2}>
+                <FormControl fullWidth error={Boolean(formik.touched.manager && formik.errors.manager)}>
+                  <InputLabel id="demo-simple-select-label">Manager</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    label="manager"
+                    name="manager"
+                    value={formik.values.manager}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  >
+                    <MenuItem value={'manager1'}>Manager1</MenuItem>
+                    <MenuItem value={'manager2'}>Manager2</MenuItem>
+                    <MenuItem value={'manager3'}>Manager3</MenuItem>
+
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={4} p={2}>
+                <FormControl fullWidth>
+                  <InputLabel id="demo-simple-select-label">Milestone</InputLabel>
+                  <Select
+                    value={selectedOptions}
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    fullWidth
+                    onChange={handleSelectOnChanged}
+                    placeholder="Select"
+                  >
+                    {customOptions1.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+
+                  </Select>
+                </FormControl>
+              </Grid>
 
               <Grid item xs={4} p={2}>
                 <FormLabel id="demo-row-radio-buttons-group-label">P0.NO</FormLabel>
@@ -1367,7 +1544,18 @@ const Projects = () => {
                   <FormControlLabel value="no" control={<Radio />} label="No" />
                 </RadioGroup>
               </Grid>
+
+
+
+
+
+
+
+
+
             </Grid>
+
+
             <Box p={2} className="edit-table-container">
               <MaterialReactTable sx={{ boxShadow: 'rgba(0, 0, 0, 0.18) 1.95px 1.95px 2.7px' }} table={editableForproject} />
             </Box>
@@ -1496,9 +1684,8 @@ const Projects = () => {
                             <p className="text-muted-light m-0 text-end">Target Date : &nbsp; {data?.toDate}</p>
                             <div className="d-flex justify-content-end">
                               <p
-                                className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${
-                                  data?.status === 'completed' ? 'badge-success max-width' : ''
-                                }${data?.status === 'not-started' ? 'badge-danger max-width' : ''}`}
+                                className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${data?.status === 'completed' ? 'badge-success max-width' : ''
+                                  }${data?.status === 'not-started' ? 'badge-danger max-width' : ''}`}
                               >
                                 {data?.statusRequest} {data?.status}
                               </p>
@@ -1516,7 +1703,7 @@ const Projects = () => {
       )}
       <Dialog fullWidth open={open} TransitionComponent={Transition} keepMounted>
         <DialogTitle>
-          <Typography variant="h3">Delete Project</Typography>
+          <Typography variant="h3">Delete Lead</Typography>
         </DialogTitle>
         <Divider />
         <DialogContent>

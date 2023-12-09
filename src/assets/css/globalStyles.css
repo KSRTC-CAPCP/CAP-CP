@@ -288,3 +288,8 @@ hr{
 {
   align-items: center !important;
 }
+
+.strong
+{
+  font-weight: bold;
+}
