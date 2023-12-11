@@ -296,7 +296,7 @@ const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const Projects = () => {
+const Projects = ({ _history, tasks }) => {
   const navigateToTaskpage = () => {
     window.location.href = '/task-panel';
   };
@@ -389,6 +389,8 @@ const Projects = () => {
   };
 
   const [selectedOption, setSelectedOption] = React.useState('no');
+  
+  const [mileselectedOption, setMileSelectedOption] = React.useState('no');
   const [textFieldText, setTextFieldText] = React.useState('PONO Number is Not Allocated');
 
   const handleOptionChange = (event) => {
@@ -438,7 +440,7 @@ const Projects = () => {
     }
   };
 
-
+  const [milestone, setMilestone] = useState([]);
   const [showSelects, setShowSelects] = useState(true);
   const [selectedOptions, setSelectedOptions] = useState('');
   const [customOptiones, setCustomOptions] = useState('');
@@ -450,6 +452,16 @@ const Projects = () => {
     { value: 'MileStone3', label: 'MileStone 3' },
     // Add other options as needed
   ];
+
+  const categoryOption = milestone?.map((data) => ({
+    label: data.name,
+    value: data.name
+  }));
+
+  const [view, setView] = useState({
+    visible: false,
+    mode: 'Initial' // 'add', 'edit', 'view'
+  });
 
   const handleSelectOnChanged = (event) => {
     setSelectedOptions(event.target.value);
@@ -466,7 +478,9 @@ const Projects = () => {
   const handleSaveCustomOptions = () => {
     // Logic for saving custom options and descriptions
   };
-
+  const [historyTableColumns, setHistoryTableColumns] = useState(coumnsForHistory);
+  const [historyTableData, setHistoryTableData] = useState([]);
+  const [taskTableData, setTaskTableData] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [options, setOptions] = useState([]);
   const [selectedValue, setSelectedValue] = useState('');
@@ -489,16 +503,51 @@ const Projects = () => {
     }
   };
 
-  const [view, setView] = useState({
-    visible: false,
-    mode: 'Initial'
-  });
 
+  const handleSaveRowHistorys = (newData, oldData) => {
+    console.log('handleSaveRowHistory - newData:', newData);
+    console.log('handleSaveRowHistory - oldData:', oldData);
+    const updatedData = historyTableData.map((row) => {
+      if (
+        row._id === oldData._id || // For existing rows
+        (row && !row._id && oldData && oldData._tempId && row._tempId === oldData._tempId) // For new rows
+      ) {
+        return { ...row, ...newData };
+      } else {
+        return row;
+      }
+    });
+    console.log('handleSaveRowHistory - updatedData:', updatedData);
+    setHistoryTableData(updatedData);
+    setEditingRowId(null);
+  };
+  console.log(historyTableData, 'history');
+  const handleCancelEditHistory = () => {
+    setEditingRowId(null);
+  };
+  const handleCreateRowHistory = (newData) => {
+    const tempId = generateTempId(); // Generate a temporary ID
+    const newTask = { ...newData.values, _id: tempId };
+    setHistoryTableData([...historyTableData, newTask]);
+    setIsCreatingRow(false);
+  };
+  const handleEditRowHistorye = (row) => {
+    console.log(row, 'looooogg');
+    const editingId = row._id || row._tempId; // Use _id if available, otherwise use _tempId
+    setEditingRowId(editingId);
+  };
+  const handleCancelCreateHistory = () => {
+    setIsCreatingRow(false);
+  };
+  const handleDeleteRowHistorye = (row) => {
+    const updatedData = historyTableData.filter((item) => item._id !== row.id);
+    setHistoryTableData(updatedData);
+  };
   const editableForHistory = useMaterialReactTable({
-    columns: coumnsForHistory,
-    data: dataForHistory,
-    createDisplayMode: 'row',
-    editDisplayMode: 'row',
+    columns: historyTableColumns,
+    data: historyTableData,
+    createDisplayMode: 'row', // ('modal', and 'custom' are also available)
+    editDisplayMode: 'row', // ('modal', 'cell', 'table', and 'custom' are also available)
     enableEditing: true,
     positionActionsColumn: 'last',
     enableColumnFilters: false,
@@ -507,24 +556,41 @@ const Projects = () => {
     enablePagination: false,
     enableHiding: false,
     enableFullScreenToggle: false,
-    getRowId: (row) => row.id,
-    onCreatingRowCancel: () => console.log('err'),
-    onEditingRowCancel: () => console.log('err'),
+    getRowId: (row) => row._id,
+    onEditingRowSave: ({ row, values, exitEditingMode }) => {
+      handleSaveRowHistorys(values, row.original); // Pass the original row data to handleSaveRowHistory
+      exitEditingMode(); // Call exitEditingMode to exit editing mode
+    },
+    onEditingRowCancel: handleCancelEditHistory,
+    onCreatingRowSave: handleCreateRowHistory,
+    onCreatingRowCancel: handleCancelCreateHistory,
     renderRowActions: ({ row, table }) => (
       <Box sx={{ display: 'flex', gap: '1rem' }}>
         <Tooltip title="Edit">
-          <IconButton onClick={() => table.setEditingRow(row)}>
+          <IconButton
+            onClick={() => {
+              handleEditRowHistorye(row), table.setEditingRow(row);
+            }}
+          >
             <ModeEditRounded style={{ color: '#2196f3' }} />
           </IconButton>
         </Tooltip>
         <Tooltip title="Delete">
-          <IconButton color="error" onClick={() => console.log('del')}>
+          <IconButton color="error" onClick={() => handleDeleteRowHistorye(row)}>
             <DeleteRounded style={{ color: '#2196f3' }} />
           </IconButton>
         </Tooltip>
       </Box>
     ),
     renderTopToolbarCustomActions: ({ table }) => (
+      // <Button
+      //   variant="contained"
+      //   onClick={() => {
+      //     table.setCreatingRow(true);
+      //   }}
+      // >
+      //   Create History
+      // </Button>
       <div className="title-bar">
         <div className="custum-header">
           <p style={{ fontWeight: 'bold', fontSize: 'large' }}>History Creation</p>
@@ -554,6 +620,130 @@ const Projects = () => {
       </div>
     )
   });
+
+  const handleSaveRowTask = (newData, oldData) => {
+    console.log('handleSaveRowtask - newData:', newData);
+    console.log('handleSaveRowtask - oldData:', oldData);
+    const updatedData = taskTableData.map((row) => {
+      if (
+        row._id === oldData._id || // For existing rows
+        (row && !row._id && oldData && oldData._tempId && row._tempId === oldData._tempId) // For new rows
+      ) {
+        return { ...row, ...newData };
+      } else {
+        return row;
+      }
+    });
+    console.log('handleSaveRowHistory - updatedData:', updatedData);
+    setTaskTableData(updatedData);
+    setEditingRowId(null);
+  };
+
+  const handleCancelEditTask = () => {
+    setEditingRowId(null);
+  };
+
+  const handleCreateRowTask = (newData) => {
+    const tempId = generateTempId(); // Generate a temporary ID
+    const newTask = { ...newData.values, _id: tempId };
+    setTaskTableData([...taskTableData, newTask]);
+    setIsCreatingRow(false);
+
+  };
+  const handleEditRowTask = (row) => {
+    const editingId = row._id; // Use _id if available, otherwise use _tempId
+    setEditingRowId(editingId);
+  };
+  const handleCancelCreateTask = () => {
+    setIsCreatingRow(false);
+  };
+  const handleDeleteRowTask = (row) => {
+    const updatedData = taskTableData.filter((item) => item._id !== row.id);
+    setTaskTableData(updatedData);
+  };
+
+  const editableForTask = useMaterialReactTable({
+    columns: coumnsForTask,
+    data: taskTableData,
+    createDisplayMode: 'row', // ('modal', and 'custom' are also available)
+    editDisplayMode: 'row', // ('modal', 'cell', 'table', and 'custom' are also available)
+    enableEditing: true,
+    positionActionsColumn: 'last',
+    enableColumnFilters: false,
+    enableFilters: false,
+    enableDensityToggle: false,
+    enablePagination: false,
+    enableHiding: false,
+    enableFullScreenToggle: false,
+    getRowId: (row) => row._id,
+    onEditingRowSave: ({ row, values, exitEditingMode }) => {
+      handleSaveRowTask(values, row.original); // Pass the original row data to handleSaveRowHistory
+      exitEditingMode(); // Call exitEditingMode to exit editing mode
+    },
+    onEditingRowCancel: handleCancelEditTask,
+    onCreatingRowSave: handleCreateRowTask,
+    onCreatingRowCancel: handleCancelCreateTask,
+    renderRowActions: ({ row, table }) => (
+      <Box sx={{ display: 'flex', gap: '1rem' }}>
+        <Tooltip title="Edit">
+          <IconButton
+            onClick={() => {
+              handleEditRowHistory(row), table.setEditingRow(row);
+            }}
+          >
+            <ModeEditRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Delete">
+          <IconButton color="error" onClick={() => handleDeleteRowTask(row)}>
+            <DeleteRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    ),
+    renderTopToolbarCustomActions: ({ table }) => (
+      // <Button
+      //   variant="contained"
+      //   onClick={() => {
+      //     table.setCreatingRow(true);
+      //   }}
+      // >
+      //   Create History
+      // </Button>
+      <div className="title-bar">
+        <div className="custum-header">
+          <p style={{ fontWeight: 'bold', fontSize: 'large' }}>Task Creation</p>
+          <ButtonBase sx={{ borderRadius: '12px' }}>
+            <Avatar
+              variant="rounded"
+              sx={{
+                ...theme.typography.commonAvatar,
+                ...theme.typography.mediumAvatar,
+                transition: 'all .2s ease-in-out',
+                background: theme.palette.secondary.light,
+                color: theme.palette.secondary.dark,
+                '&[aria-controls="menu-list-grow"],&:hover': {
+                  background: theme.palette.secondary.dark,
+                  color: theme.palette.secondary.light
+                }
+              }}
+              onClick={() => {
+                table.setCreatingRow(true);
+              }}
+              color="inherit"
+            >
+              <IconPlus />
+            </Avatar>
+          </ButtonBase>
+        </div>
+      </div>
+    )
+  });
+
+
+
+
+
   const [teamData, setTeamData] = useState([]);
   const [editingRowId, setEditingRowId] = useState(null);
   const generateTempId = () => `temp_${Math.random().toString(36).substr(2, 9)}`;
@@ -766,23 +956,38 @@ const Projects = () => {
     setEditingRowId(null);
   };
   console.log(teamData, 'history');
-  const handleCancelEditHistory = () => {
+
+
+  const handleEditRowHistorys = (row) => {
+    console.log(row, 'looooogg');
+    const editingId = row._id || row._tempId; // Use _id if available, otherwise use _tempId
+    setEditingRowId(editingId);
+  };
+
+  const handleDeleteRowHistorys = (row) => {
+    const updatedData = teamData.filter((item) => item._id !== row.id);
+    setTeamData(updatedData);
+  };
+
+  const handleCancelEditHistorys = () => {
     setEditingRowId(null);
   };
-  const handleCreateRowHistory = (newData) => {
+  const handleCreateRowHistorys = (newData) => {
     const tempId = generateTempId(); // Generate a temporary ID
     const newTask = { ...newData.values, _id: tempId };
     setTeamData([...teamData, newTask]);
     setIsCreatingRow(false);
   };
+  const handleCancelCreateHistorys = () => {
+    setIsCreatingRow(false);
+  };
+
   const handleEditRowHistory = (row) => {
     console.log(row, 'looooogg');
     const editingId = row._id || row._tempId; // Use _id if available, otherwise use _tempId
     setEditingRowId(editingId);
   };
-  const handleCancelCreateHistory = () => {
-    setIsCreatingRow(false);
-  };
+
   const handleDeleteRowHistory = (row) => {
     const updatedData = teamData.filter((item) => item._id !== row.id);
     setTeamData(updatedData);
@@ -807,22 +1012,22 @@ const Projects = () => {
       handleSaveRowHistory(values, row.original); // Pass the original row data to handleSaveRowHistory
       exitEditingMode(); // Call exitEditingMode to exit editing mode
     },
-    onEditingRowCancel: handleCancelEditHistory,
-    onCreatingRowSave: handleCreateRowHistory,
-    onCreatingRowCancel: handleCancelCreateHistory,
+    onEditingRowCancel: handleCancelEditHistorys,
+    onCreatingRowSave: handleCreateRowHistorys,
+    onCreatingRowCancel: handleCancelCreateHistorys,
     renderRowActions: ({ row, table }) => (
       <Box sx={{ display: 'flex', gap: '1rem' }}>
         <Tooltip title="Edit">
           <IconButton
             onClick={() => {
-              handleEditRowHistory(row), table.setEditingRow(row);
+              handleEditRowHistorys(row), table.setEditingRow(row);
             }}
           >
             <ModeEditRounded style={{ color: '#2196f3' }} />
           </IconButton>
         </Tooltip>
         <Tooltip title="Delete">
-          <IconButton color="error" onClick={() => handleDeleteRowHistory(row)}>
+          <IconButton color="error" onClick={() => handleDeleteRowHistorys(row)}>
             <DeleteRounded style={{ color: '#2196f3' }} />
           </IconButton>
         </Tooltip>
@@ -859,68 +1064,7 @@ const Projects = () => {
       </div>
     )
   });
-  const editableForTask = useMaterialReactTable({
-    columns: coumnsForTask,
-    data: dataForHistory,
-    createDisplayMode: 'row',
-    editDisplayMode: 'row',
-    enableEditing: true,
-    positionActionsColumn: 'last',
-    enableColumnFilters: false,
-    enableFilters: false,
-    enableDensityToggle: false,
-    enablePagination: false,
-    enableHiding: false,
-    enableFullScreenToggle: false,
-    getRowId: (row) => row.id,
-    onCreatingRowCancel: () => console.log('err'),
 
-    onEditingRowCancel: () => console.log('err'),
-
-    renderRowActions: ({ row, table }) => (
-      <Box sx={{ display: 'flex', gap: '1rem' }}>
-        <Tooltip title="Edit">
-          <IconButton onClick={() => table.setEditingRow(row)}>
-            <ModeEditRounded style={{ color: '#2196f3' }} />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Delete">
-          <IconButton color="error" onClick={() => console.log('del')}>
-            <DeleteRounded style={{ color: '#2196f3' }} />
-          </IconButton>
-        </Tooltip>
-      </Box>
-    ),
-    renderTopToolbarCustomActions: ({ table }) => (
-      <div className="title-bar">
-        <div className="custum-header">
-          <p style={{ fontWeight: 'bold', fontSize: 'large' }}>Task Creation</p>
-          <ButtonBase sx={{ borderRadius: '12px' }}>
-            <Avatar
-              variant="rounded"
-              sx={{
-                ...theme.typography.commonAvatar,
-                ...theme.typography.mediumAvatar,
-                transition: 'all .2s ease-in-out',
-                background: theme.palette.secondary.light,
-                color: theme.palette.secondary.dark,
-                '&[aria-controls="menu-list-grow"],&:hover': {
-                  background: theme.palette.secondary.dark,
-                  color: theme.palette.secondary.light
-                }
-              }}
-              onClick={() => {
-                table.setCreatingRow(true);
-              }}
-              color="inherit"
-            >
-              <IconPlus />
-            </Avatar>
-          </ButtonBase>
-        </div>
-      </div>
-    )
-  });
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: '#e3f2fd',
@@ -964,10 +1108,18 @@ const Projects = () => {
       mode: 'Initial'
     });
   };
-
+  const [description, setDescription] = useState('');
   const [showSelect, setShowSelect] = useState(true);
   const [customOption, setCustomOption] = useState('');
   const customOptions = [...milestoneOptions, { value: 'addMore', label: 'Add More Option' }];
+
+  const [showDescription, setShowDescription] = useState(false);
+
+  const handleSelectClick = () => {
+    setShowDescription(true);
+  };
+
+
 
 
   const handleSelectOnChange = (event) => {
@@ -978,7 +1130,7 @@ const Projects = () => {
     if (value === 'addMore') {
       setShowSelect(false);
     } else {
-      setSelectedOption(value);
+      setMileSelectedOption(value);
       setShowSelect(true);
     }
   };
@@ -989,7 +1141,7 @@ const Projects = () => {
     if (customOption.trim() !== '') {
       const newOption = { value: customOption, label: customOption };
       setMilestoneOptions([...milestoneOptions, newOption]);
-      setSelectedOption(customOption);
+      setMileSelectedOption(customOption);
       setCustomOption('');
       setShowSelect(true);
     }
@@ -1225,64 +1377,79 @@ const Projects = () => {
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                   >
-                    <MenuItem value={'manager1'}>Manager1</MenuItem>
-                    <MenuItem value={'manager2'}>Manager2</MenuItem>
-                    <MenuItem value={'manager3'}>Manager3</MenuItem>
+                    <MenuItem value={'manager1'}>Kotty</MenuItem>
+                    <MenuItem value={'manager2'}>Zara</MenuItem>
+                    <MenuItem value={'manager3'}>Jak</MenuItem>
 
                   </Select>
                 </FormControl>
               </Grid>
+               
+              <Grid xs={4} p={2}>
+                {showSelect ? (
+                  <FormControl fullWidth>
+                    <InputLabel id="demo-simple-select-label">MileStone</InputLabel>
+                    <Select
+                      error={Boolean(formik.touched.milestone && formik.errors.milestone)}
+                      value={mileselectedOption}
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      fullWidth
+                      name="milestone"
+                      onChange={handleSelectOnChange}
+                      label="Select"
+                      placeholder="Select"
+                    >
+                      {customOptions.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
 
-              <Grid item xs={4} p={2}>
-                <FormControl fullWidth>
-                  <InputLabel id="demo-simple-select-label">Milestone</InputLabel>
-                  <Select
-                    value={selectedOptions}
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    fullWidth
-                    onChange={handleSelectOnChanged}
-                    placeholder="Select"
-                  >
-                    {customOptions1.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
 
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={4} p={2}>
+                    {formik.touched.milestone && formik.errors.milestone && (
+                      <FormHelperText error id="standard-weight-helper-text-Password-login">
+                        {formik.errors.milestone}
+                      </FormHelperText>
+                    )}
 
-                {customOptions1.map((option) => (
-                  <div key={option.value} style={{ marginTop: '10px' }}>
-                    {selectedOptions === option.value && (
+                  </FormControl>
+                ) : (
+                  <>
+                    <div style={{ display: 'flex' }}>
                       <TextField
                         type="text"
                         fullWidth
-                        value={descriptionValues[option.value] || ''}
-                        onChange={(event) => handleDescriptionChange(option.value, event.target.value)}
-                        placeholder={`Enter description for ${option.label}`}
+                        value={customOption}
+                        onChange={handleSelectInputChange}
+                        placeholder="Enter custom option"
                       />
-                    )}
-                  </div>
-                ))}
+                      <Button onClick={handleSaveCustomOption}>Save</Button>
+                    </div>
+                  </>
+                )}
               </Grid>
-
-
-
-
-
-
-              <Grid item xs={4} p={2}>
-                <FormLabel id="demo-row-radio-buttons-group-label">P0.NO</FormLabel>
-                <RadioGroup aria-label="yesno" name="yesno" value={selectedOption} onChange={handleOptionChange} row>
-                  <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-                  <FormControlLabel value="no" control={<Radio />} label="No" />
-                </RadioGroup>
+              <Grid item>
+                {showDescription && (
+                  <TextField
+                    type="text"
+                    fullWidth
+                    value={description}
+                    onChange={handleDescriptionChange}
+                    placeholder="Enter description"
+                    style={{ marginTop: '10px' }}
+                  />
+                )}
               </Grid>
-              {/* {selectedOption === 'yes' && (
+            <Grid item xs={4} p={2}>
+              <FormLabel id="demo-row-radio-buttons-group-label">P0.NO</FormLabel>
+              <RadioGroup aria-label="yesno" name="yesno" value={selectedOption} onChange={handleOptionChange} row>
+                <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+                <FormControlLabel value="no" control={<Radio />} label="No" />
+              </RadioGroup>
+            </Grid>
+            {/* {selectedOption === 'yes' && (
                 <Grid item xs={4} p={2}>
                   <TextField
                     fullWidth
@@ -1295,437 +1462,545 @@ const Projects = () => {
                   />
                 </Grid>
               )} */}
-            </Grid>
-            <Box p={2} className="edit-table-container">
-              <MaterialReactTable sx={{ boxShadow: 'rgba(0, 0, 0, 0.18) 1.95px 1.95px 2.7px' }} table={editableForproject} />
-            </Box>
-            <Button variant="contained" style={{ float: 'right', margin: '2rem' }} type="submit">
-              Save
-            </Button>
-          </form>
+          </Grid>
+          <Box p={2} className="edit-table-container">
+            <MaterialReactTable sx={{ boxShadow: 'rgba(0, 0, 0, 0.18) 1.95px 1.95px 2.7px' }} table={editableForproject} />
+          </Box>
+          <Button variant="contained" style={{ float: 'right', margin: '2rem' }} type="submit">
+            Save
+          </Button>
+        </form>
         </MainCard>
-      )}
-      {view.mode === 'Initial' && (
-        <MainCard
-          title="Project"
-          secondary={
-            <Box
+  )
+}
+{
+  view.mode === 'Initial' && (
+    <MainCard
+      title="Project"
+      secondary={
+        <Box
+          sx={{
+            ml: 2,
+            // mr: 3,
+            [theme.breakpoints.down('md')]: {
+              mr: 2
+            }
+          }}
+        >
+          <ButtonBase sx={{ borderRadius: '12px' }}>
+            <Avatar
+              variant="rounded"
               sx={{
-                ml: 2,
-                // mr: 3,
-                [theme.breakpoints.down('md')]: {
-                  mr: 2
+                ...theme.typography.commonAvatar,
+                ...theme.typography.mediumAvatar,
+                transition: 'all .2s ease-in-out',
+                background: theme.palette.secondary.light,
+                color: theme.palette.secondary.dark,
+                '&[aria-controls="menu-list-grow"],&:hover': {
+                  background: theme.palette.secondary.dark,
+                  color: theme.palette.secondary.light
                 }
               }}
+              aria-haspopup="true"
+              onClick={handleToggle}
+              color="inherit"
             >
-              <ButtonBase sx={{ borderRadius: '12px' }}>
-                <Avatar
-                  variant="rounded"
-                  sx={{
-                    ...theme.typography.commonAvatar,
-                    ...theme.typography.mediumAvatar,
-                    transition: 'all .2s ease-in-out',
-                    background: theme.palette.secondary.light,
-                    color: theme.palette.secondary.dark,
-                    '&[aria-controls="menu-list-grow"],&:hover': {
-                      background: theme.palette.secondary.dark,
-                      color: theme.palette.secondary.light
-                    }
-                  }}
-                  aria-haspopup="true"
-                  onClick={handleToggle}
-                  color="inherit"
-                >
-                  <IconPlus stroke={2} size="1.3rem" />
-                </Avatar>
-              </ButtonBase>
-            </Box>
-          }
+              <IconPlus stroke={2} size="1.3rem" />
+            </Avatar>
+          </ButtonBase>
+        </Box>
+      }
+    >
+      <MaterialReactTable table={table} />
+    </MainCard>
+  )
+}
+{
+  view.mode === 'Edit' && (
+    <MainCard
+      title="Project Updations"
+      secondary={
+        <Box
+          sx={{
+            ml: 2,
+            // mr: 3,
+            [theme.breakpoints.down('md')]: {
+              mr: 2
+            }
+          }}
         >
-          <MaterialReactTable table={table} />
-        </MainCard>
-      )}
-      {view.mode === 'Edit' && (
-        <MainCard
-          title="Project Updations"
-          secondary={
-            <Box
+          <ButtonBase sx={{ borderRadius: '12px' }}>
+            <Avatar
+              variant="rounded"
               sx={{
-                ml: 2,
-                // mr: 3,
-                [theme.breakpoints.down('md')]: {
-                  mr: 2
+                ...theme.typography.commonAvatar,
+                ...theme.typography.mediumAvatar,
+                transition: 'all .2s ease-in-out',
+                background: theme.palette.secondary.light,
+                color: theme.palette.secondary.dark,
+                '&[aria-controls="menu-list-grow"],&:hover': {
+                  background: theme.palette.secondary.dark,
+                  color: theme.palette.secondary.light
                 }
               }}
+              aria-haspopup="true"
+              onClick={handleClose}
+              color="inherit"
             >
-              <ButtonBase sx={{ borderRadius: '12px' }}>
-                <Avatar
-                  variant="rounded"
-                  sx={{
-                    ...theme.typography.commonAvatar,
-                    ...theme.typography.mediumAvatar,
-                    transition: 'all .2s ease-in-out',
-                    background: theme.palette.secondary.light,
-                    color: theme.palette.secondary.dark,
-                    '&[aria-controls="menu-list-grow"],&:hover': {
-                      background: theme.palette.secondary.dark,
-                      color: theme.palette.secondary.light
-                    }
-                  }}
-                  aria-haspopup="true"
-                  onClick={handleClose}
-                  color="inherit"
-                >
-                  <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
-                </Avatar>
-              </ButtonBase>
-            </Box>
-          }
-        >
-          <form onSubmit={formik.handleSubmit}>
-            <Grid container>
-              <Grid item xs={4} p={2}>
-                <FormControl fullWidth error={Boolean(formik.touched.rfqNumber && formik.errors.rfqNumber)}>
-                  <InputLabel id="additional-select-label">RFQ Number</InputLabel>
-                  <Select
-                    name="rfqNumber"
-                    disabled
-                    value={formik.values.rfqNumber}
-                    onChange={(e) => {
-                      formik.handleChange(e);
-                      handleSelectChange(e);
-                    }}
-                    onBlur={formik.handleBlur}
-                  >
-                    {rfqNumber.map((lead, index) => (
-                      <MenuItem key={index} value={lead.value}>
-                        {lead.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                {formik.touched.rfqNumber && formik.errors.rfqNumber && (
-                  <FormHelperText error id="standard-weight-helper-text-Password-login">
-                    {formik.errors.rfqNumber}
-                  </FormHelperText>
+              <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
+            </Avatar>
+          </ButtonBase>
+        </Box>
+      }
+    >
+      <form onSubmit={formik.handleSubmit}>
+        <Grid container>
+          <Grid item xs={4} p={2}>
+            <FormControl fullWidth error={Boolean(formik.touched.rfqNumber && formik.errors.rfqNumber)}>
+              <InputLabel id="additional-select-label">RFQ Number</InputLabel>
+              <Select
+                name="rfqNumber"
+                disabled
+                value={formik.values.rfqNumber}
+                onChange={(e) => {
+                  formik.handleChange(e);
+                  handleSelectChange(e);
+                }}
+                onBlur={formik.handleBlur}
+              >
+                {rfqNumber.map((lead, index) => (
+                  <MenuItem key={index} value={lead.value}>
+                    {lead.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            {formik.touched.rfqNumber && formik.errors.rfqNumber && (
+              <FormHelperText error id="standard-weight-helper-text-Password-login">
+                {formik.errors.rfqNumber}
+              </FormHelperText>
+            )}
+          </Grid>
+          <Grid xs={4} p={2}>
+            <TextField
+              error={Boolean(formik.touched.companyName && formik.errors.companyName)}
+              fullWidth
+              id="outlined-basic"
+              label="Company Name"
+              variant="outlined"
+              name="companyName"
+              value={formik.values.companyName}
+              disabled
+              onBlur={formik.handleBlur}
+              onChange={formik.handleChange}
+            />
+            {formik.touched.companyName && formik.errors.companyName && (
+              <FormHelperText error id="standard-weight-helper-text-Password-login">
+                {formik.errors.companyName}
+              </FormHelperText>
+            )}
+          </Grid>
+          <Grid xs={4} p={2}>
+            <DatePicker
+              oneTap
+              style={{ width: 200 }}
+              placeholder="Assigned Date"
+              name="assignedDate"
+              onChange={(e) => handleStartDateChange(e)}
+            />
+          </Grid>
+          <Grid xs={4} p={2}>
+            <DatePicker
+              oneTap
+              style={{ width: 200 }}
+              placeholder="Target Date"
+              name="targetDate"
+              onChange={(e) => handleEndDateChange(e)}
+            />
+          </Grid>
+
+          <Grid xs={4} p={2}>
+            <FormControl fullWidth error={Boolean(formik.touched.status && formik.errors.status)}>
+              <InputLabel id="demo-simple-select-label">Status</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                label="status"
+                name="status"
+                value={formik.values.status}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+              >
+                <MenuItem value={'newlead'}>OnGoing</MenuItem>
+                <MenuItem value={'contactEstablish'}>Customer Review</MenuItem>
+                <MenuItem value={'technicleMeeting'}>Internal Review</MenuItem>
+                <MenuItem value={'requirementConfirm'}>Complete</MenuItem>
+                <MenuItem value={'hold'}>Hold</MenuItem>
+              </Select>
+            </FormControl>
+            {formik.touched.status && formik.errors.status && (
+              <FormHelperText error id="standard-weight-helper-text-Password-login">
+                {formik.errors.status}
+              </FormHelperText>
+            )}
+          </Grid>
+          <Grid xs={4} p={2}>
+            <TextField
+              error={Boolean(formik.touched.description && formik.errors.description)}
+              name="description"
+              value={formik.values.description}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              fullWidth
+              id="outlined-basic"
+              label="description"
+              variant="outlined"
+            />
+            {formik.touched.description && formik.errors.description && (
+              <FormHelperText error id="standard-weight-helper-text-Password-login">
+                {formik.errors.description}
+              </FormHelperText>
+            )}
+          </Grid>
+          <Grid xs={4} p={2}>
+            <FormControl fullWidth error={Boolean(formik.touched.manager && formik.errors.manager)}>
+              <InputLabel id="demo-simple-select-label">Manager</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                label="manager"
+                name="manager"
+                value={formik.values.manager}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+              >
+                <MenuItem value={'manager1'}>Kotty</MenuItem>
+                <MenuItem value={'manager2'}>Zara</MenuItem>
+                <MenuItem value={'manager3'}>Jak</MenuItem>
+
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid xs={4} p={2}>
+                {showSelect ? (
+                  <FormControl fullWidth>
+                    <InputLabel id="demo-simple-select-label">MileStone</InputLabel>
+                    <Select
+                      error={Boolean(formik.touched.milestone && formik.errors.milestone)}
+                      value={mileselectedOption}
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      fullWidth
+                      name="milestone"
+                      onChange={handleSelectOnChange}
+                      label="Select"
+                      placeholder="Select"
+                    >
+                      {customOptions.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+
+
+                    {formik.touched.milestone && formik.errors.milestone && (
+                      <FormHelperText error id="standard-weight-helper-text-Password-login">
+                        {formik.errors.milestone}
+                      </FormHelperText>
+                    )}
+
+                  </FormControl>
+                ) : (
+                  <>
+                    <div style={{ display: 'flex' }}>
+                      <TextField
+                        type="text"
+                        fullWidth
+                        value={customOption}
+                        onChange={handleSelectInputChange}
+                        placeholder="Enter custom option"
+                      />
+                      <Button onClick={handleSaveCustomOption}>Save</Button>
+                    </div>
+                  </>
                 )}
               </Grid>
-              <Grid xs={4} p={2}>
-                <TextField
-                  error={Boolean(formik.touched.companyName && formik.errors.companyName)}
-                  fullWidth
-                  id="outlined-basic"
-                  label="Company Name"
-                  variant="outlined"
-                  name="companyName"
-                  value={formik.values.companyName}
-                  disabled
-                  onBlur={formik.handleBlur}
-                  onChange={formik.handleChange}
-                />
-                {formik.touched.companyName && formik.errors.companyName && (
-                  <FormHelperText error id="standard-weight-helper-text-Password-login">
-                    {formik.errors.companyName}
-                  </FormHelperText>
-                )}
-              </Grid>
-              <Grid xs={4} p={2}>
-                <DatePicker
-                  oneTap
-                  style={{ width: 200 }}
-                  placeholder="Assigned Date"
-                  name="assignedDate"
-                  onChange={(e) => handleStartDateChange(e)}
-                />
-                {/* {formik.touched.assignedDate && formik.errors.assignedDate && (
-                  <FormHelperText error id="standard-weight-helper-text-Password-login">
-                    {formik.errors.assignedDate}
-                  </FormHelperText>
-                )} */}
-              </Grid>
-              <Grid xs={4} p={2}>
-                <DatePicker
-                  oneTap
-                  style={{ width: 200 }}
-                  placeholder="Target Date"
-                  name="targetDate"
-                  onChange={(e) => handleEndDateChange(e)}
-                />
-              </Grid>
-
-              <Grid xs={4} p={2}>
-                <FormControl fullWidth error={Boolean(formik.touched.status && formik.errors.status)}>
-                  <InputLabel id="demo-simple-select-label">Status</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    label="status"
-                    name="status"
-                    value={formik.values.status}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                  >
-                    <MenuItem value={'newlead'}>OnGoing</MenuItem>
-                    <MenuItem value={'contactEstablish'}>Customer Review</MenuItem>
-                    <MenuItem value={'technicleMeeting'}>Internal Review</MenuItem>
-                    <MenuItem value={'requirementConfirm'}>Complete</MenuItem>
-                    <MenuItem value={'hold'}>Hold</MenuItem>
-                  </Select>
-                </FormControl>
-                {formik.touched.status && formik.errors.status && (
-                  <FormHelperText error id="standard-weight-helper-text-Password-login">
-                    {formik.errors.status}
-                  </FormHelperText>
-                )}
-              </Grid>
-              <Grid xs={4} p={2}>
-                <TextField
-                  error={Boolean(formik.touched.description && formik.errors.description)}
-                  name="description"
-                  value={formik.values.description}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  fullWidth
-                  id="outlined-basic"
-                  label="description"
-                  variant="outlined"
-                />
-                {formik.touched.description && formik.errors.description && (
-                  <FormHelperText error id="standard-weight-helper-text-Password-login">
-                    {formik.errors.description}
-                  </FormHelperText>
-                )}
-              </Grid>
-              <Grid xs={4} p={2}>
-                <FormControl fullWidth error={Boolean(formik.touched.manager && formik.errors.manager)}>
-                  <InputLabel id="demo-simple-select-label">Manager</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    label="manager"
-                    name="manager"
-                    value={formik.values.manager}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                  >
-                    <MenuItem value={'manager1'}>Manager1</MenuItem>
-                    <MenuItem value={'manager2'}>Manager2</MenuItem>
-                    <MenuItem value={'manager3'}>Manager3</MenuItem>
-
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={4} p={2}>
-                <FormControl fullWidth>
-                  <InputLabel id="demo-simple-select-label">Milestone</InputLabel>
-                  <Select
-                    value={selectedOptions}
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    fullWidth
-                    onChange={handleSelectOnChanged}
-                    placeholder="Select"
-                  >
-                    {customOptions1.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={4} p={2}>
-                <FormLabel id="demo-row-radio-buttons-group-label">P0.NO</FormLabel>
-                <RadioGroup aria-label="yesno" name="yesno" value={selectedOption} onChange={handleOptionChange} row>
-                  <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-                  <FormControlLabel value="no" control={<Radio />} label="No" />
-                </RadioGroup>
-              </Grid>
+          <Grid item xs={4} p={2}>
+            <FormLabel id="demo-row-radio-buttons-group-label">P0.NO</FormLabel>
+            <RadioGroup aria-label="yesno" name="yesno" value={selectedOption} onChange={handleOptionChange} row>
+              <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+              <FormControlLabel value="no" control={<Radio />} label="No" />
+            </RadioGroup>
+          </Grid>
+        </Grid>
 
 
+        <Box p={2} className="edit-table-container">
+          <MaterialReactTable sx={{ boxShadow: 'rgba(0, 0, 0, 0.18) 1.95px 1.95px 2.7px' }} table={editableForproject} />
+        </Box>
+        <Box p={2} className="edit-table-container">
+          <MaterialReactTable table={editableForHistory} />
+        </Box>
+        <Box p={2} className="edit-table-container">
+          <MaterialReactTable table={editableForTask} />
+        </Box>
+        <Button variant="contained" style={{ float: 'right', margin: '2rem' }} type="submit">
+          Update
+        </Button>
+      </form>
+    </MainCard>
+  )
+}
+{
+  view.mode === 'View' && (
+    <>
+      <MainCard
+        title="Note"
+        secondary={
+          <Box
+            sx={{
+              ml: 2,
 
-
-
-
-
-
-
-            </Grid>
-
-
-            <Box p={2} className="edit-table-container">
-              <MaterialReactTable sx={{ boxShadow: 'rgba(0, 0, 0, 0.18) 1.95px 1.95px 2.7px' }} table={editableForproject} />
-            </Box>
-            <Button variant="contained" style={{ float: 'right', margin: '2rem' }} type="submit">
-              Save
-            </Button>
-          </form>
-        </MainCard>
-      )}
-      {view.mode === 'View' && (
-        <>
-          <MainCard
-            title="Note"
-            secondary={
-              <Box
+              [theme.breakpoints.down('md')]: {
+                mr: 2
+              }
+            }}
+          >
+            <ButtonBase sx={{ borderRadius: '12px' }}>
+              <Avatar
+                variant="rounded"
                 sx={{
-                  ml: 2,
-
-                  [theme.breakpoints.down('md')]: {
-                    mr: 2
+                  ...theme.typography.commonAvatar,
+                  ...theme.typography.mediumAvatar,
+                  transition: 'all .2s ease-in-out',
+                  background: theme.palette.secondary.light,
+                  color: theme.palette.secondary.dark,
+                  '&[aria-controls="menu-list-grow"],&:hover': {
+                    background: theme.palette.secondary.dark,
+                    color: theme.palette.secondary.light
                   }
                 }}
+                aria-haspopup="true"
+                onClick={handleClose}
+                color="inherit"
               >
-                <ButtonBase sx={{ borderRadius: '12px' }}>
-                  <Avatar
-                    variant="rounded"
+                <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
+              </Avatar>
+            </ButtonBase>
+          </Box>
+        }
+      >
+        <Grid container m={3}>
+          <Grid xs={3} p={2}>
+            <label className="text-muted">Project Number</label>
+            <p>{viewId?.projectNumber}</p>
+          </Grid>
+          <Grid xs={3} p={2}>
+            <label className="text-muted">Company Name</label>
+            <p>{viewId?.companyName}</p>
+          </Grid>
+          <Grid xs={3} p={2}>
+            <label className="text-muted">Assigned Date</label>
+            <p>{viewId?.assignedDate?.slice(0, 10)}</p>
+          </Grid>
+          <Grid xs={3} p={2}>
+            <label className="text-muted">Target Date</label>
+            <p>{viewId?.targetDate?.slice(0, 10)}</p>
+          </Grid>
+          <Grid xs={3} p={2}>
+            <label className="text-muted">Status</label>
+            <p>{viewId?.status}</p>
+          </Grid>
+          <Grid xs={3} p={2}>
+            <label className="text-muted">Manager</label>
+            <p>{viewId?.manager}</p>
+          </Grid>
+          <Grid xs={3} p={2}>
+            <label className="text-muted">MileStone</label>
+            <p>{viewId?.milestone}</p>
+          </Grid>
+        </Grid>
+        <Grid container p={3}>
+          <Grid xs={12} p={2}>
+            <div className="teamallocation-container">
+              <MainCard
+                title="Team Allocation"
+                secondary={
+                  <Box
                     sx={{
-                      ...theme.typography.commonAvatar,
-                      ...theme.typography.mediumAvatar,
-                      transition: 'all .2s ease-in-out',
-                      background: theme.palette.secondary.light,
-                      color: theme.palette.secondary.dark,
-                      '&[aria-controls="menu-list-grow"],&:hover': {
-                        background: theme.palette.secondary.dark,
-                        color: theme.palette.secondary.light
+                      ml: 2,
+
+                      [theme.breakpoints.down('md')]: {
+                        mr: 2
                       }
                     }}
-                    aria-haspopup="true"
-                    onClick={handleClose}
-                    color="inherit"
                   >
-                    <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
-                  </Avatar>
-                </ButtonBase>
-              </Box>
-            }
-          >
-            <Grid container m={3}>
-              <Grid xs={3} p={2}>
-                <label className="text-muted">Project Number</label>
-                <p>{viewId?.projectNumber}</p>
-              </Grid>
-              <Grid xs={3} p={2}>
-                <label className="text-muted">Company Name</label>
-                <p>{viewId?.companyName}</p>
-              </Grid>
-              <Grid xs={3} p={2}>
-                <label className="text-muted">Assigned Date</label>
-                <p>{viewId?.assignedDate?.slice(0, 10)}</p>
-              </Grid>
-              <Grid xs={3} p={2}>
-                <label className="text-muted">Target Date</label>
-                <p>{viewId?.targetDate?.slice(0, 10)}</p>
-              </Grid>
-              <Grid xs={3} p={2}>
-                <label className="text-muted">Status</label>
-                <p>{viewId?.status}</p>
-              </Grid>
-            </Grid>
-            <Grid container p={3}>
-              <Grid xs={12} p={2}>
-                <div className="history-container">
-                  <MainCard
-                    title="Task"
-                    secondary={
-                      <Box
+                    <ButtonBase sx={{ borderRadius: '12px' }}>
+                      <Avatar
+                        variant="rounded"
                         sx={{
-                          ml: 2,
-
-                          [theme.breakpoints.down('md')]: {
-                            mr: 2
+                          ...theme.typography.commonAvatar,
+                          ...theme.typography.mediumAvatar,
+                          transition: 'all .2s ease-in-out',
+                          background: theme.palette.secondary.light,
+                          color: theme.palette.secondary.dark,
+                          '&[aria-controls="menu-list-grow"],&:hover': {
+                            background: theme.palette.secondary.dark,
+                            color: theme.palette.secondary.light
                           }
                         }}
+                        aria-haspopup="true"
+                        color="inherit"
                       >
-                        <ButtonBase sx={{ borderRadius: '12px' }}>
-                          <Avatar
-                            variant="rounded"
-                            sx={{
-                              ...theme.typography.commonAvatar,
-                              ...theme.typography.mediumAvatar,
-                              transition: 'all .2s ease-in-out',
-                              background: theme.palette.secondary.light,
-                              color: theme.palette.secondary.dark,
-                              '&[aria-controls="menu-list-grow"],&:hover': {
-                                background: theme.palette.secondary.dark,
-                                color: theme.palette.secondary.light
-                              }
-                            }}
-                            aria-haspopup="true"
-                            color="inherit"
-                          >
-                            <TaskAlt stroke={2} size="1.3rem" />
-                          </Avatar>
-                        </ButtonBase>
-                      </Box>
-                    }
-                  >
-                    {viewId?.projectAllocation.map((data) => (
-                      <Card sx={{ margin: '1rem', padding: '1rem' }} className="card-hovered">
-                        <div className="d-flex justify-content-between">
-                          <div className="d-flex">
-                            {/* <Avatar sx={{ bgcolor: '#ede7f6', color: '#5e35b1' }}>{data?.employeeName[0]}</Avatar> */}
-                            <div className="ms-1">
-                              <p className="avatar-name">{data?.employeeCode}</p>
-                              <div className="d-flex align-items-center">
-                                <p className="text-muted-light m-0">{data?.team}</p> &nbsp; /
-                                <div>
-                                  <PeopleAltTwoTone style={{ fontSize: 'medium' }} />
-                                  <span className="ms-01">{data.location}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="float-end">
-                            <p className="text-muted-light m-0 text-end">Assigned Date : &nbsp; {data?.fromDate}</p>
-                            <p className="text-muted-light m-0 text-end">Target Date : &nbsp; {data?.toDate}</p>
-                            <div className="d-flex justify-content-end">
-                              <p
-                                className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${data?.status === 'completed' ? 'badge-success max-width' : ''
-                                  }${data?.status === 'not-started' ? 'badge-danger max-width' : ''}`}
-                              >
-                                {data?.statusRequest} {data?.status}
-                              </p>
+                        <TaskAlt stroke={2} size="1.3rem" />
+                      </Avatar>
+                    </ButtonBase>
+                  </Box>
+                }
+              >
+                {viewId?.projectAllocation.map((data) => (
+                  <Card sx={{ margin: '1rem', padding: '1rem' }} className="card-hovered">
+                    <div className="d-flex justify-content-between">
+                      <div className="d-flex">
+                        {/* <Avatar sx={{ bgcolor: '#ede7f6', color: '#5e35b1' }}>{data?.employeeName[0]}</Avatar> */}
+                        <div className="ms-1">
+                          <p className="avatar-name">{data?.employeeCode}</p>
+                          <div className="d-flex align-items-center">
+                            <p className="text-muted-light m-0">{data?.team}</p> &nbsp; /
+                            <div>
+                              <PeopleAltTwoTone style={{ fontSize: 'medium' }} />
+                              <span className="ms-01">{data.location}</span>
                             </div>
                           </div>
                         </div>
-                      </Card>
-                    ))}
-                  </MainCard>
-                </div>
-              </Grid>
-            </Grid>
-          </MainCard>
-        </>
-      )}
-      <Dialog fullWidth open={open} TransitionComponent={Transition} keepMounted>
-        <DialogTitle>
-          <Typography variant="h3">Delete Lead</Typography>
-        </DialogTitle>
-        <Divider />
-        <DialogContent>
-          <DialogContentText id="alert-dialog-slide-description" className="d-flex justify-content-center align-item-center">
-            <div className="bg-light rounded ">
-              <Delete style={{ fontSize: '32' }} />
+                      </div>
+                      <div className="float-end">
+                        <p className="text-muted-light m-0 text-end">Assigned Date : &nbsp; {data?.fromDate}</p>
+                        <p className="text-muted-light m-0 text-end">Target Date : &nbsp; {data?.toDate}</p>
+                        <div className="d-flex justify-content-end">
+                          <p
+                            className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${data?.status === 'completed' ? 'badge-success max-width' : ''
+                              }${data?.status === 'not-started' ? 'badge-danger max-width' : ''}`}
+                          >
+                            {data?.statusRequest} {data?.status}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </MainCard>
             </div>
-          </DialogContentText>
-          <Typography variant="h4" className="muted" display="block" gutterBottom style={{ textAlign: 'center' }} mt={2}>
-            Are you want to Delete ?
-          </Typography>
-        </DialogContent>
-        <DialogActions className="d-flex justify-content-center mb-1">
-          <Button variant="outlined" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
-          <Button variant="contained" onClick={confirmDelete}>
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </div>
+          </Grid>
+          <Grid xs={4} p={2}>
+            <div className="history-container">
+              <MainCard
+                title="History"
+                secondary={
+                  <Box
+                    sx={{
+                      ml: 2,
+                      // mr: 3,
+                      [theme.breakpoints.down('md')]: {
+                        mr: 2
+                      }
+                    }}
+                  >
+                    <ButtonBase sx={{ borderRadius: '12px' }}>
+                      <Avatar
+                        variant="rounded"
+                        sx={{
+                          ...theme.typography.commonAvatar,
+                          ...theme.typography.mediumAvatar,
+                          transition: 'all .2s ease-in-out',
+                          background: theme.palette.secondary.light,
+                          color: theme.palette.secondary.dark,
+                          '&[aria-controls="menu-list-grow"],&:hover': {
+                            background: theme.palette.secondary.dark,
+                            color: theme.palette.secondary.light
+                          }
+                        }}
+                        aria-haspopup="true"
+                        color="inherit"
+                      >
+                        <History stroke={2} size="1.3rem" />
+                      </Avatar>
+                    </ButtonBase>
+                  </Box>
+                }
+              >
+              </MainCard>
+            </div>
+          </Grid>
+          <Grid xs={8} p={2}>
+            <div className="task-container">
+              <MainCard
+                title="Task"
+                secondary={
+                  <Box
+                    sx={{
+                      ml: 2,
+                      [theme.breakpoints.down('md')]: {
+                        mr: 2
+                      }
+                    }}
+                  >
+                    <ButtonBase sx={{ borderRadius: '12px' }}>
+                      <Avatar
+                        variant="rounded"
+                        sx={{
+                          // Avatar styles
+                        }}
+                        aria-haspopup="true"
+                        color="inherit"
+                      >
+                        <TaskAlt stroke={2} size="1.3rem" />
+                      </Avatar>
+                    </ButtonBase>
+                  </Box>
+                } >
+                {tasks && Array.isArray(tasks) && tasks.map((data, index) => (
+                  <Card key={index} sx={{ margin: '1rem', padding: '1rem' }} className="card-hover">
+                    <Typography variant="h6" component="span">{data?.title}</Typography>
+                    <Typography variant="body1">{data?.description}</Typography>
+                  </Card>
+                ))}
+              </MainCard>
+            </div>
+          </Grid>
+
+        </Grid>
+      </MainCard>
+    </>
+  )
+}
+<Dialog fullWidth open={open} TransitionComponent={Transition} keepMounted>
+  <DialogTitle>
+    <Typography variant="h3">Delete Lead</Typography>
+  </DialogTitle>
+  <Divider />
+  <DialogContent>
+    <DialogContentText id="alert-dialog-slide-description" className="d-flex justify-content-center align-item-center">
+      <div className="bg-light rounded ">
+        <Delete style={{ fontSize: '32' }} />
+      </div>
+    </DialogContentText>
+    <Typography variant="h4" className="muted" display="block" gutterBottom style={{ textAlign: 'center' }} mt={2}>
+      Are you want to Delete ?
+    </Typography>
+  </DialogContent>
+  <DialogActions className="d-flex justify-content-center mb-1">
+    <Button variant="outlined" onClick={() => setOpen(false)}>
+      Cancel
+    </Button>
+    <Button variant="contained" onClick={confirmDelete}>
+      Delete
+    </Button>
+  </DialogActions>
+</Dialog>
+    </div >
   );
 };
 export default Projects;
