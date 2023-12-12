@@ -83,9 +83,11 @@ import {
   LEAD_GET,
   LEAD_GET_ID,
   LEAD_UPDATE,
-  PROFILES_GET
+  PROFILES_GET,
+  RFQ_CREATION
 } from 'api/apiEndPoint';
 import { useEffect } from 'react';
+import { Value } from 'sass';
 
 const columnHelper = createMRTColumnHelper();
 const validationSchema = Yup.object({
@@ -201,7 +203,7 @@ const columns = [
   })
 ];
 const optionsForHistoryApproval = ['Pending', 'Approval', 'Reject'];
-const optionsForHistoryStatus = ['newlead', 'Contact Establish', 'Technicle Meeting', 'Hold', 'Reject', 'Conform']; //
+const optionsForHistoryStatus = ['newlead', 'Contact Establish', 'Technicle Meeting', 'Hold', 'Reject', 'Move to RFQ']; //
 const optionsForTaskStatus = ['Not Started', 'On Going', 'Completed'];
 
 const csvConfig = mkConfig({
@@ -236,7 +238,8 @@ const Transition = forwardRef(function Transition(props, ref) {
 
 const BusinessLeads = () => {
   const [localData, setLocalData] = useState('');
-
+  const [moveRFQ, setMoveRFQ] = useState(false);
+  const [stsReq, setStsReq] = useState([]);
   const coumnsForHistory = [
     {
       accessorKey: 'date',
@@ -269,14 +272,15 @@ const BusinessLeads = () => {
       ),
       editSelectOptions: optionsForHistoryStatus,
       muiEditTextFieldProps: {
-        select: true
+        select: true,
+        onChange: (e) => handleStsReq(e)
       },
       enableEditing: true
     }
   ];
   const [historyTableColumns, setHistoryTableColumns] = useState(coumnsForHistory);
   const [profilesData, setProfilesData] = useState([]);
-
+  console.log(stsReq, 'moveRFQ');
   const coumnsForTask = [
     // {
     //   accessorKey: 'id',
@@ -356,6 +360,7 @@ const BusinessLeads = () => {
   const [updateId, setUpdateId] = useState('');
   const [updatedValue, setUpdatedValue] = useState([]);
   const [selectedOption, setSelectedOption] = useState('');
+  const [leadNumber, setleadNumber] = useState('');
   const [showSelect, setShowSelect] = useState(true);
   const [customOption, setCustomOption] = useState('');
   const [options, setOptions] = useState([]);
@@ -495,55 +500,16 @@ const BusinessLeads = () => {
     });
   };
 
-  const handleEdit = async (e) => {
-    console.log('worked', e.original._id);
-    const endpoint = LEAD_GET_ID(e.original._id);
-    const getByIdData = await fetchData(endpoint, localData?.accessToken);
-    // setUpdatedValue(getByIdData)
-    setUpdateId(e.original._id);
-    console.log(getByIdData?.data, 'getby');
-    setSelectedOption(getByIdData?.data?.category);
-    formik.setValues({
-      date: getByIdData?.data.date?.slice(0, 10),
-      Source: getByIdData?.data.Source,
-      Pilot: getByIdData?.data.Pilot,
-      companyName: getByIdData?.data.companyName,
-      // category: getByIdData?.data.category,
-      contactName: getByIdData?.data.contactName,
-      departmentName: getByIdData?.data.departmentName,
-      phoneNumber: getByIdData?.data.phoneNumber,
-      email: getByIdData?.data.email,
-      businessVertical: getByIdData?.data.businessVertical // ... Other fields
-    });
-    populateFormFields(getByIdData?.data);
-    // setUpdatedValue(e.original);
-    setView({
-      visible: true,
-      mode: 'Edit'
-    });
-  };
-  const handleView = async (e) => {
-    console.log('worked', localData, e.original._id);
-    // setLeadSummary(e.original._id);
-    const endpoint = LEAD_GET_ID(e.original._id);
-    const getByIdData = await fetchData(endpoint, localData?.accessToken);
-    setLeadSummary(getByIdData.data);
-    console.log('worked', getByIdData.data);
-
-    setView({
-      visible: true,
-      mode: 'View'
-    });
-  };
-  console.log('getByIdData', leadSummary);
-
   const fetchFun = async () => {
     const data = await fetchData(LEAD_GET, localData?.accessToken);
     setLeadData(data.data);
   };
+
+  console.log(moveRFQ, 'moveRFQ');
   const handleUpdate = async (values) => {
     try {
       // Assuming values contain the updated data
+      console.log(values, 'vvvvvvvvvvv');
       const updatedData = {
         // Update fields as needed
         date: values.date,
@@ -560,6 +526,31 @@ const BusinessLeads = () => {
         tasks: taskTableData
         // ...update other fields
       };
+      console.log(values, 'selectedOption');
+      if (moveRFQ) {
+        const leadDescriptionArray = values.leadDescription
+          ? values.leadDescription.split('\n').map((item) => ({
+              description: item.trim()
+            }))
+          : [];
+        const newRfq = {
+          date: values.date,
+          Source: values.Source,
+          Pilot: values.Pilot,
+          leadNumber: values?.serialNumber,
+          companyName: values.companyName,
+          category: values.category,
+          contactName: values.contactName,
+          departmentName: values.departmentName,
+          phoneNumber: values.departmentName,
+          email: values.email,
+          businessVertical: values.businessVertical,
+          leadDescription: leadDescriptionArray
+        };
+
+        const moveToRfq = await postData(RFQ_CREATION, newRfq, localData?.accessToken);
+        console.log(moveToRfq, 'movetorfq');
+      }
       console.log(updatedData, '00000');
       // Make the API call to update the data
       const endpoint = LEAD_UPDATE(updateId);
@@ -586,6 +577,7 @@ const BusinessLeads = () => {
       companyName: '',
       category: '',
       contactName: '',
+      serialNumber: '',
       departmentName: '',
       phoneNumber: '',
       email: '',
@@ -598,11 +590,15 @@ const BusinessLeads = () => {
     },
     validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
-      console.log('worked');
+      console.log('worked', values);
       try {
         if (updateId) {
-          console.log('handle update');
-          handleUpdate(values);
+          console.log('handle update', updateId);
+          const formattedData = {
+            ...values,
+            serialNumber: leadNumber
+          };
+          handleUpdate(formattedData);
         } else {
           console.log('handle submit');
           console.log(values, 'sts');
@@ -678,6 +674,83 @@ const BusinessLeads = () => {
     )
   });
 
+  const handleEdit = async (e) => {
+    console.log('worked', e.original._id);
+    const endpoint = LEAD_GET_ID(e.original._id);
+    const getByIdData = await fetchData(endpoint, localData?.accessToken);
+    // setUpdatedValue(getByIdData)
+    setUpdateId(e.original._id);
+    // console.log(getByIdData?.data, 'getby');
+    const value = getByIdData?.data;
+    setleadNumber(value?.serialNumber);
+    setSelectedOption(value?.category);
+    formik.setValues({
+      date: value?.date?.slice(0, 10),
+      Source: value?.Source,
+      Pilot: value?.Pilot,
+      companyName: value?.companyName,
+      serialNumber: value?.serialNumber,
+      // category: value?.category,
+      contactName: value?.contactName,
+      departmentName: value?.departmentName,
+      phoneNumber: value?.phoneNumber,
+      email: value?.email,
+      businessVertical: value?.businessVertical // ... Other fields
+    });
+    console.log(value, 'value');
+    const categoryOption = value?.leadDescription
+      ?.map((data) => ({
+        stsRequest: data.statusRequest
+      }))
+      .filter((item) => item.stsRequest === 'Move to RFQ');
+    if (categoryOption[0]?.stsRequest === 'Move to RFQ') {
+      setStsReq(categoryOption[0]?.stsRequest);
+    } else {
+      setStsReq(null);
+    }
+    console.log(categoryOption[0]?.stsRequest, 'categoryOption');
+    // if(value?.leadDescription)
+    // setStsReq()
+    populateFormFields(value);
+    // setUpdatedValue(e.original);
+    setView({
+      visible: true,
+      mode: 'Edit'
+    });
+  };
+  const handleView = async (e) => {
+    console.log('worked', localData, e.original._id);
+    // setLeadSummary(e.original._id);
+    const endpoint = LEAD_GET_ID(e.original._id);
+    const getByIdData = await fetchData(endpoint, localData?.accessToken);
+    setLeadSummary(getByIdData.data);
+    console.log('worked', getByIdData.data);
+
+    setView({
+      visible: true,
+      mode: 'View'
+    });
+  };
+
+  const handleStsReq = (e) => {
+    //emp sts
+    if (e.target.value === 'Move to RFQ') {
+      setStsReq(e.target.value);
+    } else {
+      setStsReq(null);
+    }
+  };
+
+  console.log(stsReq, 'sts hereeeeeeeee');
+  const handleStatusChange = (e) => {
+    //admin sts
+    if (stsReq === 'Move to RFQ' && e.target.value === 'Approval') {
+      setMoveRFQ(true);
+    } else {
+      setMoveRFQ(false);
+    }
+  };
+  console.log(moveRFQ, 'hereee');
   const handleSaveRowTask = (newData, oldData) => {
     console.log('handleSaveRowtask - newData:', newData);
     console.log('handleSaveRowtask - oldData:', oldData);
@@ -695,11 +768,9 @@ const BusinessLeads = () => {
     setEditingRowId(null);
     setTaskTableData(updatedData);
   };
-
   const handleCancelEditTask = () => {
     setEditingRowId(null);
   };
-
   const handleCreateRowTask = (newData) => {
     const tempId = generateTempId(); // Generate a temporary ID
     const newTask = { ...newData.values, _id: tempId };
@@ -969,7 +1040,7 @@ const BusinessLeads = () => {
 
             // Check if the user has the "Admin" role
             console.log(parsedData?.Roles, 'who?');
-            if (parsedData?.role === 'admin') {
+            if (parsedData?.role === 'Admin') {
               // Include the "Approval Status" column for Admin
               setHistoryTableColumns([
                 ...coumnsForHistory,
@@ -979,7 +1050,8 @@ const BusinessLeads = () => {
                   editVariant: 'select',
                   editSelectOptions: optionsForHistoryApproval,
                   muiEditTextFieldProps: {
-                    select: true
+                    select: true,
+                    onChange: (e) => handleStatusChange(e)
                   },
                   enableEditing: true
                 }
@@ -1787,7 +1859,7 @@ const BusinessLeads = () => {
                                 {item.statusRequest === 'Technicle Meeting' && <Group />}
                                 {item.statusRequest === 'Hold' && <NotStarted />}
                                 {item.statusRequest === 'Reject' && <ThumbDown />}
-                                {item.statusRequest === 'Conform' && <ThumbUpSharp />}
+                                {item.statusRequest === 'Move to RFQ' && <ThumbUpSharp />}
                               </TimelineDot>
                             </Tooltip>
                             <TimelineConnector />
