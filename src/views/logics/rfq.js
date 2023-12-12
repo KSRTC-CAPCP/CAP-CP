@@ -1245,16 +1245,6 @@ const BusinessRFQ = () => {
                 )}
               </Grid>{' '}
               <Grid xs={4} p={2}>
-                {/* <FormControl fullWidth>
-                  <InputLabel id="demo-simple-select-label">Category</InputLabel>
-                  <Select labelId="demo-simple-select-label" id="demo-simple-select" label="Age">
-                    <MenuItem value={'website'}>Website</MenuItem>
-                    <MenuItem value={'Expo'}>Expo</MenuItem>
-                    <MenuItem value={'Reference'}>Reference</MenuItem>
-                    <MenuItem value={'coldcalls'}>Cold Calls</MenuItem>
-                    <MenuItem value={'others'}>Others</MenuItem>
-                  </Select>
-                </FormControl> */}
                 {showSelect ? (
                   <FormControl fullWidth>
                     <InputLabel id="demo-simple-select-label">Category</InputLabel>
@@ -1938,7 +1928,7 @@ const BusinessRFQ = () => {
                 </div>
               </Grid>
               <Grid xs={8} p={2}>
-                <div className="history-container">
+                <div className="Task-container">
                   <MainCard
                     title="Task"
                     secondary={
