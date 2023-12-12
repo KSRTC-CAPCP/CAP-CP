@@ -155,6 +155,7 @@ const optionsForHistoryApproval = ['Pending', 'Approval', 'Reject'];
 const optionsForHistoryStatus = [' OnGoing', 'Customer Review', 'Internal Review', 'Complete', 'Hold'];
 const optionsForTaskStatus = ['Not Started', 'On Going', 'Completed'];
 const optionsForteamproject = ['IT Team', 'Finance Team', 'Teardown Team'];
+const optionsForFinance = ['Credit', 'Invoice', 'Spent'];
 const optionsForlocation = ['Thiruvallur', 'Ambattur'];
 const coumnsForHistory = [
   {
@@ -363,6 +364,58 @@ const Projects = ({ _history, tasks }) => {
       enableEditing: true
     }
   ];
+
+  const coumnsForFinance = [
+    {
+      accessorKey: 'date',
+      header: 'Date',
+      muiEditTextFieldProps: {
+        type: 'date',
+        required: true
+      }
+    },
+    {
+      accessorKey: 'refno/bill',
+      header: 'Ref No/Bill',
+      muiEditTextFieldProps: {
+        type: 'number',
+        required: true
+      },
+      enableEditing: true
+    },
+    {
+      accessorKey: 'amount',
+      header: 'Amount',
+      muiEditTextFieldProps: {
+        type: 'number',
+        required: true
+      },
+      enableEditing: true
+    },
+    {
+      accessorKey: 'tax',
+      header: 'Tax',
+      muiEditTextFieldProps: {
+        type: 'number',
+        required: true
+      },
+      enableEditing: true
+    },
+
+    {
+      accessorKey: 'status',
+      header: 'Status',
+      editVariant: 'select',
+      editSelectOptions: optionsForFinance,
+      muiEditTextFieldProps: {
+        select: true
+      },
+      enableEditing: true
+    }
+  ];
+
+
+
   const teamMembers = [
     { name: 'Ram', projects: 28 },
     { name: 'Arun', projects: 3 },
@@ -389,7 +442,7 @@ const Projects = ({ _history, tasks }) => {
   };
 
   const [selectedOption, setSelectedOption] = React.useState('no');
-  
+
   const [mileselectedOption, setMileSelectedOption] = React.useState('no');
   const [textFieldText, setTextFieldText] = React.useState('PONO Number is Not Allocated');
 
@@ -745,6 +798,7 @@ const Projects = ({ _history, tasks }) => {
 
 
   const [teamData, setTeamData] = useState([]);
+  const [financeData, setFinanceData] = useState([]);
   const [editingRowId, setEditingRowId] = useState(null);
   const generateTempId = () => `temp_${Math.random().toString(36).substr(2, 9)}`;
   const [isCreatingRow, setIsCreatingRow] = useState(false);
@@ -955,10 +1009,29 @@ const Projects = ({ _history, tasks }) => {
     setTeamData(updatedData);
     setEditingRowId(null);
   };
+  const handleSaveRowFinance = (newData, oldData) => {
+    const updatedData = financeData.map((row) => {
+      if (
+        row._id === oldData._id || // For existing rows
+        (row && !row._id && oldData && oldData._tempId && row._tempId === oldData._tempId) // For new rows
+      ) {
+        return { ...row, ...newData };
+      } else {
+        return row;
+      }
+    });
+    setFinanceData(updatedData);
+    setEditingRowId(null);
+  };
   console.log(teamData, 'history');
 
 
   const handleEditRowHistorys = (row) => {
+    console.log(row, 'looooogg');
+    const editingId = row._id || row._tempId; // Use _id if available, otherwise use _tempId
+    setEditingRowId(editingId);
+  };
+  const handleEditRowFinance = (row) => {
     console.log(row, 'looooogg');
     const editingId = row._id || row._tempId; // Use _id if available, otherwise use _tempId
     setEditingRowId(editingId);
@@ -968,8 +1041,15 @@ const Projects = ({ _history, tasks }) => {
     const updatedData = teamData.filter((item) => item._id !== row.id);
     setTeamData(updatedData);
   };
+  const handleDeleteRowFinance = (row) => {
+    const updatedData = financeData.filter((item) => item._id !== row.id);
+    setFinanceData(updatedData);
+  };
 
   const handleCancelEditHistorys = () => {
+    setEditingRowId(null);
+  };
+  const handleCancelEditFinance = () => {
     setEditingRowId(null);
   };
   const handleCreateRowHistorys = (newData) => {
@@ -978,7 +1058,16 @@ const Projects = ({ _history, tasks }) => {
     setTeamData([...teamData, newTask]);
     setIsCreatingRow(false);
   };
+  const handleCreateRowFinance = (newData) => {
+    const tempId = generateTempId(); // Generate a temporary ID
+    const newTask = { ...newData.values, _id: tempId };
+    setFinanceData([...financeData, newTask]);
+    setIsCreatingRow(false);
+  };
   const handleCancelCreateHistorys = () => {
+    setIsCreatingRow(false);
+  };
+  const handleCancelCreateFinace = () => {
     setIsCreatingRow(false);
   };
 
@@ -1064,6 +1153,76 @@ const Projects = ({ _history, tasks }) => {
       </div>
     )
   });
+  const financeHistorytable = useMaterialReactTable({
+    columns: coumnsForFinance,
+    data: financeData,
+    createDisplayMode: 'row',
+    editDisplayMode: 'row',
+    enableEditing: true,
+    positionActionsColumn: 'last',
+    enableColumnFilters: false,
+    enableFilters: false,
+    enableDensityToggle: false,
+    enablePagination: false,
+    enableHiding: false,
+    enableFullScreenToggle: false,
+    getRowId: (row) => row._id,
+    onEditingRowSave: ({ row, values, exitEditingMode }) => {
+      handleSaveRowFinance(values, row.original); // Pass the original row data to handleSaveRowHistory
+      exitEditingMode(); // Call exitEditingMode to exit editing mode
+    },
+    onEditingRowCancel: handleCancelEditFinance,
+    onCreatingRowSave: handleCreateRowFinance,
+    onCreatingRowCancel: handleCancelCreateFinace,
+    renderRowActions: ({ row, table }) => (
+      <Box sx={{ display: 'flex', gap: '1rem' }}>
+        <Tooltip title="Edit">
+          <IconButton
+            onClick={() => {
+              handleEditRowFinance(row), table.setEditingRow(row);
+            }}
+          >
+            <ModeEditRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Delete">
+          <IconButton color="error" onClick={() => handleDeleteRowFinance(row)}>
+            <DeleteRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    ),
+
+    renderTopToolbarCustomActions: ({ table }) => (
+      <div className="title-bar">
+        <div className="custum-header">
+          <p style={{ fontWeight: 'bold', fontSize: 'large' }}>Finance History</p>
+          <ButtonBase sx={{ borderRadius: '12px' }}>
+            <Avatar
+              variant="rounded"
+              sx={{
+                ...theme.typography.commonAvatar,
+                ...theme.typography.mediumAvatar,
+                transition: 'all .2s ease-in-out',
+                background: theme.palette.secondary.light,
+                color: theme.palette.secondary.dark,
+                '&[aria-controls="menu-list-grow"],&:hover': {
+                  background: theme.palette.secondary.dark,
+                  color: theme.palette.secondary.light
+                }
+              }}
+              onClick={() => {
+                table.setCreatingRow(true);
+              }}
+              color="inherit"
+            >
+              <IconPlus />
+            </Avatar>
+          </ButtonBase>
+        </div>
+      </div>
+    )
+  });
 
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -1120,6 +1279,21 @@ const Projects = ({ _history, tasks }) => {
   };
 
 
+  function createData(
+    Date = '',
+    Ref = 0,
+    Amount = 0,
+    Tax = 0,
+    Status = ''
+  ) {
+    return { Date, Ref, Amount, Tax, Status };
+  }
+
+  const Financeviewrows = [
+    createData('27-04-2001', 1579, 6.00, 24, 'Invoice'),
+    createData('28-05-2001', 1599, 6.07, 24, 'Credit'),
+    createData('29-06-2001', 1559, 6.08, 24, 'Spent'),
+  ];
 
 
   const handleSelectOnChange = (event) => {
@@ -1322,7 +1496,7 @@ const Projects = ({ _history, tasks }) => {
                 />
               </Grid>
 
-              <Grid xs={4} p={2}>
+              {/* <Grid xs={4} p={2}>
                 <FormControl fullWidth error={Boolean(formik.touched.status && formik.errors.status)}>
                   <InputLabel id="demo-simple-select-label">Status</InputLabel>
                   <Select
@@ -1346,8 +1520,8 @@ const Projects = ({ _history, tasks }) => {
                     {formik.errors.status}
                   </FormHelperText>
                 )}
-              </Grid>
-              <Grid xs={4} p={2}>
+              </Grid> */}
+              {/* <Grid xs={4} p={2}>
                 <TextField
                   error={Boolean(formik.touched.description && formik.errors.description)}
                   name="description"
@@ -1364,7 +1538,7 @@ const Projects = ({ _history, tasks }) => {
                     {formik.errors.description}
                   </FormHelperText>
                 )}
-              </Grid>
+              </Grid> */}
               <Grid xs={4} p={2}>
                 <FormControl fullWidth error={Boolean(formik.touched.manager && formik.errors.manager)}>
                   <InputLabel id="demo-simple-select-label">Manager</InputLabel>
@@ -1384,7 +1558,7 @@ const Projects = ({ _history, tasks }) => {
                   </Select>
                 </FormControl>
               </Grid>
-               
+
               <Grid xs={4} p={2}>
                 {showSelect ? (
                   <FormControl fullWidth>
@@ -1442,14 +1616,14 @@ const Projects = ({ _history, tasks }) => {
                   />
                 )}
               </Grid>
-            <Grid item xs={4} p={2}>
-              <FormLabel id="demo-row-radio-buttons-group-label">P0.NO</FormLabel>
-              <RadioGroup aria-label="yesno" name="yesno" value={selectedOption} onChange={handleOptionChange} row>
-                <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-                <FormControlLabel value="no" control={<Radio />} label="No" />
-              </RadioGroup>
-            </Grid>
-            {/* {selectedOption === 'yes' && (
+              <Grid item xs={4} p={2}>
+                <FormLabel id="demo-row-radio-buttons-group-label">P0.NO</FormLabel>
+                <RadioGroup aria-label="yesno" name="yesno" value={selectedOption} onChange={handleOptionChange} row>
+                  <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+                  <FormControlLabel value="no" control={<Radio />} label="No" />
+                </RadioGroup>
+              </Grid>
+              {/* {selectedOption === 'yes' && (
                 <Grid item xs={4} p={2}>
                   <TextField
                     fullWidth
@@ -1462,164 +1636,167 @@ const Projects = ({ _history, tasks }) => {
                   />
                 </Grid>
               )} */}
-          </Grid>
-          <Box p={2} className="edit-table-container">
-            <MaterialReactTable sx={{ boxShadow: 'rgba(0, 0, 0, 0.18) 1.95px 1.95px 2.7px' }} table={editableForproject} />
-          </Box>
-          <Button variant="contained" style={{ float: 'right', margin: '2rem' }} type="submit">
-            Save
-          </Button>
-        </form>
+            </Grid>
+            <Box p={2} className="edit-table-container">
+              <MaterialReactTable sx={{ boxShadow: 'rgba(0, 0, 0, 0.18) 1.95px 1.95px 2.7px' }} table={editableForproject} />
+            </Box>
+            <Box p={2} className="edit-table-container">
+              <MaterialReactTable sx={{ boxShadow: 'rgba(0, 0, 0, 0.18) 1.95px 1.95px 2.7px' }} table={financeHistorytable} />
+            </Box>
+            <Button variant="contained" style={{ float: 'right', margin: '2rem' }} type="submit">
+              Save
+            </Button>
+          </form>
         </MainCard>
-  )
-}
-{
-  view.mode === 'Initial' && (
-    <MainCard
-      title="Project"
-      secondary={
-        <Box
-          sx={{
-            ml: 2,
-            // mr: 3,
-            [theme.breakpoints.down('md')]: {
-              mr: 2
-            }
-          }}
-        >
-          <ButtonBase sx={{ borderRadius: '12px' }}>
-            <Avatar
-              variant="rounded"
-              sx={{
-                ...theme.typography.commonAvatar,
-                ...theme.typography.mediumAvatar,
-                transition: 'all .2s ease-in-out',
-                background: theme.palette.secondary.light,
-                color: theme.palette.secondary.dark,
-                '&[aria-controls="menu-list-grow"],&:hover': {
-                  background: theme.palette.secondary.dark,
-                  color: theme.palette.secondary.light
-                }
-              }}
-              aria-haspopup="true"
-              onClick={handleToggle}
-              color="inherit"
-            >
-              <IconPlus stroke={2} size="1.3rem" />
-            </Avatar>
-          </ButtonBase>
-        </Box>
+      )
       }
-    >
-      <MaterialReactTable table={table} />
-    </MainCard>
-  )
-}
-{
-  view.mode === 'Edit' && (
-    <MainCard
-      title="Project Updations"
-      secondary={
-        <Box
-          sx={{
-            ml: 2,
-            // mr: 3,
-            [theme.breakpoints.down('md')]: {
-              mr: 2
-            }
-          }}
-        >
-          <ButtonBase sx={{ borderRadius: '12px' }}>
-            <Avatar
-              variant="rounded"
-              sx={{
-                ...theme.typography.commonAvatar,
-                ...theme.typography.mediumAvatar,
-                transition: 'all .2s ease-in-out',
-                background: theme.palette.secondary.light,
-                color: theme.palette.secondary.dark,
-                '&[aria-controls="menu-list-grow"],&:hover': {
-                  background: theme.palette.secondary.dark,
-                  color: theme.palette.secondary.light
-                }
-              }}
-              aria-haspopup="true"
-              onClick={handleClose}
-              color="inherit"
-            >
-              <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
-            </Avatar>
-          </ButtonBase>
-        </Box>
-      }
-    >
-      <form onSubmit={formik.handleSubmit}>
-        <Grid container>
-          <Grid item xs={4} p={2}>
-            <FormControl fullWidth error={Boolean(formik.touched.rfqNumber && formik.errors.rfqNumber)}>
-              <InputLabel id="additional-select-label">RFQ Number</InputLabel>
-              <Select
-                name="rfqNumber"
-                disabled
-                value={formik.values.rfqNumber}
-                onChange={(e) => {
-                  formik.handleChange(e);
-                  handleSelectChange(e);
+      {
+        view.mode === 'Initial' && (
+          <MainCard
+            title="Project"
+            secondary={
+              <Box
+                sx={{
+                  ml: 2,
+                  // mr: 3,
+                  [theme.breakpoints.down('md')]: {
+                    mr: 2
+                  }
                 }}
-                onBlur={formik.handleBlur}
               >
-                {rfqNumber.map((lead, index) => (
-                  <MenuItem key={index} value={lead.value}>
-                    {lead.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            {formik.touched.rfqNumber && formik.errors.rfqNumber && (
-              <FormHelperText error id="standard-weight-helper-text-Password-login">
-                {formik.errors.rfqNumber}
-              </FormHelperText>
-            )}
-          </Grid>
-          <Grid xs={4} p={2}>
-            <TextField
-              error={Boolean(formik.touched.companyName && formik.errors.companyName)}
-              fullWidth
-              id="outlined-basic"
-              label="Company Name"
-              variant="outlined"
-              name="companyName"
-              value={formik.values.companyName}
-              disabled
-              onBlur={formik.handleBlur}
-              onChange={formik.handleChange}
-            />
-            {formik.touched.companyName && formik.errors.companyName && (
-              <FormHelperText error id="standard-weight-helper-text-Password-login">
-                {formik.errors.companyName}
-              </FormHelperText>
-            )}
-          </Grid>
-          <Grid xs={4} p={2}>
-            <DatePicker
-              oneTap
-              style={{ width: 200 }}
-              placeholder="Assigned Date"
-              name="assignedDate"
-              onChange={(e) => handleStartDateChange(e)}
-            />
-          </Grid>
-          <Grid xs={4} p={2}>
-            <DatePicker
-              oneTap
-              style={{ width: 200 }}
-              placeholder="Target Date"
-              name="targetDate"
-              onChange={(e) => handleEndDateChange(e)}
-            />
-          </Grid>
+                <ButtonBase sx={{ borderRadius: '12px' }}>
+                  <Avatar
+                    variant="rounded"
+                    sx={{
+                      ...theme.typography.commonAvatar,
+                      ...theme.typography.mediumAvatar,
+                      transition: 'all .2s ease-in-out',
+                      background: theme.palette.secondary.light,
+                      color: theme.palette.secondary.dark,
+                      '&[aria-controls="menu-list-grow"],&:hover': {
+                        background: theme.palette.secondary.dark,
+                        color: theme.palette.secondary.light
+                      }
+                    }}
+                    aria-haspopup="true"
+                    onClick={handleToggle}
+                    color="inherit"
+                  >
+                    <IconPlus stroke={2} size="1.3rem" />
+                  </Avatar>
+                </ButtonBase>
+              </Box>
+            }
+          >
+            <MaterialReactTable table={table} />
+          </MainCard>
+        )
+      }
+      {
+        view.mode === 'Edit' && (
+          <MainCard
+            title="Project Updations"
+            secondary={
+              <Box
+                sx={{
+                  ml: 2,
+                  // mr: 3,
+                  [theme.breakpoints.down('md')]: {
+                    mr: 2
+                  }
+                }}
+              >
+                <ButtonBase sx={{ borderRadius: '12px' }}>
+                  <Avatar
+                    variant="rounded"
+                    sx={{
+                      ...theme.typography.commonAvatar,
+                      ...theme.typography.mediumAvatar,
+                      transition: 'all .2s ease-in-out',
+                      background: theme.palette.secondary.light,
+                      color: theme.palette.secondary.dark,
+                      '&[aria-controls="menu-list-grow"],&:hover': {
+                        background: theme.palette.secondary.dark,
+                        color: theme.palette.secondary.light
+                      }
+                    }}
+                    aria-haspopup="true"
+                    onClick={handleClose}
+                    color="inherit"
+                  >
+                    <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
+                  </Avatar>
+                </ButtonBase>
+              </Box>
+            }
+          >
+            <form onSubmit={formik.handleSubmit}>
+              <Grid container>
+                <Grid item xs={4} p={2}>
+                  <FormControl fullWidth error={Boolean(formik.touched.rfqNumber && formik.errors.rfqNumber)}>
+                    <InputLabel id="additional-select-label">RFQ Number</InputLabel>
+                    <Select
+                      name="rfqNumber"
+                      disabled
+                      value={formik.values.rfqNumber}
+                      onChange={(e) => {
+                        formik.handleChange(e);
+                        handleSelectChange(e);
+                      }}
+                      onBlur={formik.handleBlur}
+                    >
+                      {rfqNumber.map((lead, index) => (
+                        <MenuItem key={index} value={lead.value}>
+                          {lead.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  {formik.touched.rfqNumber && formik.errors.rfqNumber && (
+                    <FormHelperText error id="standard-weight-helper-text-Password-login">
+                      {formik.errors.rfqNumber}
+                    </FormHelperText>
+                  )}
+                </Grid>
+                <Grid xs={4} p={2}>
+                  <TextField
+                    error={Boolean(formik.touched.companyName && formik.errors.companyName)}
+                    fullWidth
+                    id="outlined-basic"
+                    label="Company Name"
+                    variant="outlined"
+                    name="companyName"
+                    value={formik.values.companyName}
+                    disabled
+                    onBlur={formik.handleBlur}
+                    onChange={formik.handleChange}
+                  />
+                  {formik.touched.companyName && formik.errors.companyName && (
+                    <FormHelperText error id="standard-weight-helper-text-Password-login">
+                      {formik.errors.companyName}
+                    </FormHelperText>
+                  )}
+                </Grid>
+                <Grid xs={4} p={2}>
+                  <DatePicker
+                    oneTap
+                    style={{ width: 200 }}
+                    placeholder="Assigned Date"
+                    name="assignedDate"
+                    onChange={(e) => handleStartDateChange(e)}
+                  />
+                </Grid>
+                <Grid xs={4} p={2}>
+                  <DatePicker
+                    oneTap
+                    style={{ width: 200 }}
+                    placeholder="Target Date"
+                    name="targetDate"
+                    onChange={(e) => handleEndDateChange(e)}
+                  />
+                </Grid>
 
-          <Grid xs={4} p={2}>
+                {/* <Grid xs={4} p={2}>
             <FormControl fullWidth error={Boolean(formik.touched.status && formik.errors.status)}>
               <InputLabel id="demo-simple-select-label">Status</InputLabel>
               <Select
@@ -1643,8 +1820,8 @@ const Projects = ({ _history, tasks }) => {
                 {formik.errors.status}
               </FormHelperText>
             )}
-          </Grid>
-          <Grid xs={4} p={2}>
+          </Grid> */}
+                {/* <Grid xs={4} p={2}>
             <TextField
               error={Boolean(formik.touched.description && formik.errors.description)}
               name="description"
@@ -1661,345 +1838,383 @@ const Projects = ({ _history, tasks }) => {
                 {formik.errors.description}
               </FormHelperText>
             )}
-          </Grid>
-          <Grid xs={4} p={2}>
-            <FormControl fullWidth error={Boolean(formik.touched.manager && formik.errors.manager)}>
-              <InputLabel id="demo-simple-select-label">Manager</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                label="manager"
-                name="manager"
-                value={formik.values.manager}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-              >
-                <MenuItem value={'manager1'}>Kotty</MenuItem>
-                <MenuItem value={'manager2'}>Zara</MenuItem>
-                <MenuItem value={'manager3'}>Jak</MenuItem>
-
-              </Select>
-            </FormControl>
-          </Grid>
-
-          <Grid xs={4} p={2}>
-                {showSelect ? (
-                  <FormControl fullWidth>
-                    <InputLabel id="demo-simple-select-label">MileStone</InputLabel>
+          </Grid> */}
+                <Grid xs={4} p={2}>
+                  <FormControl fullWidth error={Boolean(formik.touched.manager && formik.errors.manager)}>
+                    <InputLabel id="demo-simple-select-label">Manager</InputLabel>
                     <Select
-                      error={Boolean(formik.touched.milestone && formik.errors.milestone)}
-                      value={mileselectedOption}
                       labelId="demo-simple-select-label"
                       id="demo-simple-select"
-                      fullWidth
-                      name="milestone"
-                      onChange={handleSelectOnChange}
-                      label="Select"
-                      placeholder="Select"
+                      label="manager"
+                      name="manager"
+                      value={formik.values.manager}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
                     >
-                      {customOptions.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
+                      <MenuItem value={'manager1'}>Kotty</MenuItem>
+                      <MenuItem value={'manager2'}>Zara</MenuItem>
+                      <MenuItem value={'manager3'}>Jak</MenuItem>
+
                     </Select>
-
-
-                    {formik.touched.milestone && formik.errors.milestone && (
-                      <FormHelperText error id="standard-weight-helper-text-Password-login">
-                        {formik.errors.milestone}
-                      </FormHelperText>
-                    )}
-
                   </FormControl>
-                ) : (
-                  <>
-                    <div style={{ display: 'flex' }}>
-                      <TextField
-                        type="text"
+                </Grid>
+
+                <Grid xs={4} p={2}>
+                  {showSelect ? (
+                    <FormControl fullWidth>
+                      <InputLabel id="demo-simple-select-label">MileStone</InputLabel>
+                      <Select
+                        error={Boolean(formik.touched.milestone && formik.errors.milestone)}
+                        value={mileselectedOption}
+                        labelId="demo-simple-select-label"
+                        id="demo-simple-select"
                         fullWidth
-                        value={customOption}
-                        onChange={handleSelectInputChange}
-                        placeholder="Enter custom option"
-                      />
-                      <Button onClick={handleSaveCustomOption}>Save</Button>
-                    </div>
-                  </>
-                )}
-              </Grid>
-          <Grid item xs={4} p={2}>
-            <FormLabel id="demo-row-radio-buttons-group-label">P0.NO</FormLabel>
-            <RadioGroup aria-label="yesno" name="yesno" value={selectedOption} onChange={handleOptionChange} row>
-              <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-              <FormControlLabel value="no" control={<Radio />} label="No" />
-            </RadioGroup>
-          </Grid>
-        </Grid>
-
-
-        <Box p={2} className="edit-table-container">
-          <MaterialReactTable sx={{ boxShadow: 'rgba(0, 0, 0, 0.18) 1.95px 1.95px 2.7px' }} table={editableForproject} />
-        </Box>
-        <Box p={2} className="edit-table-container">
-          <MaterialReactTable table={editableForHistory} />
-        </Box>
-        <Box p={2} className="edit-table-container">
-          <MaterialReactTable table={editableForTask} />
-        </Box>
-        <Button variant="contained" style={{ float: 'right', margin: '2rem' }} type="submit">
-          Update
-        </Button>
-      </form>
-    </MainCard>
-  )
-}
-{
-  view.mode === 'View' && (
-    <>
-      <MainCard
-        title="Note"
-        secondary={
-          <Box
-            sx={{
-              ml: 2,
-
-              [theme.breakpoints.down('md')]: {
-                mr: 2
-              }
-            }}
-          >
-            <ButtonBase sx={{ borderRadius: '12px' }}>
-              <Avatar
-                variant="rounded"
-                sx={{
-                  ...theme.typography.commonAvatar,
-                  ...theme.typography.mediumAvatar,
-                  transition: 'all .2s ease-in-out',
-                  background: theme.palette.secondary.light,
-                  color: theme.palette.secondary.dark,
-                  '&[aria-controls="menu-list-grow"],&:hover': {
-                    background: theme.palette.secondary.dark,
-                    color: theme.palette.secondary.light
-                  }
-                }}
-                aria-haspopup="true"
-                onClick={handleClose}
-                color="inherit"
-              >
-                <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
-              </Avatar>
-            </ButtonBase>
-          </Box>
-        }
-      >
-        <Grid container m={3}>
-          <Grid xs={3} p={2}>
-            <label className="text-muted">Project Number</label>
-            <p>{viewId?.projectNumber}</p>
-          </Grid>
-          <Grid xs={3} p={2}>
-            <label className="text-muted">Company Name</label>
-            <p>{viewId?.companyName}</p>
-          </Grid>
-          <Grid xs={3} p={2}>
-            <label className="text-muted">Assigned Date</label>
-            <p>{viewId?.assignedDate?.slice(0, 10)}</p>
-          </Grid>
-          <Grid xs={3} p={2}>
-            <label className="text-muted">Target Date</label>
-            <p>{viewId?.targetDate?.slice(0, 10)}</p>
-          </Grid>
-          <Grid xs={3} p={2}>
-            <label className="text-muted">Status</label>
-            <p>{viewId?.status}</p>
-          </Grid>
-          <Grid xs={3} p={2}>
-            <label className="text-muted">Manager</label>
-            <p>{viewId?.manager}</p>
-          </Grid>
-          <Grid xs={3} p={2}>
-            <label className="text-muted">MileStone</label>
-            <p>{viewId?.milestone}</p>
-          </Grid>
-        </Grid>
-        <Grid container p={3}>
-          <Grid xs={12} p={2}>
-            <div className="teamallocation-container">
-              <MainCard
-                title="Team Allocation"
-                secondary={
-                  <Box
-                    sx={{
-                      ml: 2,
-
-                      [theme.breakpoints.down('md')]: {
-                        mr: 2
-                      }
-                    }}
-                  >
-                    <ButtonBase sx={{ borderRadius: '12px' }}>
-                      <Avatar
-                        variant="rounded"
-                        sx={{
-                          ...theme.typography.commonAvatar,
-                          ...theme.typography.mediumAvatar,
-                          transition: 'all .2s ease-in-out',
-                          background: theme.palette.secondary.light,
-                          color: theme.palette.secondary.dark,
-                          '&[aria-controls="menu-list-grow"],&:hover': {
-                            background: theme.palette.secondary.dark,
-                            color: theme.palette.secondary.light
-                          }
-                        }}
-                        aria-haspopup="true"
-                        color="inherit"
+                        name="milestone"
+                        onChange={handleSelectOnChange}
+                        label="Select"
+                        placeholder="Select"
                       >
-                        <TaskAlt stroke={2} size="1.3rem" />
-                      </Avatar>
-                    </ButtonBase>
-                  </Box>
-                }
-              >
-                {viewId?.projectAllocation.map((data) => (
-                  <Card sx={{ margin: '1rem', padding: '1rem' }} className="card-hovered">
-                    <div className="d-flex justify-content-between">
-                      <div className="d-flex">
-                        {/* <Avatar sx={{ bgcolor: '#ede7f6', color: '#5e35b1' }}>{data?.employeeName[0]}</Avatar> */}
-                        <div className="ms-1">
-                          <p className="avatar-name">{data?.employeeCode}</p>
-                          <div className="d-flex align-items-center">
-                            <p className="text-muted-light m-0">{data?.team}</p> &nbsp; /
-                            <div>
-                              <PeopleAltTwoTone style={{ fontSize: 'medium' }} />
-                              <span className="ms-01">{data.location}</span>
+                        {customOptions.map((option) => (
+                          <MenuItem key={option.value} value={option.value}>
+                            {option.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+
+
+                      {formik.touched.milestone && formik.errors.milestone && (
+                        <FormHelperText error id="standard-weight-helper-text-Password-login">
+                          {formik.errors.milestone}
+                        </FormHelperText>
+                      )}
+
+                    </FormControl>
+                  ) : (
+                    <>
+                      <div style={{ display: 'flex' }}>
+                        <TextField
+                          type="text"
+                          fullWidth
+                          value={customOption}
+                          onChange={handleSelectInputChange}
+                          placeholder="Enter custom option"
+                        />
+                        <Button onClick={handleSaveCustomOption}>Save</Button>
+                      </div>
+                    </>
+                  )}
+                </Grid>
+                <Grid item xs={4} p={2}>
+                  <FormLabel id="demo-row-radio-buttons-group-label">P0.NO</FormLabel>
+                  <RadioGroup aria-label="yesno" name="yesno" value={selectedOption} onChange={handleOptionChange} row>
+                    <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+                    <FormControlLabel value="no" control={<Radio />} label="No" />
+                  </RadioGroup>
+                </Grid>
+              </Grid>
+
+
+              <Box p={2} className="edit-table-container">
+                <MaterialReactTable sx={{ boxShadow: 'rgba(0, 0, 0, 0.18) 1.95px 1.95px 2.7px' }} table={editableForproject} />
+              </Box>
+              <Box p={2} className="edit-table-container">
+                <MaterialReactTable table={editableForHistory} />
+              </Box>
+              <Box p={2} className="edit-table-container">
+                <MaterialReactTable table={editableForTask} />
+              </Box>
+              <Box p={2} className="edit-table-container">
+                <MaterialReactTable table={financeHistorytable} />
+              </Box>
+              <Button variant="contained" style={{ float: 'right', margin: '2rem' }} type="submit">
+                Update
+              </Button>
+            </form>
+          </MainCard>
+        )
+      }
+      {
+        view.mode === 'View' && (
+          <>
+            <MainCard
+              title="Note"
+              secondary={
+                <Box
+                  sx={{
+                    ml: 2,
+
+                    [theme.breakpoints.down('md')]: {
+                      mr: 2
+                    }
+                  }}
+                >
+                  <ButtonBase sx={{ borderRadius: '12px' }}>
+                    <Avatar
+                      variant="rounded"
+                      sx={{
+                        ...theme.typography.commonAvatar,
+                        ...theme.typography.mediumAvatar,
+                        transition: 'all .2s ease-in-out',
+                        background: theme.palette.secondary.light,
+                        color: theme.palette.secondary.dark,
+                        '&[aria-controls="menu-list-grow"],&:hover': {
+                          background: theme.palette.secondary.dark,
+                          color: theme.palette.secondary.light
+                        }
+                      }}
+                      aria-haspopup="true"
+                      onClick={handleClose}
+                      color="inherit"
+                    >
+                      <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
+                    </Avatar>
+                  </ButtonBase>
+                </Box>
+              }
+            >
+              <Grid container m={3}>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Project Number</label>
+                  <p>{viewId?.projectNumber}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Company Name</label>
+                  <p>{viewId?.companyName}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Assigned Date</label>
+                  <p>{viewId?.assignedDate?.slice(0, 10)}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Target Date</label>
+                  <p>{viewId?.targetDate?.slice(0, 10)}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Status</label>
+                  <p>{viewId?.status}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Manager</label>
+                  <p>{viewId?.manager}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">MileStone</label>
+                  <p>{viewId?.milestone}</p>
+                </Grid>
+              </Grid>
+              <Grid container p={3}>
+                <Grid xs={12} p={2}>
+                  <div className="teamallocation-container">
+                    <MainCard
+                      title="Team Allocation"
+                      secondary={
+                        <Box
+                          sx={{
+                            ml: 2,
+
+                            [theme.breakpoints.down('md')]: {
+                              mr: 2
+                            }
+                          }}
+                        >
+                          <ButtonBase sx={{ borderRadius: '12px' }}>
+                            <Avatar
+                              variant="rounded"
+                              sx={{
+                                ...theme.typography.commonAvatar,
+                                ...theme.typography.mediumAvatar,
+                                transition: 'all .2s ease-in-out',
+                                background: theme.palette.secondary.light,
+                                color: theme.palette.secondary.dark,
+                                '&[aria-controls="menu-list-grow"],&:hover': {
+                                  background: theme.palette.secondary.dark,
+                                  color: theme.palette.secondary.light
+                                }
+                              }}
+                              aria-haspopup="true"
+                              color="inherit"
+                            >
+                              <TaskAlt stroke={2} size="1.3rem" />
+                            </Avatar>
+                          </ButtonBase>
+                        </Box>
+                      }
+                    >
+                      {viewId?.projectAllocation.map((data) => (
+                        <Card sx={{ margin: '1rem', padding: '1rem' }} className="card-hovered">
+                          <div className="d-flex justify-content-between">
+                            <div className="d-flex">
+                              {/* <Avatar sx={{ bgcolor: '#ede7f6', color: '#5e35b1' }}>{data?.employeeName[0]}</Avatar> */}
+                              <div className="ms-1">
+                                <p className="avatar-name">{data?.employeeCode}</p>
+                                <div className="d-flex align-items-center">
+                                  <p className="text-muted-light m-0">{data?.team}</p> &nbsp; /
+                                  <div>
+                                    <PeopleAltTwoTone style={{ fontSize: 'medium' }} />
+                                    <span className="ms-01">{data.location}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="float-end">
+                              <p className="text-muted-light m-0 text-end">Assigned Date : &nbsp; {data?.fromDate}</p>
+                              <p className="text-muted-light m-0 text-end">Target Date : &nbsp; {data?.toDate}</p>
+                              <div className="d-flex justify-content-end">
+                                <p
+                                  className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${data?.status === 'completed' ? 'badge-success max-width' : ''
+                                    }${data?.status === 'not-started' ? 'badge-danger max-width' : ''}`}
+                                >
+                                  {data?.statusRequest} {data?.status}
+                                </p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </div>
-                      <div className="float-end">
-                        <p className="text-muted-light m-0 text-end">Assigned Date : &nbsp; {data?.fromDate}</p>
-                        <p className="text-muted-light m-0 text-end">Target Date : &nbsp; {data?.toDate}</p>
-                        <div className="d-flex justify-content-end">
-                          <p
-                            className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${data?.status === 'completed' ? 'badge-success max-width' : ''
-                              }${data?.status === 'not-started' ? 'badge-danger max-width' : ''}`}
-                          >
-                            {data?.statusRequest} {data?.status}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </MainCard>
-            </div>
-          </Grid>
-          <Grid xs={4} p={2}>
-            <div className="history-container">
-              <MainCard
-                title="History"
-                secondary={
-                  <Box
-                    sx={{
-                      ml: 2,
-                      // mr: 3,
-                      [theme.breakpoints.down('md')]: {
-                        mr: 2
+                        </Card>
+                      ))}
+                    </MainCard>
+                  </div>
+                </Grid>
+                <Grid xs={4} p={2}>
+                  <div className="history-container">
+                    <MainCard
+                      title="History"
+                      secondary={
+                        <Box
+                          sx={{
+                            ml: 2,
+                            // mr: 3,
+                            [theme.breakpoints.down('md')]: {
+                              mr: 2
+                            }
+                          }}
+                        >
+                          <ButtonBase sx={{ borderRadius: '12px' }}>
+                            <Avatar
+                              variant="rounded"
+                              sx={{
+                                ...theme.typography.commonAvatar,
+                                ...theme.typography.mediumAvatar,
+                                transition: 'all .2s ease-in-out',
+                                background: theme.palette.secondary.light,
+                                color: theme.palette.secondary.dark,
+                                '&[aria-controls="menu-list-grow"],&:hover': {
+                                  background: theme.palette.secondary.dark,
+                                  color: theme.palette.secondary.light
+                                }
+                              }}
+                              aria-haspopup="true"
+                              color="inherit"
+                            >
+                              <History stroke={2} size="1.3rem" />
+                            </Avatar>
+                          </ButtonBase>
+                        </Box>
                       }
-                    }}
-                  >
-                    <ButtonBase sx={{ borderRadius: '12px' }}>
-                      <Avatar
-                        variant="rounded"
-                        sx={{
-                          ...theme.typography.commonAvatar,
-                          ...theme.typography.mediumAvatar,
-                          transition: 'all .2s ease-in-out',
-                          background: theme.palette.secondary.light,
-                          color: theme.palette.secondary.dark,
-                          '&[aria-controls="menu-list-grow"],&:hover': {
-                            background: theme.palette.secondary.dark,
-                            color: theme.palette.secondary.light
-                          }
-                        }}
-                        aria-haspopup="true"
-                        color="inherit"
-                      >
-                        <History stroke={2} size="1.3rem" />
-                      </Avatar>
-                    </ButtonBase>
-                  </Box>
-                }
-              >
-              </MainCard>
-            </div>
-          </Grid>
-          <Grid xs={8} p={2}>
-            <div className="task-container">
-              <MainCard
-                title="Task"
-                secondary={
-                  <Box
-                    sx={{
-                      ml: 2,
-                      [theme.breakpoints.down('md')]: {
-                        mr: 2
-                      }
-                    }}
-                  >
-                    <ButtonBase sx={{ borderRadius: '12px' }}>
-                      <Avatar
-                        variant="rounded"
-                        sx={{
-                          // Avatar styles
-                        }}
-                        aria-haspopup="true"
-                        color="inherit"
-                      >
-                        <TaskAlt stroke={2} size="1.3rem" />
-                      </Avatar>
-                    </ButtonBase>
-                  </Box>
-                } >
-                {tasks && Array.isArray(tasks) && tasks.map((data, index) => (
-                  <Card key={index} sx={{ margin: '1rem', padding: '1rem' }} className="card-hover">
-                    <Typography variant="h6" component="span">{data?.title}</Typography>
-                    <Typography variant="body1">{data?.description}</Typography>
-                  </Card>
-                ))}
-              </MainCard>
-            </div>
-          </Grid>
+                    >
+                    </MainCard>
+                  </div>
+                </Grid>
+                <Grid xs={8} p={2}>
+                  <div className="task-container">
+                    <MainCard
+                      title="Task"
+                      secondary={
+                        <Box
+                          sx={{
+                            ml: 2,
+                            [theme.breakpoints.down('md')]: {
+                              mr: 2
+                            }
+                          }}
+                        >
+                          <ButtonBase sx={{ borderRadius: '12px' }}>
+                            <Avatar
+                              variant="rounded"
+                              sx={{
+                                // Avatar styles
+                              }}
+                              aria-haspopup="true"
+                              color="inherit"
+                            >
+                              <TaskAlt stroke={2} size="1.3rem" />
+                            </Avatar>
+                          </ButtonBase>
+                        </Box>
+                      } >
+                      {tasks && Array.isArray(tasks) && tasks.map((data, index) => (
+                        <Card key={index} sx={{ margin: '1rem', padding: '1rem' }} className="card-hover">
+                          <Typography variant="h6" component="span">{data?.title}</Typography>
+                          <Typography variant="body1">{data?.description}</Typography>
+                        </Card>
+                      ))}
+                    </MainCard>
+                  </div>
+                </Grid>
+                <Grid>
+                  <TableContainer component={Paper}>
+                    <MainCard
+                      title="Finance History">
+                      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Date</TableCell>
+                            <TableCell align="right">Ref No/Bill</TableCell>
+                            <TableCell align="right">Amount</TableCell>
+                            <TableCell align="right">Tax</TableCell>
+                            <TableCell align="right">Status</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {Financeviewrows.map((row) => (
+                            <TableRow
+                              key={row.name}
+                              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                            >
+                              <TableCell component="th" scope="row">
+                                {row.Date}
+                              </TableCell>
+                              <TableCell align="right">{row.Ref}</TableCell>
+                              <TableCell align="right">{row.Amount}</TableCell>
+                              <TableCell align="right">{row.Tax}</TableCell>
+                              <TableCell align="right">{row.Status}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </MainCard>
+                  </TableContainer>
+                </Grid>
 
-        </Grid>
-      </MainCard>
-    </>
-  )
-}
-<Dialog fullWidth open={open} TransitionComponent={Transition} keepMounted>
-  <DialogTitle>
-    <Typography variant="h3">Delete Lead</Typography>
-  </DialogTitle>
-  <Divider />
-  <DialogContent>
-    <DialogContentText id="alert-dialog-slide-description" className="d-flex justify-content-center align-item-center">
-      <div className="bg-light rounded ">
-        <Delete style={{ fontSize: '32' }} />
-      </div>
-    </DialogContentText>
-    <Typography variant="h4" className="muted" display="block" gutterBottom style={{ textAlign: 'center' }} mt={2}>
-      Are you want to Delete ?
-    </Typography>
-  </DialogContent>
-  <DialogActions className="d-flex justify-content-center mb-1">
-    <Button variant="outlined" onClick={() => setOpen(false)}>
-      Cancel
-    </Button>
-    <Button variant="contained" onClick={confirmDelete}>
-      Delete
-    </Button>
-  </DialogActions>
-</Dialog>
+              </Grid>
+
+            </MainCard>
+          </>
+        )
+      }
+      <Dialog fullWidth open={open} TransitionComponent={Transition} keepMounted>
+        <DialogTitle>
+          <Typography variant="h3">Delete Lead</Typography>
+        </DialogTitle>
+        <Divider />
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description" className="d-flex justify-content-center align-item-center">
+            <div className="bg-light rounded ">
+              <Delete style={{ fontSize: '32' }} />
+            </div>
+          </DialogContentText>
+          <Typography variant="h4" className="muted" display="block" gutterBottom style={{ textAlign: 'center' }} mt={2}>
+            Are you want to Delete ?
+          </Typography>
+        </DialogContent>
+        <DialogActions className="d-flex justify-content-center mb-1">
+          <Button variant="outlined" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={confirmDelete}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div >
   );
 };
