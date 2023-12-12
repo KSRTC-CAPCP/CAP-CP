@@ -1039,7 +1039,7 @@ const BusinessRFQ = () => {
             setTaskTableData(fetchUpdateId?.data?.tasks);
             // Check if the user has the "Admin" role
             console.log(parsedData?.Roles, 'who?');
-            if (parsedData?.role === 'admin') {
+            if (parsedData?.role === 'Admin') {
               // Include the "Approval Status" column for Admin
               setHistoryTableColumns([
                 ...coumnsForHistory,
@@ -1162,39 +1162,7 @@ const BusinessRFQ = () => {
         >
           <form onSubmit={formik.handleSubmit}>
             <Grid container>
-              <Grid item xs={4} p={2}>
-                <FormControl fullWidth>
-                  <InputLabel id="demo-simple-select-label">RFQ</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    label="rfq"
-                    name="Source"
-                    value={rfqFrom}
-                    onChange={(e) => {
-                      // formik.handleChange(e);
-                      handleChange(e);
-                    }}
-                  >
-                    <MenuItem value={'rfqfromlead'}>RFQ From Lead</MenuItem>
-                    <MenuItem value={'createnewrfq'}>Create New RFQ</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              {showAdditionalInput && (
-                <Grid item xs={4} p={2}>
-                  <FormControl fullWidth>
-                    <InputLabel id="additional-select-label">Lead Number</InputLabel>
-                    <Select onChange={handleSelectChange}>
-                      {leadNumber.map((lead, index) => (
-                        <MenuItem key={index} value={lead.value}>
-                          {lead.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-              )}
+              
               <Grid xs={4} p={2}>
                 <TextField
                   error={Boolean(formik.touched.date && formik.errors.date)}
