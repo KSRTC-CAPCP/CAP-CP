@@ -747,8 +747,9 @@ const Profiles = () => {
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                   >
-                    <MenuItem value={'admin'}>Admin</MenuItem>
-                    <MenuItem value={'user'}>Employee</MenuItem>
+                    <MenuItem value={'Admin'}>Admin</MenuItem>
+                    <MenuItem value={'Manager'}>Manager</MenuItem>
+                    <MenuItem value={'Employee'}>Employee</MenuItem>
                   </Select>
                 </FormControl>
                 {formik.touched.Role && formik.errors.Role && (

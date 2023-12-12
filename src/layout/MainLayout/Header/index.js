@@ -12,6 +12,7 @@ import NotificationSection from './NotificationSection';
 
 // assets
 import { IconMenu2 } from '@tabler/icons';
+import Logout from './logout';
 
 // ==============================|| MAIN NAVBAR / HEADER ||============================== //
 
@@ -61,7 +62,9 @@ const Header = ({ handleLeftDrawerToggle }) => {
       <Box sx={{ flexGrow: 1 }} />
 
       {/* notification & profile */}
+      <Logout />
       <NotificationSection />
+
       <ProfileSection />
     </>
   );

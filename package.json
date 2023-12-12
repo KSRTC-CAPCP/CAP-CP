@@ -2,6 +2,7 @@
   "name": "CAP-CP Organization Management System",
   "version": "3.3.2",
   "private": true,
+  "homepage": "https://hivedemo.capcp.in/org",
   "dependencies": {
     "@emotion/cache": "^11.9.3",
     "@emotion/react": "^11.11.1",
