@@ -20,12 +20,14 @@ export const RFQ_GET = `${BASE_URL}/rfq/get`;
 export const RFQ_GET_ID = (id) => `${BASE_URL}/rfq/getbyid/${id}`;
 export const RFQ_UPDATE = (id) => `${BASE_URL}/rfq/update/${id}`;
 export const RFQ_DELETE = (id) => `${BASE_URL}/rfq/delete/${id}`;
+
 //FOR TEAMS
 export const TEAMS_GET = `${BASE_URL}/roleaccess/getall`;
 
 //FOR PROFILES
 export const PROFILES_GET = `${BASE_URL}/employee/getall`;
 export const PROFILES_GET_ID = (id) => `${BASE_URL}/employee/getbyid/${id}`;
+export const PROFILES_GET_ROLE = (id) => `${BASE_URL}/employees/role/${id}`;
 export const PROFILES_CREATE = `${BASE_URL}/employee/add`;
 export const PROFILES_UPDATE = (id) => `${BASE_URL}/employee/update/${id}`;
 export const PROFILES_DELETE = (id) => `${BASE_URL}/employee/delete/${id}`;
@@ -40,3 +42,5 @@ export const PROJECT_UPDATE =(id) => `${BASE_URL}/project/update/${id}`;
 //FOR CATEGORY
 export const CATEGORY_CREATE = `${BASE_URL}/categories`;
 export const CATEGORY_GET = `${BASE_URL}/categories`;
+export const MILESTONE_GET = `${BASE_URL}/milestones`;
+export const MILESTONE_CREATE = `${BASE_URL}/milestone`;

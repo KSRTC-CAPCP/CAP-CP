@@ -49,7 +49,12 @@ export async function postData(endpoint, data, token = null) {
 
     if (!response.ok) {
       const errorResponse = await response.json();
-      toast.error(`${errorResponse.error}`);
+      console.log(errorResponse, 'errorResponse');
+      if(errorResponse.error){
+        toast.error(`${errorResponse.error}`);
+      }else{
+        toast.error(errorResponse.message?.employeeEffort[0])
+      }
       throw new Error(errorResponse.error);
     }
     console.log(response, "log");
