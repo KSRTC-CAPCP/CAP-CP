@@ -257,8 +257,13 @@ const Profiles = () => {
       header: 'Name Of Candidate'
     }),
 
-    columnHelper.accessor('DateOfBirth', {
-      header: 'Date Of Birth'
+    columnHelper.accessor('PercentageOfEffort', {
+      header: 'Effort',
+      Cell: ({ renderedCellValue, row }) => (
+        <Box component="span">
+          <p>{row.original.PercentageOfEffort}/100</p>
+        </Box>
+      )
     }),
     columnHelper.accessor('Designation', {
       header: 'Designation'

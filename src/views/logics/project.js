@@ -80,8 +80,11 @@ import {
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { DatePicker } from 'rsuite';
 import {
+  MILESTONE_CREATE,
+  MILESTONE_GET,
   PROFILES_CREATE,
   PROFILES_GET,
+  PROFILES_GET_ROLE,
   PROJECT_CREATE,
   PROJECT_DELETE,
   PROJECT_GET,
@@ -138,9 +141,9 @@ const columns = [
       </Box>
     )
   }),
-  columnHelper.accessor('status', {
-    header: 'Status'
-  }),
+  // columnHelper.accessor('status', {
+  //   header: 'Status'
+  // }),
   columnHelper.accessor('manager', {
     header: 'Manager'
   }),
@@ -302,8 +305,14 @@ const Projects = ({ _history, tasks }) => {
     window.location.href = '/task-panel';
   };
   const [profilesData, setProfilesData] = useState([]);
+  const [managerData, setManagerData] = useState([]);
+  const [managerId, setManagerId] = useState('');
   const handleEmployee = (e) => {
-    console.log(e, 'its worked');
+    console.log(e.target.value.slice(0, 7), 'its worked');
+    const value = e.target.value;
+    const filterEmployee = profilesData.filter((employee) => employee?.EmployeeCode === value.slice(0, 7));
+    console.log(filterEmployee[0], 'filterEmployee');
+    setManagerId(filterEmployee[0]);
   };
   const coumnsForproject = [
     {
@@ -313,7 +322,7 @@ const Projects = ({ _history, tasks }) => {
       editSelectOptions: profilesData.map((item) => item.EmployeeCode + '-' + item.NameOfCandidate),
       muiEditTextFieldProps: {
         select: true,
-        onchange: (e) => handleEmployee(e)
+        onChange: (e) => handleEmployee(e)
       },
       enableEditing: true
     },
@@ -375,7 +384,7 @@ const Projects = ({ _history, tasks }) => {
       }
     },
     {
-      accessorKey: 'refno/bill',
+      accessorKey: 'refNumber',
       header: 'Ref No/Bill',
       muiEditTextFieldProps: {
         type: 'number',
@@ -414,8 +423,6 @@ const Projects = ({ _history, tasks }) => {
     }
   ];
 
-
-
   const teamMembers = [
     { name: 'Ram', projects: 28 },
     { name: 'Arun', projects: 3 },
@@ -425,7 +432,12 @@ const Projects = ({ _history, tasks }) => {
   ];
 
   const [selectedDate, setSelectedDate] = useState('');
-
+  const parseDate = (dateString) => {
+    // Assuming dateString is in the format 'dd-MM-yyyy'
+    const [day, month, year] = dateString.split('-');
+    const parsedDate = new Date(`${year}-${month}-${day}`);
+    return parsedDate;
+  };
   const handleEndDateChange = (event) => {
     const inputDate = new Date(event);
     const formattedDate = inputDate.toLocaleDateString('en-GB');
@@ -443,7 +455,7 @@ const Projects = ({ _history, tasks }) => {
 
   const [selectedOption, setSelectedOption] = React.useState('no');
 
-  const [mileselectedOption, setMileSelectedOption] = React.useState('no');
+  const [mileselectedOption, setMileSelectedOption] = React.useState('');
   const [textFieldText, setTextFieldText] = React.useState('PONO Number is Not Allocated');
 
   const handleOptionChange = (event) => {
@@ -502,14 +514,9 @@ const Projects = ({ _history, tasks }) => {
   const customOptions1 = [
     { value: 'MileStone1', label: 'MileStone 1' },
     { value: 'MileStone2', label: 'MileStone 2' },
-    { value: 'MileStone3', label: 'MileStone 3' },
+    { value: 'MileStone3', label: 'MileStone 3' }
     // Add other options as needed
   ];
-
-  const categoryOption = milestone?.map((data) => ({
-    label: data.name,
-    value: data.name
-  }));
 
   const [view, setView] = useState({
     visible: false,
@@ -555,7 +562,6 @@ const Projects = ({ _history, tasks }) => {
       setInputValue('');
     }
   };
-
 
   const handleSaveRowHistorys = (newData, oldData) => {
     console.log('handleSaveRowHistory - newData:', newData);
@@ -701,7 +707,6 @@ const Projects = ({ _history, tasks }) => {
     const newTask = { ...newData.values, _id: tempId };
     setTaskTableData([...taskTableData, newTask]);
     setIsCreatingRow(false);
-
   };
   const handleEditRowTask = (row) => {
     const editingId = row._id; // Use _id if available, otherwise use _tempId
@@ -793,10 +798,6 @@ const Projects = ({ _history, tasks }) => {
     )
   });
 
-
-
-
-
   const [teamData, setTeamData] = useState([]);
   const [financeData, setFinanceData] = useState([]);
   const [editingRowId, setEditingRowId] = useState(null);
@@ -831,28 +832,41 @@ const Projects = ({ _history, tasks }) => {
       description: '',
       manager: '',
       milestone: '',
-      requirePO: '',
-      // poNumber: '',
+      poNumber: '',
       projectAllocation: [],
-      status: ''
+      finance: [],
+      history: [],
+      task: []
       // Add initial values for other fields
       // ...
     },
     // validationSchema,
-    onSubmit: async (values, { setSubmitting }) => {
+    onSubmit: async (values) => {
       console.log('worked');
       try {
         if (editId) {
-          // handleUpdate(values);
+          const teamsValue = teamData
+            ? teamData.map((item) => ({
+                fromDate: item.fromDate,
+                employeeCode: item.employeeCode?.slice(0, 7),
+                employeeId: managerId?._id,
+                toDate: item.toDate,
+                location: item.location,
+                percentage: Number(item.percentage),
+                team: item.team
+              }))
+            : [];
+
           const formattedData = {
             ...values,
             assignedDate: startDate,
             targetDate: endDate,
-            // companyName: selectedRFQ,
-            requirePO: selectedOption === 'yes' ? true : false,
-            projectAllocation: teamData
+            companyName: selectedRFQ,
+            projectAllocation: teamsValue,
+            finance: financeData,
+            history: historyTableData,
+            task: taskTableData
           };
-          console.log('handle update', formattedData);
           const endpoint = PROJECT_UPDATE(editId?.original?._id);
           await updateData(endpoint, formattedData, localData?.accessToken);
           setView({
@@ -862,17 +876,32 @@ const Projects = ({ _history, tasks }) => {
           fetchFun();
         } else {
           console.log('handle submit');
+          const teamsValue = teamData
+            ? teamData.map((item) => ({
+                fromDate: item.fromDate,
+                employeeCode: item.employeeCode?.slice(0, 7),
+                employeeId: managerId?._id,
+                toDate: item.toDate,
+                location: item.location,
+                percentage: Number(item.percentage),
+                team: item.team
+              }))
+            : [];
+
           const formattedData = {
             ...values,
             assignedDate: startDate,
             targetDate: endDate,
             companyName: selectedRFQ,
-            requirePO: selectedOption === 'yes' ? true : false,
-            projectAllocation: teamData
+            projectAllocation: teamsValue,
+            finance: financeData,
+            history: historyTableData,
+            task: taskTableData
           };
           console.log(formattedData, 'values');
 
-          await postData(PROJECT_CREATE, formattedData, localData?.accessToken);
+          const projectAllocate = await postData(PROJECT_CREATE, formattedData, localData?.accessToken);
+          console.log(projectAllocate, 'projectAllocate');
           setView({
             visible: true,
             mode: 'Initial'
@@ -909,11 +938,7 @@ const Projects = ({ _history, tasks }) => {
     }
   };
 
-  const [milestoneOptions, setMilestoneOptions] = useState([
-    { value: 'Milestone 1', label: 'Milestone 1' },
-    { value: 'Milestone 2', label: 'Milestone 2' },
-    { value: 'Milestone 3', label: 'Milestone 3' }
-  ]);
+  const [milestoneOptions, setMilestoneOptions] = useState([]);
 
   const theme = useTheme();
   const handleExportData = () => {
@@ -927,17 +952,20 @@ const Projects = ({ _history, tasks }) => {
       mode: 'Edit'
     });
     setEditId(row);
+    setMileSelectedOption(row?.original?.milestone);
+    setSelectedRFQ(row?.original?.companyName);
     formik.setValues({
       rfqNumber: row?.original?.rfqNumber,
-      companyName: row?.original?.companyName,
+      // companyName: row?.original?.companyName,
       status: row?.original?.status,
       assignedDate: row?.original?.assignedDate.slice(0, 10),
       targetDate: row?.original?.targetDate.slice(0, 10),
       description: row?.original?.description,
-      requirePO: row?.original?.requirePO
+      manager: row?.original?.manager
+      // milestone: row?.original?.milestone
     });
     setTeamData(row?.original?.projectAllocation);
-    setSelectedOption(row?.original?.requirePO === true ? 'yes' : 'no');
+    // setSelectedOption(row?.original?.requirePO === true ? 'yes' : 'no');
   };
 
   console.log(formik.values, 'formik');
@@ -1025,7 +1053,6 @@ const Projects = ({ _history, tasks }) => {
   };
   console.log(teamData, 'history');
 
-
   const handleEditRowHistorys = (row) => {
     console.log(row, 'looooogg');
     const editingId = row._id || row._tempId; // Use _id if available, otherwise use _tempId
@@ -1083,6 +1110,8 @@ const Projects = ({ _history, tasks }) => {
   };
 
   console.log(teamData, 'teamData');
+
+  
   const editableForproject = useMaterialReactTable({
     columns: coumnsForproject,
     data: teamData,
@@ -1260,6 +1289,8 @@ const Projects = ({ _history, tasks }) => {
       visible: true,
       mode: 'Add'
     });
+    formik.resetForm();
+    setEditId('');
   };
   const handleClose = () => {
     setView({
@@ -1270,31 +1301,27 @@ const Projects = ({ _history, tasks }) => {
   const [description, setDescription] = useState('');
   const [showSelect, setShowSelect] = useState(true);
   const [customOption, setCustomOption] = useState('');
-  const customOptions = [...milestoneOptions, { value: 'addMore', label: 'Add More Option' }];
 
+  const categoryOption = milestoneOptions?.map((data) => ({
+    label: data.name,
+    value: data.name
+  }));
+  const customOptions = [...categoryOption, { value: 'addMore', label: 'Add More Option' }];
   const [showDescription, setShowDescription] = useState(false);
 
   const handleSelectClick = () => {
     setShowDescription(true);
   };
 
-
-  function createData(
-    Date = '',
-    Ref = 0,
-    Amount = 0,
-    Tax = 0,
-    Status = ''
-  ) {
+  function createData(Date = '', Ref = 0, Amount = 0, Tax = 0, Status = '') {
     return { Date, Ref, Amount, Tax, Status };
   }
 
   const Financeviewrows = [
-    createData('27-04-2001', 1579, 6.00, 24, 'Invoice'),
+    createData('27-04-2001', 1579, 6.0, 24, 'Invoice'),
     createData('28-05-2001', 1599, 6.07, 24, 'Credit'),
-    createData('29-06-2001', 1559, 6.08, 24, 'Spent'),
+    createData('29-06-2001', 1559, 6.08, 24, 'Spent')
   ];
-
 
   const handleSelectOnChange = (event) => {
     const value = event.target.value;
@@ -1311,12 +1338,27 @@ const Projects = ({ _history, tasks }) => {
   const handleSelectInputChange = (event) => {
     setCustomOption(event.target.value);
   };
-  const handleSaveCustomOption = () => {
+  const handleSaveCustomOption = async () => {
+    // if (customOption.trim() !== '') {
+    //   const newOption = { value: customOption, label: customOption };
+    //   setMilestoneOptions([...milestoneOptions, newOption]);
+    //   setMileSelectedOption(customOption);
+    //   setCustomOption('');
+    //   setShowSelect(true);
+    // }
     if (customOption.trim() !== '') {
-      const newOption = { value: customOption, label: customOption };
-      setMilestoneOptions([...milestoneOptions, newOption]);
-      setMileSelectedOption(customOption);
+      if (mileselectedOption === 'addMore') {
+        // If "Add More Option" is selected, set selectedOption to the customOption value
+        setMileSelectedOption(customOption);
+      }
+      // Save the custom option to the backend
+      await postData(MILESTONE_CREATE, { name: customOption });
+      // Fetch the updated category data
+      const categoryData = await fetchData(MILESTONE_GET);
+      setMilestoneOptions(categoryData);
+      // Reset the customOption state
       setCustomOption('');
+      // Show the select input
       setShowSelect(true);
     }
   };
@@ -1325,8 +1367,8 @@ const Projects = ({ _history, tasks }) => {
     label: item.serialNumber + '  ' + item.companyName,
     value: item.serialNumber
   }));
-  const employeeList = profilesData.map((item) => ({
-    label: item.EmployeeCode,
+  const managerList = managerData.map((item) => ({
+    label: item.EmployeeCode + ' - ' + item.NameOfCandidate,
     value: item.EmployeeCode
   }));
 
@@ -1368,8 +1410,12 @@ const Projects = ({ _history, tasks }) => {
           console.log(parsedData, 'parsed');
           const data = await fetchData(PROJECT_GET, parsedData?.accessToken);
           const data4Rfq = await fetchData(RFQ_GET, parsedData?.accessToken);
-          const data4Employee = await fetchData(PROFILES_GET, parsedData?.accessToken);
-          console.log(data, 'parsedddd');
+          const data4Employee = await fetchData(PROFILES_GET_ROLE('Employee'), parsedData?.accessToken);
+          const EmployeeRole = await fetchData(PROFILES_GET_ROLE('Manager'), parsedData?.accessToken);
+          const categoryData = await fetchData(MILESTONE_GET);
+          setMilestoneOptions(categoryData);
+          setManagerData(EmployeeRole?.data);
+          console.log(EmployeeRole, 'EmployeeRole');
           setProfilesData(data4Employee?.data);
           setRFQData(data4Rfq?.data);
           console.log(data, 'parsedddd');
@@ -1477,8 +1523,10 @@ const Projects = ({ _history, tasks }) => {
                   style={{ width: 200 }}
                   placeholder="Assigned Date"
                   name="assignedDate"
+                  aria-autocomplete="false"
+                  autoComplete="false"
                   onChange={(e) => handleStartDateChange(e)}
-                // value={formik.values.assignedDate}
+                  // value={formik.values.assignedDate}
                 />
                 {/* {formik.touched.assignedDate && formik.errors.assignedDate && (
                   <FormHelperText error id="standard-weight-helper-text-Password-login">
@@ -1521,7 +1569,7 @@ const Projects = ({ _history, tasks }) => {
                   </FormHelperText>
                 )}
               </Grid> */}
-              {/* <Grid xs={4} p={2}>
+              <Grid xs={4} p={2}>
                 <TextField
                   error={Boolean(formik.touched.description && formik.errors.description)}
                   name="description"
@@ -1538,7 +1586,7 @@ const Projects = ({ _history, tasks }) => {
                     {formik.errors.description}
                   </FormHelperText>
                 )}
-              </Grid> */}
+              </Grid>
               <Grid xs={4} p={2}>
                 <FormControl fullWidth error={Boolean(formik.touched.manager && formik.errors.manager)}>
                   <InputLabel id="demo-simple-select-label">Manager</InputLabel>
@@ -1551,10 +1599,9 @@ const Projects = ({ _history, tasks }) => {
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                   >
-                    <MenuItem value={'manager1'}>Kotty</MenuItem>
-                    <MenuItem value={'manager2'}>Zara</MenuItem>
-                    <MenuItem value={'manager3'}>Jak</MenuItem>
-
+                    {managerList?.map((item) => (
+                      <MenuItem value={item.value}>{item.label}</MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </Grid>
@@ -1581,13 +1628,11 @@ const Projects = ({ _history, tasks }) => {
                       ))}
                     </Select>
 
-
                     {formik.touched.milestone && formik.errors.milestone && (
                       <FormHelperText error id="standard-weight-helper-text-Password-login">
                         {formik.errors.milestone}
                       </FormHelperText>
                     )}
-
                   </FormControl>
                 ) : (
                   <>
@@ -1648,59 +1693,323 @@ const Projects = ({ _history, tasks }) => {
             </Button>
           </form>
         </MainCard>
-      )
-      }
-      {
-        view.mode === 'Initial' && (
-          <MainCard
-            title="Project"
-            secondary={
-              <Box
-                sx={{
-                  ml: 2,
-                  // mr: 3,
-                  [theme.breakpoints.down('md')]: {
-                    mr: 2
-                  }
-                }}
-              >
-                <ButtonBase sx={{ borderRadius: '12px' }}>
-                  <Avatar
-                    variant="rounded"
-                    sx={{
-                      ...theme.typography.commonAvatar,
-                      ...theme.typography.mediumAvatar,
-                      transition: 'all .2s ease-in-out',
-                      background: theme.palette.secondary.light,
-                      color: theme.palette.secondary.dark,
-                      '&[aria-controls="menu-list-grow"],&:hover': {
-                        background: theme.palette.secondary.dark,
-                        color: theme.palette.secondary.light
-                      }
+      )}
+      {view.mode === 'Initial' && (
+        <MainCard
+          title="Project"
+          secondary={
+            <Box
+              sx={{
+                ml: 2,
+                // mr: 3,
+                [theme.breakpoints.down('md')]: {
+                  mr: 2
+                }
+              }}
+            >
+              <ButtonBase sx={{ borderRadius: '12px' }}>
+                <Avatar
+                  variant="rounded"
+                  sx={{
+                    ...theme.typography.commonAvatar,
+                    ...theme.typography.mediumAvatar,
+                    transition: 'all .2s ease-in-out',
+                    background: theme.palette.secondary.light,
+                    color: theme.palette.secondary.dark,
+                    '&[aria-controls="menu-list-grow"],&:hover': {
+                      background: theme.palette.secondary.dark,
+                      color: theme.palette.secondary.light
+                    }
+                  }}
+                  aria-haspopup="true"
+                  onClick={handleToggle}
+                  color="inherit"
+                >
+                  <IconPlus stroke={2} size="1.3rem" />
+                </Avatar>
+              </ButtonBase>
+            </Box>
+          }
+        >
+          <MaterialReactTable table={table} />
+        </MainCard>
+      )}
+      {view.mode === 'Edit' && (
+        <MainCard
+          title="Project Updations"
+          secondary={
+            <Box
+              sx={{
+                ml: 2,
+                // mr: 3,
+                [theme.breakpoints.down('md')]: {
+                  mr: 2
+                }
+              }}
+            >
+              <ButtonBase sx={{ borderRadius: '12px' }}>
+                <Avatar
+                  variant="rounded"
+                  sx={{
+                    ...theme.typography.commonAvatar,
+                    ...theme.typography.mediumAvatar,
+                    transition: 'all .2s ease-in-out',
+                    background: theme.palette.secondary.light,
+                    color: theme.palette.secondary.dark,
+                    '&[aria-controls="menu-list-grow"],&:hover': {
+                      background: theme.palette.secondary.dark,
+                      color: theme.palette.secondary.light
+                    }
+                  }}
+                  aria-haspopup="true"
+                  onClick={handleClose}
+                  color="inherit"
+                >
+                  <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
+                </Avatar>
+              </ButtonBase>
+            </Box>
+          }
+        >
+          <form onSubmit={formik.handleSubmit}>
+            <Grid container>
+              <Grid item xs={4} p={2}>
+                <FormControl fullWidth error={Boolean(formik.touched.rfqNumber && formik.errors.rfqNumber)}>
+                  <InputLabel id="additional-select-label">RFQ Number</InputLabel>
+                  <Select
+                    name="rfqNumber"
+                    value={formik.values.rfqNumber}
+                    onChange={(e) => {
+                      formik.handleChange(e);
+                      handleSelectChange(e);
                     }}
-                    aria-haspopup="true"
-                    onClick={handleToggle}
-                    color="inherit"
+                    onBlur={formik.handleBlur}
                   >
-                    <IconPlus stroke={2} size="1.3rem" />
-                  </Avatar>
-                </ButtonBase>
-              </Box>
-            }
-          >
-            <MaterialReactTable table={table} />
-          </MainCard>
-        )
-      }
-      {
-        view.mode === 'Edit' && (
+                    {rfqNumber.map((lead, index) => (
+                      <MenuItem key={index} value={lead.value}>
+                        {lead.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                {formik.touched.rfqNumber && formik.errors.rfqNumber && (
+                  <FormHelperText error id="standard-weight-helper-text-Password-login">
+                    {formik.errors.rfqNumber}
+                  </FormHelperText>
+                )}
+              </Grid>
+              <Grid xs={4} p={2}>
+                <TextField
+                  error={Boolean(formik.touched.companyName && formik.errors.companyName)}
+                  fullWidth
+                  id="outlined-basic"
+                  label="Company Name"
+                  variant="outlined"
+                  name="companyName"
+                  value={selectedRFQ}
+                  disabled
+                  onBlur={formik.handleBlur}
+                  onChange={formik.handleChange}
+                />
+                {formik.touched.companyName && formik.errors.companyName && (
+                  <FormHelperText error id="standard-weight-helper-text-Password-login">
+                    {formik.errors.companyName}
+                  </FormHelperText>
+                )}
+              </Grid>
+              <Grid xs={4} p={2}>
+                <DatePicker
+                  oneTap
+                  style={{ width: 200 }}
+                  placeholder="Assigned Date"
+                  name="assignedDate"
+                  aria-autocomplete="false"
+                  autoComplete="false"
+                  onChange={(e) => handleStartDateChange(e)}
+                  value={parseDate(formik.values.assignedDate)}
+                />
+                {/* {formik.touched.assignedDate && formik.errors.assignedDate && (
+                  <FormHelperText error id="standard-weight-helper-text-Password-login">
+                    {formik.errors.assignedDate}
+                  </FormHelperText>
+                )} */}
+              </Grid>
+              <Grid xs={4} p={2}>
+                <DatePicker
+                  oneTap
+                  style={{ width: 200 }}
+                  placeholder="Target Date"
+                  name="targetDate"
+                  onChange={(e) => handleEndDateChange(e)}
+                  value={parseDate(formik.values.targetDate)}
+                />
+              </Grid>
+
+              {/* <Grid xs={4} p={2}>
+                <FormControl fullWidth error={Boolean(formik.touched.status && formik.errors.status)}>
+                  <InputLabel id="demo-simple-select-label">Status</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    label="status"
+                    name="status"
+                    value={formik.values.status}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  >
+                    <MenuItem value={'newlead'}>OnGoing</MenuItem>
+                    <MenuItem value={'contactEstablish'}>Customer Review</MenuItem>
+                    <MenuItem value={'technicleMeeting'}>Internal Review</MenuItem>
+                    <MenuItem value={'requirementConfirm'}>Complete</MenuItem>
+                    <MenuItem value={'hold'}>Hold</MenuItem>
+                  </Select>
+                </FormControl>
+                {formik.touched.status && formik.errors.status && (
+                  <FormHelperText error id="standard-weight-helper-text-Password-login">
+                    {formik.errors.status}
+                  </FormHelperText>
+                )}
+              </Grid> */}
+              <Grid xs={4} p={2}>
+                <TextField
+                  error={Boolean(formik.touched.description && formik.errors.description)}
+                  name="description"
+                  value={formik.values.description}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  fullWidth
+                  id="outlined-basic"
+                  label="description"
+                  variant="outlined"
+                />
+                {formik.touched.description && formik.errors.description && (
+                  <FormHelperText error id="standard-weight-helper-text-Password-login">
+                    {formik.errors.description}
+                  </FormHelperText>
+                )}
+              </Grid>
+              <Grid xs={4} p={2}>
+                <FormControl fullWidth error={Boolean(formik.touched.manager && formik.errors.manager)}>
+                  <InputLabel id="demo-simple-select-label">Manager</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    label="manager"
+                    name="manager"
+                    value={formik.values.manager}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  >
+                    {managerList?.map((item) => (
+                      <MenuItem value={item.value}>{item.label}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid xs={4} p={2}>
+                {showSelect ? (
+                  <FormControl fullWidth>
+                    <InputLabel id="demo-simple-select-label">MileStone</InputLabel>
+                    <Select
+                      error={Boolean(formik.touched.milestone && formik.errors.milestone)}
+                      value={mileselectedOption}
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      fullWidth
+                      name="milestone"
+                      onChange={handleSelectOnChange}
+                      label="Select"
+                      placeholder="Select"
+                    >
+                      {customOptions.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+
+                    {formik.touched.milestone && formik.errors.milestone && (
+                      <FormHelperText error id="standard-weight-helper-text-Password-login">
+                        {formik.errors.milestone}
+                      </FormHelperText>
+                    )}
+                  </FormControl>
+                ) : (
+                  <>
+                    <div style={{ display: 'flex' }}>
+                      <TextField
+                        type="text"
+                        fullWidth
+                        value={customOption}
+                        onChange={handleSelectInputChange}
+                        placeholder="Enter custom option"
+                      />
+                      <Button onClick={handleSaveCustomOption}>Save</Button>
+                    </div>
+                  </>
+                )}
+              </Grid>
+              <Grid item>
+                {showDescription && (
+                  <TextField
+                    type="text"
+                    fullWidth
+                    value={description}
+                    onChange={handleDescriptionChange}
+                    placeholder="Enter description"
+                    style={{ marginTop: '10px' }}
+                  />
+                )}
+              </Grid>
+              <Grid item xs={4} p={2}>
+                <FormLabel id="demo-row-radio-buttons-group-label">P0.NO</FormLabel>
+                <RadioGroup aria-label="yesno" name="yesno" value={selectedOption} onChange={handleOptionChange} row>
+                  <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+                  <FormControlLabel value="no" control={<Radio />} label="No" />
+                </RadioGroup>
+              </Grid>
+              {/* {selectedOption === 'yes' && (
+                <Grid item xs={4} p={2}>
+                  <TextField
+                    fullWidth
+                    id="status-display"
+                    label="PO Number"
+                    variant="outlined"
+                    value={textFieldText}
+                    disabled={selectedOption === 'no'}
+                    onChange={(e) => setTextFieldText(e.target.value)}
+                  />
+                </Grid>
+              )} */}
+            </Grid>
+            <Box p={2} className="edit-table-container">
+              <MaterialReactTable sx={{ boxShadow: 'rgba(0, 0, 0, 0.18) 1.95px 1.95px 2.7px' }} table={editableForproject} />
+            </Box>
+            <Box p={2} className="edit-table-container">
+              <MaterialReactTable sx={{ boxShadow: 'rgba(0, 0, 0, 0.18) 1.95px 1.95px 2.7px' }} table={financeHistorytable} />
+            </Box>
+            <Box p={2} className="edit-table-container">
+              <MaterialReactTable table={editableForHistory} />
+            </Box>
+            <Box p={2} className="edit-table-container">
+              <MaterialReactTable table={editableForTask} />
+            </Box>
+            <Button variant="contained" style={{ float: 'right', margin: '2rem' }} type="submit">
+              Update
+            </Button>
+          </form>
+        </MainCard>
+      )}
+      {view.mode === 'View' && (
+        <>
           <MainCard
-            title="Project Updations"
+            title="Note"
             secondary={
               <Box
                 sx={{
                   ml: 2,
-                  // mr: 3,
+
                   [theme.breakpoints.down('md')]: {
                     mr: 2
                   }
@@ -1730,467 +2039,225 @@ const Projects = ({ _history, tasks }) => {
               </Box>
             }
           >
-            <form onSubmit={formik.handleSubmit}>
-              <Grid container>
-                <Grid item xs={4} p={2}>
-                  <FormControl fullWidth error={Boolean(formik.touched.rfqNumber && formik.errors.rfqNumber)}>
-                    <InputLabel id="additional-select-label">RFQ Number</InputLabel>
-                    <Select
-                      name="rfqNumber"
-                      disabled
-                      value={formik.values.rfqNumber}
-                      onChange={(e) => {
-                        formik.handleChange(e);
-                        handleSelectChange(e);
-                      }}
-                      onBlur={formik.handleBlur}
-                    >
-                      {rfqNumber.map((lead, index) => (
-                        <MenuItem key={index} value={lead.value}>
-                          {lead.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  {formik.touched.rfqNumber && formik.errors.rfqNumber && (
-                    <FormHelperText error id="standard-weight-helper-text-Password-login">
-                      {formik.errors.rfqNumber}
-                    </FormHelperText>
-                  )}
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <TextField
-                    error={Boolean(formik.touched.companyName && formik.errors.companyName)}
-                    fullWidth
-                    id="outlined-basic"
-                    label="Company Name"
-                    variant="outlined"
-                    name="companyName"
-                    value={formik.values.companyName}
-                    disabled
-                    onBlur={formik.handleBlur}
-                    onChange={formik.handleChange}
-                  />
-                  {formik.touched.companyName && formik.errors.companyName && (
-                    <FormHelperText error id="standard-weight-helper-text-Password-login">
-                      {formik.errors.companyName}
-                    </FormHelperText>
-                  )}
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <DatePicker
-                    oneTap
-                    style={{ width: 200 }}
-                    placeholder="Assigned Date"
-                    name="assignedDate"
-                    onChange={(e) => handleStartDateChange(e)}
-                  />
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <DatePicker
-                    oneTap
-                    style={{ width: 200 }}
-                    placeholder="Target Date"
-                    name="targetDate"
-                    onChange={(e) => handleEndDateChange(e)}
-                  />
-                </Grid>
+            <Grid container m={3}>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Project Number</label>
+                <p>{viewId?.projectNumber}</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Company Name</label>
+                <p>{viewId?.companyName}</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Assigned Date</label>
+                <p>{viewId?.assignedDate?.slice(0, 10)}</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Target Date</label>
+                <p>{viewId?.targetDate?.slice(0, 10)}</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Status</label>
+                <p>{viewId?.status}</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Manager</label>
+                <p>{viewId?.manager}</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">MileStone</label>
+                <p>{viewId?.milestone}</p>
+              </Grid>
+            </Grid>
+            <Grid container p={3}>
+              <Grid xs={12} p={2}>
+                <div className="teamallocation-container">
+                  <MainCard
+                    title="Team Allocation"
+                    secondary={
+                      <Box
+                        sx={{
+                          ml: 2,
 
-                {/* <Grid xs={4} p={2}>
-            <FormControl fullWidth error={Boolean(formik.touched.status && formik.errors.status)}>
-              <InputLabel id="demo-simple-select-label">Status</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                label="status"
-                name="status"
-                value={formik.values.status}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-              >
-                <MenuItem value={'newlead'}>OnGoing</MenuItem>
-                <MenuItem value={'contactEstablish'}>Customer Review</MenuItem>
-                <MenuItem value={'technicleMeeting'}>Internal Review</MenuItem>
-                <MenuItem value={'requirementConfirm'}>Complete</MenuItem>
-                <MenuItem value={'hold'}>Hold</MenuItem>
-              </Select>
-            </FormControl>
-            {formik.touched.status && formik.errors.status && (
-              <FormHelperText error id="standard-weight-helper-text-Password-login">
-                {formik.errors.status}
-              </FormHelperText>
-            )}
-          </Grid> */}
-                {/* <Grid xs={4} p={2}>
-            <TextField
-              error={Boolean(formik.touched.description && formik.errors.description)}
-              name="description"
-              value={formik.values.description}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              fullWidth
-              id="outlined-basic"
-              label="description"
-              variant="outlined"
-            />
-            {formik.touched.description && formik.errors.description && (
-              <FormHelperText error id="standard-weight-helper-text-Password-login">
-                {formik.errors.description}
-              </FormHelperText>
-            )}
-          </Grid> */}
-                <Grid xs={4} p={2}>
-                  <FormControl fullWidth error={Boolean(formik.touched.manager && formik.errors.manager)}>
-                    <InputLabel id="demo-simple-select-label">Manager</InputLabel>
-                    <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      label="manager"
-                      name="manager"
-                      value={formik.values.manager}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                    >
-                      <MenuItem value={'manager1'}>Kotty</MenuItem>
-                      <MenuItem value={'manager2'}>Zara</MenuItem>
-                      <MenuItem value={'manager3'}>Jak</MenuItem>
-
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                <Grid xs={4} p={2}>
-                  {showSelect ? (
-                    <FormControl fullWidth>
-                      <InputLabel id="demo-simple-select-label">MileStone</InputLabel>
-                      <Select
-                        error={Boolean(formik.touched.milestone && formik.errors.milestone)}
-                        value={mileselectedOption}
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        fullWidth
-                        name="milestone"
-                        onChange={handleSelectOnChange}
-                        label="Select"
-                        placeholder="Select"
+                          [theme.breakpoints.down('md')]: {
+                            mr: 2
+                          }
+                        }}
                       >
-                        {customOptions.map((option) => (
-                          <MenuItem key={option.value} value={option.value}>
-                            {option.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-
-
-                      {formik.touched.milestone && formik.errors.milestone && (
-                        <FormHelperText error id="standard-weight-helper-text-Password-login">
-                          {formik.errors.milestone}
-                        </FormHelperText>
-                      )}
-
-                    </FormControl>
-                  ) : (
-                    <>
-                      <div style={{ display: 'flex' }}>
-                        <TextField
-                          type="text"
-                          fullWidth
-                          value={customOption}
-                          onChange={handleSelectInputChange}
-                          placeholder="Enter custom option"
-                        />
-                        <Button onClick={handleSaveCustomOption}>Save</Button>
-                      </div>
-                    </>
-                  )}
-                </Grid>
-                <Grid item xs={4} p={2}>
-                  <FormLabel id="demo-row-radio-buttons-group-label">P0.NO</FormLabel>
-                  <RadioGroup aria-label="yesno" name="yesno" value={selectedOption} onChange={handleOptionChange} row>
-                    <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-                    <FormControlLabel value="no" control={<Radio />} label="No" />
-                  </RadioGroup>
-                </Grid>
-              </Grid>
-
-
-              <Box p={2} className="edit-table-container">
-                <MaterialReactTable sx={{ boxShadow: 'rgba(0, 0, 0, 0.18) 1.95px 1.95px 2.7px' }} table={editableForproject} />
-              </Box>
-              <Box p={2} className="edit-table-container">
-                <MaterialReactTable table={editableForHistory} />
-              </Box>
-              <Box p={2} className="edit-table-container">
-                <MaterialReactTable table={editableForTask} />
-              </Box>
-              <Box p={2} className="edit-table-container">
-                <MaterialReactTable table={financeHistorytable} />
-              </Box>
-              <Button variant="contained" style={{ float: 'right', margin: '2rem' }} type="submit">
-                Update
-              </Button>
-            </form>
-          </MainCard>
-        )
-      }
-      {
-        view.mode === 'View' && (
-          <>
-            <MainCard
-              title="Note"
-              secondary={
-                <Box
-                  sx={{
-                    ml: 2,
-
-                    [theme.breakpoints.down('md')]: {
-                      mr: 2
+                        <ButtonBase sx={{ borderRadius: '12px' }}>
+                          <Avatar
+                            variant="rounded"
+                            sx={{
+                              ...theme.typography.commonAvatar,
+                              ...theme.typography.mediumAvatar,
+                              transition: 'all .2s ease-in-out',
+                              background: theme.palette.secondary.light,
+                              color: theme.palette.secondary.dark,
+                              '&[aria-controls="menu-list-grow"],&:hover': {
+                                background: theme.palette.secondary.dark,
+                                color: theme.palette.secondary.light
+                              }
+                            }}
+                            aria-haspopup="true"
+                            color="inherit"
+                          >
+                            <TaskAlt stroke={2} size="1.3rem" />
+                          </Avatar>
+                        </ButtonBase>
+                      </Box>
                     }
-                  }}
-                >
-                  <ButtonBase sx={{ borderRadius: '12px' }}>
-                    <Avatar
-                      variant="rounded"
-                      sx={{
-                        ...theme.typography.commonAvatar,
-                        ...theme.typography.mediumAvatar,
-                        transition: 'all .2s ease-in-out',
-                        background: theme.palette.secondary.light,
-                        color: theme.palette.secondary.dark,
-                        '&[aria-controls="menu-list-grow"],&:hover': {
-                          background: theme.palette.secondary.dark,
-                          color: theme.palette.secondary.light
-                        }
-                      }}
-                      aria-haspopup="true"
-                      onClick={handleClose}
-                      color="inherit"
-                    >
-                      <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
-                    </Avatar>
-                  </ButtonBase>
-                </Box>
-              }
-            >
-              <Grid container m={3}>
-                <Grid xs={3} p={2}>
-                  <label className="text-muted">Project Number</label>
-                  <p>{viewId?.projectNumber}</p>
-                </Grid>
-                <Grid xs={3} p={2}>
-                  <label className="text-muted">Company Name</label>
-                  <p>{viewId?.companyName}</p>
-                </Grid>
-                <Grid xs={3} p={2}>
-                  <label className="text-muted">Assigned Date</label>
-                  <p>{viewId?.assignedDate?.slice(0, 10)}</p>
-                </Grid>
-                <Grid xs={3} p={2}>
-                  <label className="text-muted">Target Date</label>
-                  <p>{viewId?.targetDate?.slice(0, 10)}</p>
-                </Grid>
-                <Grid xs={3} p={2}>
-                  <label className="text-muted">Status</label>
-                  <p>{viewId?.status}</p>
-                </Grid>
-                <Grid xs={3} p={2}>
-                  <label className="text-muted">Manager</label>
-                  <p>{viewId?.manager}</p>
-                </Grid>
-                <Grid xs={3} p={2}>
-                  <label className="text-muted">MileStone</label>
-                  <p>{viewId?.milestone}</p>
-                </Grid>
-              </Grid>
-              <Grid container p={3}>
-                <Grid xs={12} p={2}>
-                  <div className="teamallocation-container">
-                    <MainCard
-                      title="Team Allocation"
-                      secondary={
-                        <Box
-                          sx={{
-                            ml: 2,
-
-                            [theme.breakpoints.down('md')]: {
-                              mr: 2
-                            }
-                          }}
-                        >
-                          <ButtonBase sx={{ borderRadius: '12px' }}>
-                            <Avatar
-                              variant="rounded"
-                              sx={{
-                                ...theme.typography.commonAvatar,
-                                ...theme.typography.mediumAvatar,
-                                transition: 'all .2s ease-in-out',
-                                background: theme.palette.secondary.light,
-                                color: theme.palette.secondary.dark,
-                                '&[aria-controls="menu-list-grow"],&:hover': {
-                                  background: theme.palette.secondary.dark,
-                                  color: theme.palette.secondary.light
-                                }
-                              }}
-                              aria-haspopup="true"
-                              color="inherit"
-                            >
-                              <TaskAlt stroke={2} size="1.3rem" />
-                            </Avatar>
-                          </ButtonBase>
-                        </Box>
-                      }
-                    >
-                      {viewId?.projectAllocation.map((data) => (
-                        <Card sx={{ margin: '1rem', padding: '1rem' }} className="card-hovered">
-                          <div className="d-flex justify-content-between">
-                            <div className="d-flex">
-                              {/* <Avatar sx={{ bgcolor: '#ede7f6', color: '#5e35b1' }}>{data?.employeeName[0]}</Avatar> */}
-                              <div className="ms-1">
-                                <p className="avatar-name">{data?.employeeCode}</p>
-                                <div className="d-flex align-items-center">
-                                  <p className="text-muted-light m-0">{data?.team}</p> &nbsp; /
-                                  <div>
-                                    <PeopleAltTwoTone style={{ fontSize: 'medium' }} />
-                                    <span className="ms-01">{data.location}</span>
-                                  </div>
+                  >
+                    {viewId?.projectAllocation.map((data) => (
+                      <Card sx={{ margin: '1rem', padding: '1rem' }} className="card-hovered">
+                        <div className="d-flex justify-content-between">
+                          <div className="d-flex">
+                            {/* <Avatar sx={{ bgcolor: '#ede7f6', color: '#5e35b1' }}>{data?.employeeName[0]}</Avatar> */}
+                            <div className="ms-1">
+                              <p className="avatar-name">{data?.employeeCode}</p>
+                              <div className="d-flex align-items-center">
+                                <p className="text-muted-light m-0">{data?.team}</p> &nbsp; /
+                                <div>
+                                  <PeopleAltTwoTone style={{ fontSize: 'medium' }} />
+                                  <span className="ms-01">{data.location}</span>
                                 </div>
                               </div>
                             </div>
-                            <div className="float-end">
-                              <p className="text-muted-light m-0 text-end">Assigned Date : &nbsp; {data?.fromDate}</p>
-                              <p className="text-muted-light m-0 text-end">Target Date : &nbsp; {data?.toDate}</p>
-                              <div className="d-flex justify-content-end">
-                                <p
-                                  className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${data?.status === 'completed' ? 'badge-success max-width' : ''
-                                    }${data?.status === 'not-started' ? 'badge-danger max-width' : ''}`}
-                                >
-                                  {data?.statusRequest} {data?.status}
-                                </p>
-                              </div>
+                          </div>
+                          <div className="float-end">
+                            <p className="text-muted-light m-0 text-end">Assigned Date : &nbsp; {data?.fromDate}</p>
+                            <p className="text-muted-light m-0 text-end">Target Date : &nbsp; {data?.toDate}</p>
+                            <div className="d-flex justify-content-end">
+                              <p
+                                className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${
+                                  data?.status === 'completed' ? 'badge-success max-width' : ''
+                                }${data?.status === 'not-started' ? 'badge-danger max-width' : ''}`}
+                              >
+                                {data?.statusRequest} {data?.status}
+                              </p>
                             </div>
                           </div>
-                        </Card>
-                      ))}
-                    </MainCard>
-                  </div>
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <div className="history-container">
-                    <MainCard
-                      title="History"
-                      secondary={
-                        <Box
-                          sx={{
-                            ml: 2,
-                            // mr: 3,
-                            [theme.breakpoints.down('md')]: {
-                              mr: 2
-                            }
-                          }}
-                        >
-                          <ButtonBase sx={{ borderRadius: '12px' }}>
-                            <Avatar
-                              variant="rounded"
-                              sx={{
-                                ...theme.typography.commonAvatar,
-                                ...theme.typography.mediumAvatar,
-                                transition: 'all .2s ease-in-out',
-                                background: theme.palette.secondary.light,
-                                color: theme.palette.secondary.dark,
-                                '&[aria-controls="menu-list-grow"],&:hover': {
-                                  background: theme.palette.secondary.dark,
-                                  color: theme.palette.secondary.light
-                                }
-                              }}
-                              aria-haspopup="true"
-                              color="inherit"
-                            >
-                              <History stroke={2} size="1.3rem" />
-                            </Avatar>
-                          </ButtonBase>
-                        </Box>
-                      }
-                    >
-                    </MainCard>
-                  </div>
-                </Grid>
-                <Grid xs={8} p={2}>
-                  <div className="task-container">
-                    <MainCard
-                      title="Task"
-                      secondary={
-                        <Box
-                          sx={{
-                            ml: 2,
-                            [theme.breakpoints.down('md')]: {
-                              mr: 2
-                            }
-                          }}
-                        >
-                          <ButtonBase sx={{ borderRadius: '12px' }}>
-                            <Avatar
-                              variant="rounded"
-                              sx={{
+                        </div>
+                      </Card>
+                    ))}
+                  </MainCard>
+                </div>
+              </Grid>
+              <Grid xs={4} p={2}>
+                <div className="history-container">
+                  <MainCard
+                    title="History"
+                    secondary={
+                      <Box
+                        sx={{
+                          ml: 2,
+                          // mr: 3,
+                          [theme.breakpoints.down('md')]: {
+                            mr: 2
+                          }
+                        }}
+                      >
+                        <ButtonBase sx={{ borderRadius: '12px' }}>
+                          <Avatar
+                            variant="rounded"
+                            sx={{
+                              ...theme.typography.commonAvatar,
+                              ...theme.typography.mediumAvatar,
+                              transition: 'all .2s ease-in-out',
+                              background: theme.palette.secondary.light,
+                              color: theme.palette.secondary.dark,
+                              '&[aria-controls="menu-list-grow"],&:hover': {
+                                background: theme.palette.secondary.dark,
+                                color: theme.palette.secondary.light
+                              }
+                            }}
+                            aria-haspopup="true"
+                            color="inherit"
+                          >
+                            <History stroke={2} size="1.3rem" />
+                          </Avatar>
+                        </ButtonBase>
+                      </Box>
+                    }
+                  ></MainCard>
+                </div>
+              </Grid>
+              <Grid xs={8} p={2}>
+                <div className="task-container">
+                  <MainCard
+                    title="Task"
+                    secondary={
+                      <Box
+                        sx={{
+                          ml: 2,
+                          [theme.breakpoints.down('md')]: {
+                            mr: 2
+                          }
+                        }}
+                      >
+                        <ButtonBase sx={{ borderRadius: '12px' }}>
+                          <Avatar
+                            variant="rounded"
+                            sx={
+                              {
                                 // Avatar styles
-                              }}
-                              aria-haspopup="true"
-                              color="inherit"
-                            >
-                              <TaskAlt stroke={2} size="1.3rem" />
-                            </Avatar>
-                          </ButtonBase>
-                        </Box>
-                      } >
-                      {tasks && Array.isArray(tasks) && tasks.map((data, index) => (
+                              }
+                            }
+                            aria-haspopup="true"
+                            color="inherit"
+                          >
+                            <TaskAlt stroke={2} size="1.3rem" />
+                          </Avatar>
+                        </ButtonBase>
+                      </Box>
+                    }
+                  >
+                    {tasks &&
+                      Array.isArray(tasks) &&
+                      tasks.map((data, index) => (
                         <Card key={index} sx={{ margin: '1rem', padding: '1rem' }} className="card-hover">
-                          <Typography variant="h6" component="span">{data?.title}</Typography>
+                          <Typography variant="h6" component="span">
+                            {data?.title}
+                          </Typography>
                           <Typography variant="body1">{data?.description}</Typography>
                         </Card>
                       ))}
-                    </MainCard>
-                  </div>
-                </Grid>
-                <Grid>
-                  <TableContainer component={Paper}>
-                    <MainCard
-                      title="Finance History">
-                      <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>Date</TableCell>
-                            <TableCell align="right">Ref No/Bill</TableCell>
-                            <TableCell align="right">Amount</TableCell>
-                            <TableCell align="right">Tax</TableCell>
-                            <TableCell align="right">Status</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {Financeviewrows.map((row) => (
-                            <TableRow
-                              key={row.name}
-                              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                            >
-                              <TableCell component="th" scope="row">
-                                {row.Date}
-                              </TableCell>
-                              <TableCell align="right">{row.Ref}</TableCell>
-                              <TableCell align="right">{row.Amount}</TableCell>
-                              <TableCell align="right">{row.Tax}</TableCell>
-                              <TableCell align="right">{row.Status}</TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </MainCard>
-                  </TableContainer>
-                </Grid>
-
+                  </MainCard>
+                </div>
               </Grid>
-
-            </MainCard>
-          </>
-        )
-      }
+              <Grid>
+                <TableContainer component={Paper}>
+                  <MainCard title="Finance History">
+                    <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Date</TableCell>
+                          <TableCell align="right">Ref No/Bill</TableCell>
+                          <TableCell align="right">Amount</TableCell>
+                          <TableCell align="right">Tax</TableCell>
+                          <TableCell align="right">Status</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {Financeviewrows.map((row) => (
+                          <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                            <TableCell component="th" scope="row">
+                              {row.Date}
+                            </TableCell>
+                            <TableCell align="right">{row.Ref}</TableCell>
+                            <TableCell align="right">{row.Amount}</TableCell>
+                            <TableCell align="right">{row.Tax}</TableCell>
+                            <TableCell align="right">{row.Status}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </MainCard>
+                </TableContainer>
+              </Grid>
+            </Grid>
+          </MainCard>
+        </>
+      )}
       <Dialog fullWidth open={open} TransitionComponent={Transition} keepMounted>
         <DialogTitle>
           <Typography variant="h3">Delete Lead</Typography>
@@ -2215,7 +2282,7 @@ const Projects = ({ _history, tasks }) => {
           </Button>
         </DialogActions>
       </Dialog>
-    </div >
+    </div>
   );
 };
 export default Projects;

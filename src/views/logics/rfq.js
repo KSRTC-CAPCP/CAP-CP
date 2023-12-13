@@ -1079,8 +1079,6 @@ const BusinessRFQ = () => {
     'red'
   );
   const statusFilter = historyTableData.map((item) => item.statusRequest);
-  const filteredStatusArray = statusFilter.filter((statusRequest) => statusRequest === 'TCO Submitted Approved');
-  console.log(rfqSummary, 'filteredStatusArray');
   return (
     <div className="max">
       {view.mode === 'Initial' && (
