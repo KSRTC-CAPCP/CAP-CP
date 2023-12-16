@@ -11,6 +11,8 @@ import themes from 'themes';
 
 // project imports
 import NavigationScroll from 'layout/NavigationScroll';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 // ==============================|| APP ||============================== //
 
@@ -19,12 +21,13 @@ const App = () => {
 
   return (
     <StyledEngineProvider injectFirst>
+    <DndProvider backend={HTML5Backend}>
       <ThemeProvider theme={themes(customization)}>
         <CssBaseline />
         <NavigationScroll>
           <Routes />
         </NavigationScroll>
-      </ThemeProvider>
+      </ThemeProvider></DndProvider>
     </StyledEngineProvider>
   );
 };
