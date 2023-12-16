@@ -225,8 +225,9 @@ const Profiles = () => {
   const [dob, setDOB] = useState('');
   const [localData, setLocalData] = useState('');
   const [teamsData, setTeamsData] = useState([]);
-  const [employeeData, setEmployeeData] = useState([]);
   const [deleteId, setDeleteId] = useState('');
+  const [employeeData, setEmployeeData] = useState([]);
+  const [employeeViewData, setEmployeeViewData] = useState([]);
   const [editId, setEditId] = useState('');
   const [viewId, setViewId] = useState('');
   const teamsOption = teamsData.map((data) => ({
@@ -425,13 +426,15 @@ const Profiles = () => {
       mode: 'Edit'
     });
   };
-  const handleView = (id) => {
-    setViewId(id.original._id);
+  const handleView = async (id) => {
+    setViewId(id?.original);
     console.log(id.original._id, 'worked');
     setView({
       visible: true,
       mode: 'View'
     });
+    const endpoint = PROFILES_GET_ID(id.original._id);
+    const getByIdData = await fetchData(endpoint, localData?.accessToken);
   };
   const confirmDelete = async () => {
     try {
@@ -791,7 +794,7 @@ const Profiles = () => {
                 )}
               </Grid>
               <Grid xs={4} p={2}>
-                <FormControl fullWidth error={Boolean(formik.touched.Team && formik.errors.Team)}>
+                <FormControl fullWidth error={Boolean(formik.touched.Role && formik.errors.Role)}>
                   <InputLabel id="demo-simple-select-label">Role</InputLabel>
                   <Select
                     labelId="demo-simple-select-label"
@@ -1022,7 +1025,7 @@ const Profiles = () => {
                 )}
               </Grid>
               <Grid xs={4} p={2}>
-                <FormControl fullWidth error={Boolean(formik.touched.Team && formik.errors.Team)}>
+                <FormControl fullWidth error={Boolean(formik.touched.Role && formik.errors.Role)}>
                   <InputLabel id="demo-simple-select-label">Role</InputLabel>
                   <Select
                     labelId="demo-simple-select-label"
@@ -1033,8 +1036,9 @@ const Profiles = () => {
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                   >
-                    <MenuItem value={'admin'}>Admin</MenuItem>
-                    <MenuItem value={'user'}>Employee</MenuItem>
+                    <MenuItem value={'Admin'}>Admin</MenuItem>
+                    <MenuItem value={'Employee'}>Employee</MenuItem>
+                    <MenuItem value={'Manager'}>Manager</MenuItem>
                   </Select>
                 </FormControl>
                 {formik.touched.Role && formik.errors.Role && (
@@ -1098,27 +1102,39 @@ const Profiles = () => {
             <Grid container m={3}>
               <Grid xs={3} p={2}>
                 <label className="text-muted">Employee Code</label>
-                <p>001</p>
+                <p>{viewId?.EmployeeCode}</p>
               </Grid>
               <Grid xs={3} p={2}>
                 <label className="text-muted">Name Of Candidate</label>
-                <p>Thara</p>
+                <p>{viewId?.NameOfCandidate}</p>
               </Grid>
               <Grid xs={3} p={2}>
                 <label className="text-muted">Date Of Birth</label>
-                <p>27-09-2001</p>
+                <p>{viewId?.DateOfBirth}</p>
               </Grid>
               <Grid xs={3} p={2}>
                 <label className="text-muted">Designation</label>
-                <p>Developer</p>
+                <p>{viewId?.Designation}</p>
               </Grid>
               <Grid xs={3} p={2}>
                 <label className="text-muted">Team</label>
-                <p>ABC Team</p>
+                <p>{viewId?.Team}</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Role</label>
+                <p>{viewId?.Role}</p>
               </Grid>
               <Grid xs={3} p={2}>
                 <label className="text-muted">Contact Number</label>
-                <p>9876543278</p>
+                <p>{viewId?.ContactNumber}</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Category</label>
+                <p>{viewId?.Category}</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Status</label>
+                <p>{viewId?.status === true ? 'Current Employeee' : 'Resigned Employee'}</p>
               </Grid>
             </Grid>
           </MainCard>
