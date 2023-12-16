@@ -31,7 +31,7 @@ import {
     Slide,
     Input
 } from '@mui/material';
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useState } from 'react';
 import MainCard from 'ui-component/cards/MainCard';
 import { useTheme } from '@mui/material/styles';
 import { IconDownload, IconEdit, IconEye, IconHistoryToggle, IconPlus, IconTrash, IconUpload } from '@tabler/icons';
@@ -56,9 +56,28 @@ import {
     ThumbUpSharp,
     VisibilityRounded
 } from '@mui/icons-material';
-import { useState } from 'react';
 import theme from 'themes';
 
+
+
+const ViewModal = ({ rowData, open, onClose }) => {
+    return (
+        <Dialog open={open} onClose={onClose}>
+            <DialogTitle>View Details</DialogTitle>
+            <DialogContent>
+                {/* Display the details of the selected row */}
+                <Typography>Name: {rowData.name}</Typography>
+                <Typography>Employee Code: {rowData.employeecode}</Typography>
+                {/* Add other details here */}
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose} color="primary">
+                    Close
+                </Button>
+            </DialogActions>
+        </Dialog>
+    );
+};
 
 const columnHelper = createMRTColumnHelper();
 const data = [
@@ -83,72 +102,9 @@ const data = [
 ];
 
 // const [openModal, setOpenModal] = useState(false);
-// const [openModal, setOpenModal] = useState(false);
 
-    // const handleOpenModal = () => {
-    //     setOpenModal(true);
-    // };
 
-    // const handleCloseModal = () => {
-    //     setOpenModal(false);
-    // };
 
-const columns = [
-
-    columnHelper.accessor('name', {
-        header: 'Name',
-        Cell: ({ row }) => (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-                {row && row.original && (
-                    <Avatar alt="Profile" style={{ marginRight: '8px' }}>
-                        {row.original.name.charAt(0)}
-                    </Avatar>
-                )}
-                {row && row.original && row.original.name}
-            </div>
-        ),
-    }),
-    columnHelper.accessor('employeecode', {
-        header: 'Employee Code'
-    }),
-    columnHelper.accessor('jobtitle', {
-        header: 'Job Title'
-    }),
-    columnHelper.accessor('status', {
-        header: 'Status',
-        Cell: ({ row }) => (
-            <div>
-                <Button
-                     sx={{
-                            backgroundColor: '#ede7f6',
-                            color: '#5e35b1',
-                            transition: 'background-color 0.3s',
-                            '&:hover': {
-                                backgroundColor: '#5e35b1',
-                                color: '#ede7f6',
-                            },
-                        }}
-                        onClick={handleOpenModal}
-                >
-                    View
-                </Button>
-                <Dialog open={openModal} onClose={handleCloseModal}>
-                        <DialogTitle>View Details</DialogTitle>
-                        <DialogContent>
-                            <DialogContentText>
-                                This is the content of the modal. Replace this with your view content.
-                            </DialogContentText>
-                        </DialogContent>
-                        <DialogActions>
-                            <Button onClick={handleCloseModal}>Close</Button>
-                        </DialogActions>
-                    </Dialog>
-            </div>
-
-        ),
-    }),
-
-];
 
 const csvConfig = mkConfig({
     fieldSeparator: ',',
@@ -165,9 +121,60 @@ const Transition = forwardRef(function Transition(props, ref) {
 const ManagerPanel = () => {
 
 
-    
+    const [open, setOpen] = useState(false);
+    const handleView = (id) => {
+        setOpen(true);
+    };
+    const handleClose = () => {
+        setOpen(false)
+    }
 
+    const columns = [
 
+        columnHelper.accessor('name', {
+            header: 'Name',
+            Cell: ({ row }) => (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {row && row.original && (
+                        <Avatar alt="Profile" style={{ marginRight: '8px' }}>
+                            {row.original.name.charAt(0)}
+                        </Avatar>
+                    )}
+                    {row && row.original && row.original.name}
+                </div>
+            ),
+        }),
+        columnHelper.accessor('employeecode', {
+            header: 'Employee Code'
+        }),
+        columnHelper.accessor('jobtitle', {
+            header: 'Job Title'
+        }),
+        columnHelper.accessor('status', {
+            header: 'Status',
+            Cell: ({ row }) => (
+                <div>
+                    <Button
+                        onClick={() => handleView(row)}
+                        sx={{
+                            backgroundColor: '#ede7f6',
+                            color: '#5e35b1',
+                            transition: 'background-color 0.3s',
+                            '&:hover': {
+                                backgroundColor: '#5e35b1',
+                                color: '#ede7f6',
+                            },
+                        }}
+                    >
+                        View
+                    </Button>
+
+                </div>
+
+            ),
+        }),
+
+    ];
 
     const fileInputRef = React.createRef();
     const handleImportClick = () => {
@@ -231,12 +238,6 @@ const ManagerPanel = () => {
         visible: false,
         mode: 'Initial' // 'add', 'edit', 'view'
     });
-    const [open, setOpen] = useState(false);
-    const handleDelete = () => {
-        setOpen(true);
-        console.log('open', open);
-    };
-
 
 
     const theme = useTheme();
@@ -312,6 +313,22 @@ const ManagerPanel = () => {
                     <MaterialReactTable table={table} />
                 </MainCard>
             )}
+            <Dialog
+                fullWidth
+                open={open}
+                TransitionComponent={Transition}
+                keepMounted
+            // onClose={handleClose}
+            // aria-describedby="alert-dialog-slide-description"
+            >
+                <DialogTitle className='d-flex justify-content-between'>
+                    <Typography variant="h3">Delete Lead</Typography>
+                    <Typography variant="h3" onClick={handleClose}>Close</Typography>
+                </DialogTitle>
+                <Divider />
+                <DialogContent>rrrrrrrrrrrrrrrrrr</DialogContent>
+            </Dialog>
+
         </div>
     );
 };
