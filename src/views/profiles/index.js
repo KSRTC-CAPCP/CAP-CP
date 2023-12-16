@@ -75,7 +75,17 @@ import { DatePicker, DateRangePicker } from 'rsuite';
 import { deleteData, fetchData, postData, updateData } from 'utils/apiUtils';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { PROFILES_CREATE, PROFILES_DELETE, PROFILES_GET, PROFILES_GET_ID, PROFILES_UPDATE, TEAMS_GET } from 'api/apiEndPoint';
+import {
+  PROFILES_CREATE,
+  PROFILES_DELETE,
+  PROFILES_GET,
+  PROFILES_GETBY_CAC,
+  PROFILES_GETBY_CAE,
+  PROFILES_GET_ID,
+  PROFILES_UPDATE,
+  PROFILES_UPLOAD,
+  TEAMS_GET
+} from 'api/apiEndPoint';
 import { useEffect } from 'react';
 
 const columnHelper = createMRTColumnHelper();
@@ -215,8 +225,9 @@ const Profiles = () => {
   const [dob, setDOB] = useState('');
   const [localData, setLocalData] = useState('');
   const [teamsData, setTeamsData] = useState([]);
-  const [employeeData, setEmployeeData] = useState([]);
   const [deleteId, setDeleteId] = useState('');
+  const [employeeData, setEmployeeData] = useState([]);
+  const [employeeViewData, setEmployeeViewData] = useState([]);
   const [editId, setEditId] = useState('');
   const [viewId, setViewId] = useState('');
   const teamsOption = teamsData.map((data) => ({
@@ -292,11 +303,22 @@ const Profiles = () => {
     fileInputRef.current.click();
   };
   const [selectedOption, setSelectedOption] = React.useState('active');
+  const [selectedOptionCategory, setSelectedOptionCategory] = React.useState('Direct Hiring');
 
   const handleOptionChange = (event) => {
     console.log(event.target.value, 'event');
     setSelectedOption(event.target.value);
   };
+  const handleOptionChangeCategory = (event) => {
+    console.log(event.target.value, 'event');
+    setSelectedOptionCategory(event.target.value);
+  };
+  const [hired, setHired] = useState(false);
+  const handleTableToggle = () => {
+    setHired(!hired);
+  };
+
+  console.log(hired, 'hired');
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -315,17 +337,31 @@ const Profiles = () => {
   };
 
   const uploadToServer = async (data) => {
+    console.log(data, 'data here');
     try {
-      const response = await fetch('http://localhost:3001/upload', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ data })
+      // Convert numeric dates to DD-MM-YYYY format and adjust status
+      const parsedData = data.map((item) => {
+        const formattedDateOfBirth = new Date(item.DateOfBirth).toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+        const formattedDate = formattedDateOfBirth.replace(/\//g, '-');
+
+        // Update the values with the formatted date and adjusted status
+        const formattedValues = {
+          ...item,
+          DateOfBirth: formattedDate,
+          status: true
+        };
+        return formattedValues;
       });
 
-      // Handle response if needed
-      console.log('Upload successful:', response);
+      console.log(parsedData, 'parse');
+
+      // Now, parsedData has the desired format, send it to the server
+      await postData(PROFILES_UPLOAD, { employees: parsedData }, localData?.accessToken);
+      fetchAllData();
     } catch (error) {
       console.error('Error uploading file:', error);
     }
@@ -390,13 +426,15 @@ const Profiles = () => {
       mode: 'Edit'
     });
   };
-  const handleView = (id) => {
-    setViewId(id.original._id);
+  const handleView = async (id) => {
+    setViewId(id?.original);
     console.log(id.original._id, 'worked');
     setView({
       visible: true,
       mode: 'View'
     });
+    const endpoint = PROFILES_GET_ID(id.original._id);
+    const getByIdData = await fetchData(endpoint, localData?.accessToken);
   };
   const confirmDelete = async () => {
     try {
@@ -498,7 +536,8 @@ const Profiles = () => {
       Team: '',
       ContactNumber: '',
       Role: '',
-      status: ''
+      status: '',
+      Category: ''
     },
     validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
@@ -516,7 +555,8 @@ const Profiles = () => {
           const formattedValues = {
             ...values,
             DateOfBirth: formattedDate,
-            status: selectedOption === 'active' ? true : false
+            status: selectedOption === 'active' ? true : false,
+            Category: selectedOptionCategory === 'Consultant Hiring' ? 'Consultant Hiring' : 'Direct Hiring'
           };
 
           console.log(formattedValues, 'worked');
@@ -542,7 +582,8 @@ const Profiles = () => {
           const formattedValues = {
             ...values,
             DateOfBirth: formattedDate,
-            status: selectedOption === 'active' ? true : false
+            status: selectedOption === 'active' ? true : false,
+            Category: selectedOptionCategory === 'Consultant Hiring' ? 'Consultant Hiring' : 'Direct Hiring'
           };
 
           console.log(formattedValues, 'worked');
@@ -562,9 +603,15 @@ const Profiles = () => {
   });
   const fetchAllData = async () => {
     try {
-      const fetchProfiles = await fetchData(PROFILES_GET, localData?.accessToken);
-      // Set employee data in the state
-      setEmployeeData(fetchProfiles?.data);
+      if (hired) {
+        const fetchProfiles = await fetchData(PROFILES_GETBY_CAC, localData?.accessToken);
+        // Set employee data in the state
+        setEmployeeData(fetchProfiles?.data);
+      } else {
+        const fetchProfiles = await fetchData(PROFILES_GETBY_CAE, localData?.accessToken);
+        // Set employee data in the state
+        setEmployeeData(fetchProfiles?.data);
+      }
     } catch (error) {
       console.log('error :', error);
     }
@@ -584,9 +631,15 @@ const Profiles = () => {
           setLocalData(parsedData);
           setTeamsData(fetchTeams);
           // Fetch profiles data using the access token
-          const fetchProfiles = await fetchData(PROFILES_GET, parsedData?.accessToken);
-          // Set employee data in the state
-          setEmployeeData(fetchProfiles?.data);
+          if (hired) {
+            const fetchProfiles = await fetchData(PROFILES_GETBY_CAC, localData?.accessToken);
+            // Set employee data in the state
+            setEmployeeData(fetchProfiles?.data);
+          } else {
+            const fetchProfiles = await fetchData(PROFILES_GETBY_CAE, localData?.accessToken);
+            // Set employee data in the state
+            setEmployeeData(fetchProfiles?.data);
+          }
         }
       } catch (error) {
         // Handle errors during data fetching
@@ -596,7 +649,7 @@ const Profiles = () => {
     };
     // Call the async function to fetch data when the component mounts
     fetchDataAsync();
-  }, []); // Empty dependency array to mimic componentDidMount behavior
+  }, [hired]); // Empty dependency array to mimic componentDidMount behavior
 
   console.log(employeeData, 'fetchTeams');
 
@@ -741,7 +794,7 @@ const Profiles = () => {
                 )}
               </Grid>
               <Grid xs={4} p={2}>
-                <FormControl fullWidth error={Boolean(formik.touched.Team && formik.errors.Team)}>
+                <FormControl fullWidth error={Boolean(formik.touched.Role && formik.errors.Role)}>
                   <InputLabel id="demo-simple-select-label">Role</InputLabel>
                   <Select
                     labelId="demo-simple-select-label"
@@ -770,6 +823,13 @@ const Profiles = () => {
                   <FormControlLabel value="inActive" control={<Radio />} label="In Active" />
                 </RadioGroup>
               </Grid>
+              <Grid item xs={4} p={2}>
+                <FormLabel id="demo-row-radio-buttons-group-label">Category</FormLabel>
+                <RadioGroup aria-label="yesno" name="Category" value={selectedOptionCategory} onChange={handleOptionChangeCategory} row>
+                  <FormControlLabel value="Direct Hiring" control={<Radio />} label="Direct Hired" />
+                  <FormControlLabel value="Consultant Hiring" control={<Radio />} label="Consultant Hired" />
+                </RadioGroup>
+              </Grid>
             </Grid>
             <Button variant="contained" style={{ float: 'right', margin: '2rem' }} type="submit">
               Save
@@ -790,6 +850,15 @@ const Profiles = () => {
                 }
               }}
             >
+              {!hired ? (
+                <Button variant="outlined" style={{ marginRight: '1rem' }} color="primary" onClick={handleTableToggle}>
+                  Consultant Employees
+                </Button>
+              ) : (
+                <Button variant="outlined" style={{ marginRight: '1rem' }} color="primary" onClick={handleTableToggle}>
+                  Direct Employees
+                </Button>
+              )}
               <ButtonBase sx={{ borderRadius: '12px' }}>
                 <Avatar
                   variant="rounded"
@@ -956,7 +1025,7 @@ const Profiles = () => {
                 )}
               </Grid>
               <Grid xs={4} p={2}>
-                <FormControl fullWidth error={Boolean(formik.touched.Team && formik.errors.Team)}>
+                <FormControl fullWidth error={Boolean(formik.touched.Role && formik.errors.Role)}>
                   <InputLabel id="demo-simple-select-label">Role</InputLabel>
                   <Select
                     labelId="demo-simple-select-label"
@@ -967,8 +1036,9 @@ const Profiles = () => {
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                   >
-                    <MenuItem value={'admin'}>Admin</MenuItem>
-                    <MenuItem value={'user'}>Employee</MenuItem>
+                    <MenuItem value={'Admin'}>Admin</MenuItem>
+                    <MenuItem value={'Employee'}>Employee</MenuItem>
+                    <MenuItem value={'Manager'}>Manager</MenuItem>
                   </Select>
                 </FormControl>
                 {formik.touched.Role && formik.errors.Role && (
@@ -1032,27 +1102,39 @@ const Profiles = () => {
             <Grid container m={3}>
               <Grid xs={3} p={2}>
                 <label className="text-muted">Employee Code</label>
-                <p>001</p>
+                <p>{viewId?.EmployeeCode}</p>
               </Grid>
               <Grid xs={3} p={2}>
                 <label className="text-muted">Name Of Candidate</label>
-                <p>Thara</p>
+                <p>{viewId?.NameOfCandidate}</p>
               </Grid>
               <Grid xs={3} p={2}>
                 <label className="text-muted">Date Of Birth</label>
-                <p>27-09-2001</p>
+                <p>{viewId?.DateOfBirth}</p>
               </Grid>
               <Grid xs={3} p={2}>
                 <label className="text-muted">Designation</label>
-                <p>Developer</p>
+                <p>{viewId?.Designation}</p>
               </Grid>
               <Grid xs={3} p={2}>
                 <label className="text-muted">Team</label>
-                <p>ABC Team</p>
+                <p>{viewId?.Team}</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Role</label>
+                <p>{viewId?.Role}</p>
               </Grid>
               <Grid xs={3} p={2}>
                 <label className="text-muted">Contact Number</label>
-                <p>9876543278</p>
+                <p>{viewId?.ContactNumber}</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Category</label>
+                <p>{viewId?.Category}</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Status</label>
+                <p>{viewId?.status === true ? 'Current Employeee' : 'Resigned Employee'}</p>
               </Grid>
             </Grid>
           </MainCard>

@@ -378,7 +378,7 @@ const BusinessRFQ = () => {
   const [showSelect, setShowSelect] = useState(true);
   const [customOption, setCustomOption] = useState('');
   const [category, setCategory] = useState([]);
-  const [options, setOptions] = useState([]);
+  const [lNumber, setlNumber] = useState('');
   const [selectedValue, setSelectedValue] = useState('');
   const generateTempId = () => `temp_${Math.random().toString(36).substr(2, 9)}`;
   const [taskTableData, setTaskTableData] = useState([]);
@@ -553,10 +553,12 @@ const BusinessRFQ = () => {
     setUpdateId(e.original._id);
     setSelectedOption(getByIdData?.data.category);
     console.log(getByIdData?.data, 'getby');
+    setlNumber(getByIdData?.data.leadNumber);
     formik.setValues({
       date: getByIdData?.data.date,
       Source: getByIdData?.data.Source,
       Pilot: getByIdData?.data.Pilot,
+      leadNumber: getByIdData?.data.leadNumber,
       companyName: getByIdData?.data.companyName,
       contactName: getByIdData?.data.contactName,
       departmentName: getByIdData?.data.departmentName,
@@ -571,7 +573,6 @@ const BusinessRFQ = () => {
     } else {
       setTcoNumberView(false);
     }
-
     populateFormFields(getByIdData?.data);
     // setUpdatedValue(e.original);
     setView({
@@ -595,6 +596,7 @@ const BusinessRFQ = () => {
     setrfqData(data.data);
   };
   const handleUpdate = async (values) => {
+    console.log('values------>', values);
     try {
       // Assuming values contain the updated data
       const updatesValues = {
@@ -605,6 +607,7 @@ const BusinessRFQ = () => {
         companyName: values.companyName,
         category: values.category,
         contactName: values.contactName,
+        leadNumber: lNumber,
         departmentName: values.departmentName,
         phoneNumber: values?.phoneNumber,
         email: values?.email,
@@ -615,8 +618,7 @@ const BusinessRFQ = () => {
         tasks: taskTableData
         // ...update other fields
       };
-      console.log(updatesValues, '00000');
-      console.log(updatesValues, '00000');
+
       // Make the API call to update the data
       const endpoint = RFQ_UPDATE(updateId);
       await updateData(endpoint, updatesValues, localData?.accessToken);
@@ -624,7 +626,7 @@ const BusinessRFQ = () => {
       // Reset the form and fetch updated data
       fetchFun();
       formik.resetForm();
-
+      setlNumber('')
       // Optionally, set the view mode to 'Initial' or perform other actions
       setView({
         visible: true,
@@ -678,7 +680,7 @@ const BusinessRFQ = () => {
             ...values,
             rfqDescription: rfqDescriptionArray
           };
-
+          console.log(formattedData, 'formattedData');
           await postData(RFQ_CREATION, formattedData, localData?.accessToken);
           setView({
             visible: true,
@@ -1160,7 +1162,6 @@ const BusinessRFQ = () => {
         >
           <form onSubmit={formik.handleSubmit}>
             <Grid container>
-              
               <Grid xs={4} p={2}>
                 <TextField
                   error={Boolean(formik.touched.date && formik.errors.date)}

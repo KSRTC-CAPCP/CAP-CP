@@ -125,6 +125,9 @@ const columns = [
   columnHelper.accessor('projectNumber', {
     header: 'Project No'
   }),
+  columnHelper.accessor('projectName', {
+    header: 'Project Name'
+  }),
   columnHelper.accessor('assignedDate', {
     header: 'Start Date',
     Cell: ({ renderedCellValue, row }) => (
@@ -160,89 +163,6 @@ const optionsForTaskStatus = ['Not Started', 'On Going', 'Completed'];
 const optionsForteamproject = ['IT Team', 'Finance Team', 'Teardown Team'];
 const optionsForFinance = ['Credit', 'Invoice', 'Spent'];
 const optionsForlocation = ['Thiruvallur', 'Ambattur'];
-const coumnsForHistory = [
-  {
-    accessorKey: 'date',
-    header: 'Date',
-    muiEditTextFieldProps: {
-      type: 'date',
-      required: true
-    }
-  },
-  {
-    accessorKey: 'description',
-    header: 'Lead Description',
-    enableEditing: true
-  },
-  {
-    accessorKey: 'requeststatus',
-    header: 'Request Status',
-    editVariant: 'select',
-    editSelectOptions: optionsForHistoryStatus,
-    muiEditTextFieldProps: {
-      select: true
-    },
-    enableEditing: true
-  },
-  {
-    accessorKey: 'approvalstatus',
-    header: 'Approval Status',
-    editVariant: 'select',
-    editSelectOptions: optionsForHistoryApproval,
-    muiEditTextFieldProps: {
-      select: true
-    },
-    enableEditing: true
-  }
-];
-
-const coumnsForTask = [
-  {
-    accessorKey: 'title',
-    header: 'Title'
-  },
-  {
-    accessorKey: 'description',
-    header: 'Description',
-    enableEditing: true
-  },
-  {
-    accessorKey: 'responsible',
-    header: 'Responsible',
-    enableEditing: true
-  },
-  {
-    accessorKey: 'remarks',
-    header: 'Remarks',
-    enableEditing: true
-  },
-  {
-    accessorKey: 'assigneddate',
-    header: 'Assigned Date',
-    muiEditTextFieldProps: {
-      type: 'date',
-      required: true
-    }
-  },
-  {
-    accessorKey: 'targetdate',
-    header: 'Target Date',
-    muiEditTextFieldProps: {
-      type: 'date',
-      required: true
-    }
-  },
-  {
-    accessorKey: 'status',
-    header: 'Status',
-    editVariant: 'select',
-    editSelectOptions: optionsForTaskStatus,
-    muiEditTextFieldProps: {
-      select: true
-    },
-    enableEditing: true
-  }
-];
 
 const csvConfig = mkConfig({
   fieldSeparator: ',',
@@ -314,7 +234,7 @@ const Projects = ({ _history, tasks }) => {
     console.log(filterEmployee[0], 'filterEmployee');
     setManagerId(filterEmployee[0]);
   };
-  const coumnsForproject = [
+  const columnsForproject = [
     {
       accessorKey: 'employeeCode',
       header: 'Employee Code',
@@ -373,8 +293,7 @@ const Projects = ({ _history, tasks }) => {
       enableEditing: true
     }
   ];
-
-  const coumnsForFinance = [
+  const columnsForFinance = [
     {
       accessorKey: 'date',
       header: 'Date',
@@ -422,28 +341,113 @@ const Projects = ({ _history, tasks }) => {
       enableEditing: true
     }
   ];
-
-  const teamMembers = [
-    { name: 'Ram', projects: 28 },
-    { name: 'Arun', projects: 3 },
-    { name: 'Anu', projects: 7 },
-    { name: 'Latha', projects: 4 },
-    { name: 'Junnu', projects: 6 }
+  const columnsForHistory = [
+    {
+      accessorKey: 'date',
+      header: 'Date',
+      muiEditTextFieldProps: {
+        type: 'date',
+        required: true
+      }
+    },
+    {
+      accessorKey: 'projectDescription',
+      header: 'Lead Description',
+      enableEditing: true
+    },
+    {
+      accessorKey: 'requestStatus',
+      header: 'Request Status',
+      editVariant: 'select',
+      editSelectOptions: optionsForHistoryStatus,
+      muiEditTextFieldProps: {
+        select: true
+      },
+      enableEditing: true
+    },
+    {
+      accessorKey: 'approvalStatus',
+      header: 'Approval Status',
+      editVariant: 'select',
+      editSelectOptions: optionsForHistoryApproval,
+      muiEditTextFieldProps: {
+        select: true
+      },
+      enableEditing: true
+    }
+  ];
+  const columnsForTask = [
+    {
+      accessorKey: 'title',
+      header: 'Title'
+    },
+    {
+      accessorKey: 'description',
+      header: 'Description',
+      enableEditing: true
+    },
+    {
+      accessorKey: 'responsible',
+      header: 'Responsible',
+      enableEditing: true
+    },
+    {
+      accessorKey: 'remarks',
+      header: 'Remarks',
+      enableEditing: true
+    },
+    {
+      accessorKey: 'assignedDate',
+      header: 'Assigned Date',
+      muiEditTextFieldProps: {
+        type: 'date',
+        required: true
+      }
+    },
+    {
+      accessorKey: 'targetDate',
+      header: 'Target Date',
+      muiEditTextFieldProps: {
+        type: 'date',
+        required: true
+      }
+    },
+    {
+      accessorKey: 'status',
+      header: 'Status',
+      editVariant: 'select',
+      editSelectOptions: optionsForTaskStatus,
+      muiEditTextFieldProps: {
+        select: true
+      },
+      enableEditing: true
+    }
   ];
 
   const [selectedDate, setSelectedDate] = useState('');
   const parseDate = (dateString) => {
-    // Assuming dateString is in the format 'dd-MM-yyyy'
-    const [day, month, year] = dateString.split('-');
-    const parsedDate = new Date(`${year}-${month}-${day}`);
-    return parsedDate;
+    // Check if dateString is provided and is a non-empty string
+    if (dateString && typeof dateString === 'string' && dateString.trim() !== '') {
+      // Assuming dateString is in the format 'dd-MM-yyyy'
+      const [day, month, year] = dateString.split('-');
+      const parsedDate = new Date(`${year}-${month}-${day}`);
+      return parsedDate;
+    } else {
+      // Return null or handle the case when dateString is not valid
+      // return null;
+    }
   };
+
   const handleEndDateChange = (event) => {
     const inputDate = new Date(event);
     const formattedDate = inputDate.toLocaleDateString('en-GB');
     const [day, month, year] = formattedDate.split('/');
     const formattedStartDate = `${day}-${month}-${year}`;
     setEndDate(formattedStartDate);
+    formik.setValues({
+      ...formik.values,
+      targetDate: formattedStartDate
+    });
   };
   const handleStartDateChange = (event) => {
     const inputDate = new Date(event);
@@ -451,6 +455,10 @@ const Projects = ({ _history, tasks }) => {
     const [day, month, year] = formattedDate.split('/');
     const formattedStartDate = `${day}-${month}-${year}`;
     setStartDate(formattedStartDate);
+    formik.setValues({
+      ...formik.values,
+      assignedDate: formattedStartDate
+    });
   };
 
   const [selectedOption, setSelectedOption] = React.useState('no');
@@ -482,7 +490,6 @@ const Projects = ({ _history, tasks }) => {
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const parsedData = XLSX.utils.sheet_to_json(sheet);
-
         await uploadToServer(parsedData);
       };
       reader.readAsArrayBuffer(file);
@@ -498,8 +505,6 @@ const Projects = ({ _history, tasks }) => {
         },
         body: JSON.stringify({ data })
       });
-
-      console.log('Upload successful:', response);
     } catch (error) {
       console.error('Error uploading file:', error);
     }
@@ -511,36 +516,16 @@ const Projects = ({ _history, tasks }) => {
   const [customOptiones, setCustomOptions] = useState('');
   const [descriptionValues, setDescriptionValues] = useState({}); // State to store descriptions for options
 
-  const customOptions1 = [
-    { value: 'MileStone1', label: 'MileStone 1' },
-    { value: 'MileStone2', label: 'MileStone 2' },
-    { value: 'MileStone3', label: 'MileStone 3' }
-    // Add other options as needed
-  ];
-
   const [view, setView] = useState({
     visible: false,
     mode: 'Initial' // 'add', 'edit', 'view'
   });
 
-  const handleSelectOnChanged = (event) => {
-    setSelectedOptions(event.target.value);
-  };
-
-  const handleSelectInputChanged = (event) => {
-    setCustomOptions(event.target.value);
-  };
-
   const handleDescriptionChange = (optionValue, description) => {
     setDescriptionValues({ ...descriptionValues, [optionValue]: description });
   };
 
-  const handleSaveCustomOptions = () => {
-    // Logic for saving custom options and descriptions
-  };
-  const [historyTableColumns, setHistoryTableColumns] = useState(coumnsForHistory);
-  const [historyTableData, setHistoryTableData] = useState([]);
-  const [taskTableData, setTaskTableData] = useState([]);
+  const [historyTableColumns, setHistoryTableColumns] = useState(columnsForHistory);
   const [inputValue, setInputValue] = useState('');
   const [options, setOptions] = useState([]);
   const [selectedValue, setSelectedValue] = useState('');
@@ -551,278 +536,15 @@ const Projects = ({ _history, tasks }) => {
   const [projectData, setProjectData] = useState([]);
   const [rfqData, setRFQData] = useState([]);
   const [selectedRFQ, setSelectedRFQ] = useState('');
-
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
-  };
-
-  const handleAddOption = () => {
-    if (inputValue.trim() !== '') {
-      setOptions([...options, inputValue]);
-      setInputValue('');
-    }
-  };
-
-  const handleSaveRowHistorys = (newData, oldData) => {
-    console.log('handleSaveRowHistory - newData:', newData);
-    console.log('handleSaveRowHistory - oldData:', oldData);
-    const updatedData = historyTableData.map((row) => {
-      if (
-        row._id === oldData._id || // For existing rows
-        (row && !row._id && oldData && oldData._tempId && row._tempId === oldData._tempId) // For new rows
-      ) {
-        return { ...row, ...newData };
-      } else {
-        return row;
-      }
-    });
-    console.log('handleSaveRowHistory - updatedData:', updatedData);
-    setHistoryTableData(updatedData);
-    setEditingRowId(null);
-  };
-  console.log(historyTableData, 'history');
-  const handleCancelEditHistory = () => {
-    setEditingRowId(null);
-  };
-  const handleCreateRowHistory = (newData) => {
-    const tempId = generateTempId(); // Generate a temporary ID
-    const newTask = { ...newData.values, _id: tempId };
-    setHistoryTableData([...historyTableData, newTask]);
-    setIsCreatingRow(false);
-  };
-  const handleEditRowHistorye = (row) => {
-    console.log(row, 'looooogg');
-    const editingId = row._id || row._tempId; // Use _id if available, otherwise use _tempId
-    setEditingRowId(editingId);
-  };
-  const handleCancelCreateHistory = () => {
-    setIsCreatingRow(false);
-  };
-  const handleDeleteRowHistorye = (row) => {
-    const updatedData = historyTableData.filter((item) => item._id !== row.id);
-    setHistoryTableData(updatedData);
-  };
-  const editableForHistory = useMaterialReactTable({
-    columns: historyTableColumns,
-    data: historyTableData,
-    createDisplayMode: 'row', // ('modal', and 'custom' are also available)
-    editDisplayMode: 'row', // ('modal', 'cell', 'table', and 'custom' are also available)
-    enableEditing: true,
-    positionActionsColumn: 'last',
-    enableColumnFilters: false,
-    enableFilters: false,
-    enableDensityToggle: false,
-    enablePagination: false,
-    enableHiding: false,
-    enableFullScreenToggle: false,
-    getRowId: (row) => row._id,
-    onEditingRowSave: ({ row, values, exitEditingMode }) => {
-      handleSaveRowHistorys(values, row.original); // Pass the original row data to handleSaveRowHistory
-      exitEditingMode(); // Call exitEditingMode to exit editing mode
-    },
-    onEditingRowCancel: handleCancelEditHistory,
-    onCreatingRowSave: handleCreateRowHistory,
-    onCreatingRowCancel: handleCancelCreateHistory,
-    renderRowActions: ({ row, table }) => (
-      <Box sx={{ display: 'flex', gap: '1rem' }}>
-        <Tooltip title="Edit">
-          <IconButton
-            onClick={() => {
-              handleEditRowHistorye(row), table.setEditingRow(row);
-            }}
-          >
-            <ModeEditRounded style={{ color: '#2196f3' }} />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Delete">
-          <IconButton color="error" onClick={() => handleDeleteRowHistorye(row)}>
-            <DeleteRounded style={{ color: '#2196f3' }} />
-          </IconButton>
-        </Tooltip>
-      </Box>
-    ),
-    renderTopToolbarCustomActions: ({ table }) => (
-      // <Button
-      //   variant="contained"
-      //   onClick={() => {
-      //     table.setCreatingRow(true);
-      //   }}
-      // >
-      //   Create History
-      // </Button>
-      <div className="title-bar">
-        <div className="custum-header">
-          <p style={{ fontWeight: 'bold', fontSize: 'large' }}>History Creation</p>
-          <ButtonBase sx={{ borderRadius: '12px' }}>
-            <Avatar
-              variant="rounded"
-              sx={{
-                ...theme.typography.commonAvatar,
-                ...theme.typography.mediumAvatar,
-                transition: 'all .2s ease-in-out',
-                background: theme.palette.secondary.light,
-                color: theme.palette.secondary.dark,
-                '&[aria-controls="menu-list-grow"],&:hover': {
-                  background: theme.palette.secondary.dark,
-                  color: theme.palette.secondary.light
-                }
-              }}
-              onClick={() => {
-                table.setCreatingRow(true);
-              }}
-              color="inherit"
-            >
-              <IconPlus />
-            </Avatar>
-          </ButtonBase>
-        </div>
-      </div>
-    )
-  });
-
-  const handleSaveRowTask = (newData, oldData) => {
-    console.log('handleSaveRowtask - newData:', newData);
-    console.log('handleSaveRowtask - oldData:', oldData);
-    const updatedData = taskTableData.map((row) => {
-      if (
-        row._id === oldData._id || // For existing rows
-        (row && !row._id && oldData && oldData._tempId && row._tempId === oldData._tempId) // For new rows
-      ) {
-        return { ...row, ...newData };
-      } else {
-        return row;
-      }
-    });
-    console.log('handleSaveRowHistory - updatedData:', updatedData);
-    setTaskTableData(updatedData);
-    setEditingRowId(null);
-  };
-
-  const handleCancelEditTask = () => {
-    setEditingRowId(null);
-  };
-
-  const handleCreateRowTask = (newData) => {
-    const tempId = generateTempId(); // Generate a temporary ID
-    const newTask = { ...newData.values, _id: tempId };
-    setTaskTableData([...taskTableData, newTask]);
-    setIsCreatingRow(false);
-  };
-  const handleEditRowTask = (row) => {
-    const editingId = row._id; // Use _id if available, otherwise use _tempId
-    setEditingRowId(editingId);
-  };
-  const handleCancelCreateTask = () => {
-    setIsCreatingRow(false);
-  };
-  const handleDeleteRowTask = (row) => {
-    const updatedData = taskTableData.filter((item) => item._id !== row.id);
-    setTaskTableData(updatedData);
-  };
-
-  const editableForTask = useMaterialReactTable({
-    columns: coumnsForTask,
-    data: taskTableData,
-    createDisplayMode: 'row', // ('modal', and 'custom' are also available)
-    editDisplayMode: 'row', // ('modal', 'cell', 'table', and 'custom' are also available)
-    enableEditing: true,
-    positionActionsColumn: 'last',
-    enableColumnFilters: false,
-    enableFilters: false,
-    enableDensityToggle: false,
-    enablePagination: false,
-    enableHiding: false,
-    enableFullScreenToggle: false,
-    getRowId: (row) => row._id,
-    onEditingRowSave: ({ row, values, exitEditingMode }) => {
-      handleSaveRowTask(values, row.original); // Pass the original row data to handleSaveRowHistory
-      exitEditingMode(); // Call exitEditingMode to exit editing mode
-    },
-    onEditingRowCancel: handleCancelEditTask,
-    onCreatingRowSave: handleCreateRowTask,
-    onCreatingRowCancel: handleCancelCreateTask,
-    renderRowActions: ({ row, table }) => (
-      <Box sx={{ display: 'flex', gap: '1rem' }}>
-        <Tooltip title="Edit">
-          <IconButton
-            onClick={() => {
-              handleEditRowHistory(row), table.setEditingRow(row);
-            }}
-          >
-            <ModeEditRounded style={{ color: '#2196f3' }} />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Delete">
-          <IconButton color="error" onClick={() => handleDeleteRowTask(row)}>
-            <DeleteRounded style={{ color: '#2196f3' }} />
-          </IconButton>
-        </Tooltip>
-      </Box>
-    ),
-    renderTopToolbarCustomActions: ({ table }) => (
-      // <Button
-      //   variant="contained"
-      //   onClick={() => {
-      //     table.setCreatingRow(true);
-      //   }}
-      // >
-      //   Create History
-      // </Button>
-      <div className="title-bar">
-        <div className="custum-header">
-          <p style={{ fontWeight: 'bold', fontSize: 'large' }}>Task Creation</p>
-          <ButtonBase sx={{ borderRadius: '12px' }}>
-            <Avatar
-              variant="rounded"
-              sx={{
-                ...theme.typography.commonAvatar,
-                ...theme.typography.mediumAvatar,
-                transition: 'all .2s ease-in-out',
-                background: theme.palette.secondary.light,
-                color: theme.palette.secondary.dark,
-                '&[aria-controls="menu-list-grow"],&:hover': {
-                  background: theme.palette.secondary.dark,
-                  color: theme.palette.secondary.light
-                }
-              }}
-              onClick={() => {
-                table.setCreatingRow(true);
-              }}
-              color="inherit"
-            >
-              <IconPlus />
-            </Avatar>
-          </ButtonBase>
-        </div>
-      </div>
-    )
-  });
-
+  const [selectedPR, setSelectedPR] = useState('');
   const [teamData, setTeamData] = useState([]);
   const [financeData, setFinanceData] = useState([]);
+  const [historyTableData, setHistoryTableData] = useState([]);
+  const [taskTableData, setTaskTableData] = useState([]);
   const [editingRowId, setEditingRowId] = useState(null);
   const generateTempId = () => `temp_${Math.random().toString(36).substr(2, 9)}`;
   const [isCreatingRow, setIsCreatingRow] = useState(false);
-  const handleUpdate = async (values) => {
-    try {
-      console.log(values, '00000');
-      // Make the API call to update the data
-      // const endpoint = RFQ_UPDATE(updateId);
-      // await updateData(endpoint, updatesValues, localData?.accessToken);
 
-      // Reset the form and fetch updated data
-      fetchFun();
-      formik.resetForm();
-
-      // Optionally, set the view mode to 'Initial' or perform other actions
-      // setView({
-      //   visible: true,
-      //   mode: 'Initial'
-      // });
-    } catch (error) {
-      console.error('API error:', error);
-    }
-  };
   const formik = useFormik({
     initialValues: {
       rfqNumber: '',
@@ -833,6 +555,7 @@ const Projects = ({ _history, tasks }) => {
       manager: '',
       milestone: '',
       poNumber: '',
+      projectName: '',
       projectAllocation: [],
       finance: [],
       history: [],
@@ -842,7 +565,7 @@ const Projects = ({ _history, tasks }) => {
     },
     // validationSchema,
     onSubmit: async (values) => {
-      console.log('worked');
+      console.log('worked', values);
       try {
         if (editId) {
           const teamsValue = teamData
@@ -856,16 +579,46 @@ const Projects = ({ _history, tasks }) => {
                 team: item.team
               }))
             : [];
-
+          const historyValue = historyTableData
+            ? historyTableData.map((data) => ({
+                date: data.date,
+                projectDescription: data.projectDescription,
+                requestStatus: data.requestStatus,
+                approvalStatus: data.approvalStatus
+              }))
+            : [];
+          const taskValue = taskTableData
+            ? taskTableData.map((data) => ({
+                title: data.title,
+                description: data.description,
+                responsible: data.responsible,
+                remarks: data.remarks,
+                assignedDate: data.assignedDate,
+                targetDate: data.targetDate,
+                status: data.status
+              }))
+            : [];
+          const financeValue = financeData
+            ? financeData.map((data) => ({
+                date: data.date,
+                refNumber: data.refNumber,
+                amount: data.amount,
+                tax: data.tax,
+                status: data.status
+              }))
+            : [];
+          console.log(values, 'upd');
           const formattedData = {
             ...values,
             assignedDate: startDate,
             targetDate: endDate,
-            companyName: selectedRFQ,
+            companyName: selectedRFQ?.companyName,
+            projectName: selectedPR,
+            milestone: mileselectedOption,
             projectAllocation: teamsValue,
-            finance: financeData,
-            history: historyTableData,
-            task: taskTableData
+            finance: financeValue,
+            history: historyValue,
+            task: taskValue
           };
           const endpoint = PROJECT_UPDATE(editId?.original?._id);
           await updateData(endpoint, formattedData, localData?.accessToken);
@@ -875,7 +628,7 @@ const Projects = ({ _history, tasks }) => {
           });
           fetchFun();
         } else {
-          console.log('handle submit');
+          console.log('handle submit', values, startDate, endDate);
           const teamsValue = teamData
             ? teamData.map((item) => ({
                 fromDate: item.fromDate,
@@ -887,19 +640,46 @@ const Projects = ({ _history, tasks }) => {
                 team: item.team
               }))
             : [];
-
+          const historyValue = historyTableData
+            ? historyTableData.map((data) => ({
+                date: data.date,
+                projectDescription: data.description,
+                requestStatus: data.requeststatus,
+                approvalStatus: data.approvalstatus
+              }))
+            : [];
+          const taskValue = taskTableData
+            ? taskTableData.map((data) => ({
+                title: data.title,
+                description: data.description,
+                responsible: data.responsible,
+                remarks: data.remarks,
+                assignedDate: data.assigneddate,
+                targetDate: data.targetdate,
+                status: data.status
+              }))
+            : [];
+          const financeValue = financeData
+            ? financeData.map((data) => ({
+                date: data.date,
+                refNumber: data.refNumber,
+                amount: data.amount,
+                tax: data.tax,
+                status: data.status
+              }))
+            : [];
           const formattedData = {
             ...values,
             assignedDate: startDate,
             targetDate: endDate,
-            companyName: selectedRFQ,
+            companyName: selectedRFQ?.companyName,
+            projectName: selectedPR,
             projectAllocation: teamsValue,
-            finance: financeData,
-            history: historyTableData,
-            task: taskTableData
+            finance: financeValue,
+            history: historyValue,
+            task: taskValue
           };
           console.log(formattedData, 'values');
-
           const projectAllocate = await postData(PROJECT_CREATE, formattedData, localData?.accessToken);
           console.log(projectAllocate, 'projectAllocate');
           setView({
@@ -953,18 +733,24 @@ const Projects = ({ _history, tasks }) => {
     });
     setEditId(row);
     setMileSelectedOption(row?.original?.milestone);
-    setSelectedRFQ(row?.original?.companyName);
+    setSelectedRFQ(row?.original);
+    setSelectedPR(row?.original?.projectName);
+    setStartDate(row?.original?.assignedDate);
+    setEndDate(row?.original?.targetDate);
     formik.setValues({
       rfqNumber: row?.original?.rfqNumber,
       // companyName: row?.original?.companyName,
       status: row?.original?.status,
-      assignedDate: row?.original?.assignedDate.slice(0, 10),
-      targetDate: row?.original?.targetDate.slice(0, 10),
+      assignedDate: row?.original?.assignedDate,
+      targetDate: row?.original?.targetDate,
       description: row?.original?.description,
-      manager: row?.original?.manager
-      // milestone: row?.original?.milestone
+      manager: row?.original?.manager,
+      milestone: row?.original?.milestone
     });
     setTeamData(row?.original?.projectAllocation);
+    setHistoryTableData(row?.original?.history);
+    setFinanceData(row?.original?.finance);
+    setTaskTableData(row?.original?.task);
     // setSelectedOption(row?.original?.requirePO === true ? 'yes' : 'no');
   };
 
@@ -1020,9 +806,11 @@ const Projects = ({ _history, tasks }) => {
       </>
     )
   });
-  const handleSaveRowHistory = (newData, oldData) => {
-    console.log('handleSaveRowHistory - newData:', newData);
-    console.log('handleSaveRowHistory - oldData:', oldData);
+
+  //Project
+  const handleSaveRowProject = (newData, oldData) => {
+    console.log('handleSaveRowProject - newData:', newData);
+    console.log('handleSaveRowProject - oldData:', oldData);
     const updatedData = teamData.map((row) => {
       if (
         row._id === oldData._id || // For existing rows
@@ -1033,10 +821,108 @@ const Projects = ({ _history, tasks }) => {
         return row;
       }
     });
-    console.log('handleSaveRowHistory - updatedData:', updatedData);
+    console.log('handleSaveRowProject - updatedData:', updatedData);
     setTeamData(updatedData);
     setEditingRowId(null);
   };
+  const handleEditRowProjects = (row) => {
+    console.log(row, 'looooogg');
+    const editingId = row._id || row._tempId; // Use _id if available, otherwise use _tempId
+    setEditingRowId(editingId);
+  };
+  const handleDeleteRowProjects = (row) => {
+    const updatedData = teamData.filter((item) => item._id !== row.id);
+    setTeamData(updatedData);
+  };
+  const handleCancelEditProjects = () => {
+    setEditingRowId(null);
+  };
+  const handleCreateRowProjects = (newData) => {
+    const tempId = generateTempId(); // Generate a temporary ID
+    const newTask = { ...newData.values, _id: tempId };
+    setTeamData([...teamData, newTask]);
+    setIsCreatingRow(false);
+  };
+  const handleCancelCreateProjects = () => {
+    setIsCreatingRow(false);
+  };
+  //History
+  // projectAllocation: teamsValue,
+  //           finance: financeData,
+  //           history: historyTableData,
+  //           task: taskTableData
+  const handleSaveRowHistory = (newData, oldData) => {
+    const updatedData = historyTableData.map((row) => {
+      if (
+        row._id === oldData._id || // For existing rows
+        (row && !row._id && oldData && oldData._tempId && row._tempId === oldData._tempId) // For new rows
+      ) {
+        return { ...row, ...newData };
+      } else {
+        return row;
+      }
+    });
+    setHistoryTableData(updatedData);
+    setEditingRowId(null);
+  };
+  const handleEditRowHistorys = (row) => {
+    console.log(row, 'looooogg');
+    const editingId = row._id || row._tempId; // Use _id if available, otherwise use _tempId
+    setEditingRowId(editingId);
+  };
+  const handleDeleteRowHistorys = (row) => {
+    const updatedData = historyTableData.filter((item) => item._id !== row.id);
+    setHistoryTableData(updatedData);
+  };
+  const handleCancelEditHistorys = () => {
+    setEditingRowId(null);
+  };
+  const handleCreateRowHistorys = (newData) => {
+    const tempId = generateTempId(); // Generate a temporary ID
+    const newTask = { ...newData.values, _id: tempId };
+    setHistoryTableData([...historyTableData, newTask]);
+    setIsCreatingRow(false);
+  };
+  const handleCancelCreateHistorys = () => {
+    setIsCreatingRow(false);
+  };
+  //Task
+  const handleSaveRowTask = (newData, oldData) => {
+    const updatedData = taskTableData.map((row) => {
+      if (
+        row._id === oldData._id || // For existing rows
+        (row && !row._id && oldData && oldData._tempId && row._tempId === oldData._tempId) // For new rows
+      ) {
+        return { ...row, ...newData };
+      } else {
+        return row;
+      }
+    });
+    setTaskTableData(updatedData);
+    setEditingRowId(null);
+  };
+  const handleEditRowTasks = (row) => {
+    console.log(row, 'looooogg');
+    const editingId = row._id || row._tempId; // Use _id if available, otherwise use _tempId
+    setEditingRowId(editingId);
+  };
+  const handleDeleteRowTasks = (row) => {
+    const updatedData = taskTableData.filter((item) => item._id !== row.id);
+    setTaskTableData(updatedData);
+  };
+  const handleCancelEditTasks = () => {
+    setEditingRowId(null);
+  };
+  const handleCreateRowTasks = (newData) => {
+    const tempId = generateTempId(); // Generate a temporary ID
+    const newTask = { ...newData.values, _id: tempId };
+    setTaskTableData([...taskTableData, newTask]);
+    setIsCreatingRow(false);
+  };
+  const handleCancelCreateTasks = () => {
+    setIsCreatingRow(false);
+  };
+  //Finance
   const handleSaveRowFinance = (newData, oldData) => {
     const updatedData = financeData.map((row) => {
       if (
@@ -1051,69 +937,29 @@ const Projects = ({ _history, tasks }) => {
     setFinanceData(updatedData);
     setEditingRowId(null);
   };
-  console.log(teamData, 'history');
-
-  const handleEditRowHistorys = (row) => {
+  const handleEditRowFinances = (row) => {
     console.log(row, 'looooogg');
     const editingId = row._id || row._tempId; // Use _id if available, otherwise use _tempId
     setEditingRowId(editingId);
   };
-  const handleEditRowFinance = (row) => {
-    console.log(row, 'looooogg');
-    const editingId = row._id || row._tempId; // Use _id if available, otherwise use _tempId
-    setEditingRowId(editingId);
-  };
-
-  const handleDeleteRowHistorys = (row) => {
-    const updatedData = teamData.filter((item) => item._id !== row.id);
-    setTeamData(updatedData);
-  };
-  const handleDeleteRowFinance = (row) => {
+  const handleDeleteRowFinances = (row) => {
     const updatedData = financeData.filter((item) => item._id !== row.id);
     setFinanceData(updatedData);
   };
-
-  const handleCancelEditHistorys = () => {
+  const handleCancelEditFinances = () => {
     setEditingRowId(null);
   };
-  const handleCancelEditFinance = () => {
-    setEditingRowId(null);
-  };
-  const handleCreateRowHistorys = (newData) => {
-    const tempId = generateTempId(); // Generate a temporary ID
-    const newTask = { ...newData.values, _id: tempId };
-    setTeamData([...teamData, newTask]);
-    setIsCreatingRow(false);
-  };
-  const handleCreateRowFinance = (newData) => {
+  const handleCreateRowFinances = (newData) => {
     const tempId = generateTempId(); // Generate a temporary ID
     const newTask = { ...newData.values, _id: tempId };
     setFinanceData([...financeData, newTask]);
     setIsCreatingRow(false);
   };
-  const handleCancelCreateHistorys = () => {
+  const handleCancelCreateFinances = () => {
     setIsCreatingRow(false);
   };
-  const handleCancelCreateFinace = () => {
-    setIsCreatingRow(false);
-  };
-
-  const handleEditRowHistory = (row) => {
-    console.log(row, 'looooogg');
-    const editingId = row._id || row._tempId; // Use _id if available, otherwise use _tempId
-    setEditingRowId(editingId);
-  };
-
-  const handleDeleteRowHistory = (row) => {
-    const updatedData = teamData.filter((item) => item._id !== row.id);
-    setTeamData(updatedData);
-  };
-
-  console.log(teamData, 'teamData');
-
-  
   const editableForproject = useMaterialReactTable({
-    columns: coumnsForproject,
+    columns: columnsForproject,
     data: teamData,
     createDisplayMode: 'row',
     editDisplayMode: 'row',
@@ -1127,25 +973,25 @@ const Projects = ({ _history, tasks }) => {
     enableFullScreenToggle: false,
     getRowId: (row) => row._id,
     onEditingRowSave: ({ row, values, exitEditingMode }) => {
-      handleSaveRowHistory(values, row.original); // Pass the original row data to handleSaveRowHistory
+      handleSaveRowProject(values, row.original); // Pass the original row data to handleSaveRowProject
       exitEditingMode(); // Call exitEditingMode to exit editing mode
     },
-    onEditingRowCancel: handleCancelEditHistorys,
-    onCreatingRowSave: handleCreateRowHistorys,
-    onCreatingRowCancel: handleCancelCreateHistorys,
+    onEditingRowCancel: handleCancelEditProjects,
+    onCreatingRowSave: handleCreateRowProjects,
+    onCreatingRowCancel: handleCancelCreateProjects,
     renderRowActions: ({ row, table }) => (
       <Box sx={{ display: 'flex', gap: '1rem' }}>
         <Tooltip title="Edit">
           <IconButton
             onClick={() => {
-              handleEditRowHistorys(row), table.setEditingRow(row);
+              handleEditRowProjects(row), table.setEditingRow(row);
             }}
           >
             <ModeEditRounded style={{ color: '#2196f3' }} />
           </IconButton>
         </Tooltip>
         <Tooltip title="Delete">
-          <IconButton color="error" onClick={() => handleDeleteRowHistorys(row)}>
+          <IconButton color="error" onClick={() => handleDeleteRowProjects(row)}>
             <DeleteRounded style={{ color: '#2196f3' }} />
           </IconButton>
         </Tooltip>
@@ -1182,8 +1028,78 @@ const Projects = ({ _history, tasks }) => {
       </div>
     )
   });
+  const editableForHistory = useMaterialReactTable({
+    columns: columnsForHistory,
+    data: historyTableData,
+    createDisplayMode: 'row',
+    editDisplayMode: 'row',
+    enableEditing: true,
+    positionActionsColumn: 'last',
+    enableColumnFilters: false,
+    enableFilters: false,
+    enableDensityToggle: false,
+    enablePagination: false,
+    enableHiding: false,
+    enableFullScreenToggle: false,
+    getRowId: (row) => row._id,
+    onEditingRowSave: ({ row, values, exitEditingMode }) => {
+      handleSaveRowHistory(values, row.original); // Pass the original row data to handleSaveRowProject
+      exitEditingMode(); // Call exitEditingMode to exit editing mode
+    },
+    onEditingRowCancel: handleCancelEditHistorys,
+    onCreatingRowSave: handleCreateRowHistorys,
+    onCreatingRowCancel: handleCancelCreateHistorys,
+    renderRowActions: ({ row, table }) => (
+      <Box sx={{ display: 'flex', gap: '1rem' }}>
+        <Tooltip title="Edit">
+          <IconButton
+            onClick={() => {
+              handleEditRowHistorys(row), table.setEditingRow(row);
+            }}
+          >
+            <ModeEditRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Delete">
+          <IconButton color="error" onClick={() => handleDeleteRowHistorys(row)}>
+            <DeleteRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    ),
+
+    renderTopToolbarCustomActions: ({ table }) => (
+      <div className="title-bar">
+        <div className="custum-header">
+          <p style={{ fontWeight: 'bold', fontSize: 'large' }}>History</p>
+          <ButtonBase sx={{ borderRadius: '12px' }}>
+            <Avatar
+              variant="rounded"
+              sx={{
+                ...theme.typography.commonAvatar,
+                ...theme.typography.mediumAvatar,
+                transition: 'all .2s ease-in-out',
+                background: theme.palette.secondary.light,
+                color: theme.palette.secondary.dark,
+                '&[aria-controls="menu-list-grow"],&:hover': {
+                  background: theme.palette.secondary.dark,
+                  color: theme.palette.secondary.light
+                }
+              }}
+              onClick={() => {
+                table.setCreatingRow(true);
+              }}
+              color="inherit"
+            >
+              <IconPlus />
+            </Avatar>
+          </ButtonBase>
+        </div>
+      </div>
+    )
+  });
   const financeHistorytable = useMaterialReactTable({
-    columns: coumnsForFinance,
+    columns: columnsForFinance,
     data: financeData,
     createDisplayMode: 'row',
     editDisplayMode: 'row',
@@ -1197,25 +1113,25 @@ const Projects = ({ _history, tasks }) => {
     enableFullScreenToggle: false,
     getRowId: (row) => row._id,
     onEditingRowSave: ({ row, values, exitEditingMode }) => {
-      handleSaveRowFinance(values, row.original); // Pass the original row data to handleSaveRowHistory
+      handleSaveRowFinance(values, row.original); // Pass the original row data to handleSaveRowFinance
       exitEditingMode(); // Call exitEditingMode to exit editing mode
     },
-    onEditingRowCancel: handleCancelEditFinance,
-    onCreatingRowSave: handleCreateRowFinance,
-    onCreatingRowCancel: handleCancelCreateFinace,
+    onEditingRowCancel: handleCancelEditFinances,
+    onCreatingRowSave: handleCreateRowFinances,
+    onCreatingRowCancel: handleCancelCreateFinances,
     renderRowActions: ({ row, table }) => (
       <Box sx={{ display: 'flex', gap: '1rem' }}>
         <Tooltip title="Edit">
           <IconButton
             onClick={() => {
-              handleEditRowFinance(row), table.setEditingRow(row);
+              handleEditRowFinances(row), table.setEditingRow(row);
             }}
           >
             <ModeEditRounded style={{ color: '#2196f3' }} />
           </IconButton>
         </Tooltip>
         <Tooltip title="Delete">
-          <IconButton color="error" onClick={() => handleDeleteRowFinance(row)}>
+          <IconButton color="error" onClick={() => handleDeleteRowFinances(row)}>
             <DeleteRounded style={{ color: '#2196f3' }} />
           </IconButton>
         </Tooltip>
@@ -1252,27 +1168,80 @@ const Projects = ({ _history, tasks }) => {
       </div>
     )
   });
-
-  const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-      backgroundColor: '#e3f2fd',
-      color: '#333'
+  const editableForTask = useMaterialReactTable({
+    columns: columnsForTask,
+    data: taskTableData,
+    createDisplayMode: 'row',
+    editDisplayMode: 'row',
+    enableEditing: true,
+    positionActionsColumn: 'last',
+    enableColumnFilters: false,
+    enableFilters: false,
+    enableDensityToggle: false,
+    enablePagination: false,
+    enableHiding: false,
+    enableFullScreenToggle: false,
+    getRowId: (row) => row._id,
+    onEditingRowSave: ({ row, values, exitEditingMode }) => {
+      handleSaveRowTask(values, row.original); // Pass the original row data to handleSaveRowTask
+      exitEditingMode(); // Call exitEditingMode to exit editing mode
     },
-    [`&.${tableCellClasses.body}`]: {
-      fontSize: 14
-    }
-  }));
+    onEditingRowCancel: handleCancelEditTasks,
+    onCreatingRowSave: handleCreateRowTasks,
+    onCreatingRowCancel: handleCancelCreateTasks,
+    renderRowActions: ({ row, table }) => (
+      <Box sx={{ display: 'flex', gap: '1rem' }}>
+        <Tooltip title="Edit">
+          <IconButton
+            onClick={() => {
+              handleEditRowTasks(row), table.setEditingRow(row);
+            }}
+          >
+            <ModeEditRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Delete">
+          <IconButton color="error" onClick={() => handleDeleteRowTasks(row)}>
+            <DeleteRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    ),
 
-  const StyledTableRow = styled(TableRow)(({ theme }) => ({
-    '&:nth-of-type(even)': {
-      backgroundColor: theme.palette.action.hover
-    },
-
-    '&:last-child td, &:last-child th': {
-      border: 0
-    }
-  }));
-
+    renderTopToolbarCustomActions: ({ table }) => (
+      <div className="title-bar">
+        <div className="custum-header">
+          <p style={{ fontWeight: 'bold', fontSize: 'large' }}>Task Allocation</p>
+          <ButtonBase sx={{ borderRadius: '12px' }}>
+            <Avatar
+              variant="rounded"
+              sx={{
+                ...theme.typography.commonAvatar,
+                ...theme.typography.mediumAvatar,
+                transition: 'all .2s ease-in-out',
+                background: theme.palette.secondary.light,
+                color: theme.palette.secondary.dark,
+                '&[aria-controls="menu-list-grow"],&:hover': {
+                  background: theme.palette.secondary.dark,
+                  color: theme.palette.secondary.light
+                }
+              }}
+              onClick={() => {
+                table.setCreatingRow(true);
+              }}
+              color="inherit"
+            >
+              <IconPlus />
+            </Avatar>
+          </ButtonBase>
+        </div>
+      </div>
+    )
+  });
+  console.log('history---->', historyTableData);
+  console.log('teams---->', teamData);
+  console.log('tasks---->', taskTableData);
+  console.log('finance---->', financeData);
   function createData(name, calories, fat, carbs) {
     return { name, calories, fat, carbs };
   }
@@ -1291,6 +1260,9 @@ const Projects = ({ _history, tasks }) => {
     });
     formik.resetForm();
     setEditId('');
+    setSelectedPR('');
+    setMileSelectedOption('');
+    setSelectedRFQ('');
   };
   const handleClose = () => {
     setView({
@@ -1382,9 +1354,11 @@ const Projects = ({ _history, tasks }) => {
       console.log(fetchedRFQAll.data, 'ffff');
       const filteredData = fetchedRFQAll.data.filter((data) => data.serialNumber === selectedValue);
       if (filteredData.length > 0) {
-        const selectedRFQ = filteredData[0].companyName;
+        const selectedRFQ = filteredData[0];
         console.log(selectedRFQ, 'Selected RFQ');
         setSelectedRFQ(selectedRFQ);
+        const projectNameSchema = selectedRFQ?.companyName + '-' + selectedRFQ?.contactName + '-' + selectedRFQ?.category;
+        setSelectedPR(projectNameSchema);
       } else {
         console.log('No matching data found for the selected serialNumber');
       }
@@ -1503,10 +1477,10 @@ const Projects = ({ _history, tasks }) => {
                   error={Boolean(formik.touched.companyName && formik.errors.companyName)}
                   fullWidth
                   id="outlined-basic"
-                  label="Company Name"
+                  label={selectedRFQ?.companyName ? '' : 'Company Name'}
                   variant="outlined"
                   name="companyName"
-                  value={selectedRFQ}
+                  value={selectedRFQ?.companyName}
                   disabled
                   onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
@@ -1518,15 +1492,35 @@ const Projects = ({ _history, tasks }) => {
                 )}
               </Grid>
               <Grid xs={4} p={2}>
+                <TextField
+                  error={Boolean(formik.touched.projectName && formik.errors.projectName)}
+                  fullWidth
+                  id="outlined-basic"
+                  label={'Project Name'}
+                  variant="outlined"
+                  name="projectName"
+                  value={selectedPR}
+                  disabled
+                  onBlur={formik.handleBlur}
+                  onChange={formik.handleChange}
+                />
+                {formik.touched.projectName && formik.errors.projectName && (
+                  <FormHelperText error id="standard-weight-helper-text-Password-login">
+                    {formik.errors.projectName}
+                  </FormHelperText>
+                )}
+              </Grid>
+              <Grid xs={4} p={2}>
                 <DatePicker
                   oneTap
                   style={{ width: 200 }}
                   placeholder="Assigned Date"
                   name="assignedDate"
                   aria-autocomplete="false"
+                  onClean={() => setStartDate('')}
                   autoComplete="false"
                   onChange={(e) => handleStartDateChange(e)}
-                  // value={formik.values.assignedDate}
+                  value={parseDate(formik.values.assignedDate)}
                 />
                 {/* {formik.touched.assignedDate && formik.errors.assignedDate && (
                   <FormHelperText error id="standard-weight-helper-text-Password-login">
@@ -1803,10 +1797,10 @@ const Projects = ({ _history, tasks }) => {
                   error={Boolean(formik.touched.companyName && formik.errors.companyName)}
                   fullWidth
                   id="outlined-basic"
-                  label="Company Name"
                   variant="outlined"
                   name="companyName"
-                  value={selectedRFQ}
+                  label="Company Name"
+                  value={selectedRFQ?.companyName}
                   disabled
                   onBlur={formik.handleBlur}
                   onChange={formik.handleChange}
@@ -1818,6 +1812,25 @@ const Projects = ({ _history, tasks }) => {
                 )}
               </Grid>
               <Grid xs={4} p={2}>
+                <TextField
+                  error={Boolean(formik.touched.projectName && formik.errors.projectName)}
+                  fullWidth
+                  id="outlined-basic"
+                  label="Project Name"
+                  variant="outlined"
+                  name="projectName"
+                  value={selectedPR}
+                  disabled
+                  onBlur={formik.handleBlur}
+                  onChange={formik.handleChange}
+                />
+                {formik.touched.projectName && formik.errors.projectName && (
+                  <FormHelperText error id="standard-weight-helper-text-Password-login">
+                    {formik.errors.projectName}
+                  </FormHelperText>
+                )}
+              </Grid>
+              <Grid xs={4} p={2}>
                 <DatePicker
                   oneTap
                   style={{ width: 200 }}
@@ -1825,7 +1838,11 @@ const Projects = ({ _history, tasks }) => {
                   name="assignedDate"
                   aria-autocomplete="false"
                   autoComplete="false"
-                  onChange={(e) => handleStartDateChange(e)}
+                  // onClean={() => formik.setValues({ assignedDate: '' })}
+                  onChange={(e) => {
+                    handleStartDateChange(e);
+                    formik.handleChange;
+                  }}
                   value={parseDate(formik.values.assignedDate)}
                 />
                 {/* {formik.touched.assignedDate && formik.errors.assignedDate && (
@@ -1840,36 +1857,14 @@ const Projects = ({ _history, tasks }) => {
                   style={{ width: 200 }}
                   placeholder="Target Date"
                   name="targetDate"
-                  onChange={(e) => handleEndDateChange(e)}
+                  onChange={(e) => {
+                    handleEndDateChange(e);
+                    formik.handleChange;
+                  }}
                   value={parseDate(formik.values.targetDate)}
                 />
               </Grid>
 
-              {/* <Grid xs={4} p={2}>
-                <FormControl fullWidth error={Boolean(formik.touched.status && formik.errors.status)}>
-                  <InputLabel id="demo-simple-select-label">Status</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    label="status"
-                    name="status"
-                    value={formik.values.status}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                  >
-                    <MenuItem value={'newlead'}>OnGoing</MenuItem>
-                    <MenuItem value={'contactEstablish'}>Customer Review</MenuItem>
-                    <MenuItem value={'technicleMeeting'}>Internal Review</MenuItem>
-                    <MenuItem value={'requirementConfirm'}>Complete</MenuItem>
-                    <MenuItem value={'hold'}>Hold</MenuItem>
-                  </Select>
-                </FormControl>
-                {formik.touched.status && formik.errors.status && (
-                  <FormHelperText error id="standard-weight-helper-text-Password-login">
-                    {formik.errors.status}
-                  </FormHelperText>
-                )}
-              </Grid> */}
               <Grid xs={4} p={2}>
                 <TextField
                   error={Boolean(formik.touched.description && formik.errors.description)}
@@ -2040,33 +2035,75 @@ const Projects = ({ _history, tasks }) => {
             }
           >
             <Grid container m={3}>
-              <Grid xs={3} p={2}>
-                <label className="text-muted">Project Number</label>
-                <p>{viewId?.projectNumber}</p>
+              <Grid xs={6}>
+                <Grid container>
+                  <Grid xs={6} p={2}>
+                    <label className="text-muted">Project Number</label>
+                    <p>{viewId?.projectNumber}</p>
+                  </Grid>
+                  <Grid xs={6} p={2}>
+                    <label className="text-muted">Project Name</label>
+                    <p>{viewId?.projectName}</p>
+                  </Grid>
+                  <Grid xs={6} p={2}>
+                    <label className="text-muted">RFQ Number</label>
+                    <p>{viewId?.rfqNumber}</p>
+                  </Grid>
+                  <Grid xs={6} p={2}>
+                    <label className="text-muted">Company Name</label>
+                    <p>{viewId?.companyName}</p>
+                  </Grid>
+                  <Grid xs={6} p={2}>
+                    <label className="text-muted">Assigned Date</label>
+                    <p>{viewId?.assignedDate?.slice(0, 10)}</p>
+                  </Grid>
+                  <Grid xs={6} p={2}>
+                    <label className="text-muted">Target Date</label>
+                    <p>{viewId?.targetDate?.slice(0, 10)}</p>
+                  </Grid>
+                  <Grid xs={6} p={2}>
+                    <label className="text-muted">Description</label>
+                    <p>{viewId?.description}</p>
+                  </Grid>
+                  <Grid xs={6} p={2}>
+                    <label className="text-muted">Manager</label>
+                    <p>{viewId?.manager}</p>
+                  </Grid>
+                  <Grid xs={6} p={2}>
+                    <label className="text-muted">MileStone</label>
+                    <p>{viewId?.milestone}</p>
+                  </Grid>
+                </Grid>
               </Grid>
-              <Grid xs={3} p={2}>
-                <label className="text-muted">Company Name</label>
-                <p>{viewId?.companyName}</p>
-              </Grid>
-              <Grid xs={3} p={2}>
-                <label className="text-muted">Assigned Date</label>
-                <p>{viewId?.assignedDate?.slice(0, 10)}</p>
-              </Grid>
-              <Grid xs={3} p={2}>
-                <label className="text-muted">Target Date</label>
-                <p>{viewId?.targetDate?.slice(0, 10)}</p>
-              </Grid>
-              <Grid xs={3} p={2}>
-                <label className="text-muted">Status</label>
-                <p>{viewId?.status}</p>
-              </Grid>
-              <Grid xs={3} p={2}>
-                <label className="text-muted">Manager</label>
-                <p>{viewId?.manager}</p>
-              </Grid>
-              <Grid xs={3} p={2}>
-                <label className="text-muted">MileStone</label>
-                <p>{viewId?.milestone}</p>
+              <Grid xs={6}>
+                <TableContainer component={Paper}>
+                  <MainCard title="Finance History">
+                    <Table aria-label="simple table">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Date</TableCell>
+                          <TableCell align="right">Ref No/Bill</TableCell>
+                          <TableCell align="right">Amount</TableCell>
+                          <TableCell align="right">Tax</TableCell>
+                          <TableCell align="right">Status</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {Financeviewrows.map((row) => (
+                          <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                            <TableCell component="th" scope="row">
+                              {row.Date}
+                            </TableCell>
+                            <TableCell align="right">{row.Ref}</TableCell>
+                            <TableCell align="right">{row.Amount}</TableCell>
+                            <TableCell align="right">{row.Tax}</TableCell>
+                            <TableCell align="right">{row.Status}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </MainCard>
+                </TableContainer>
               </Grid>
             </Grid>
             <Grid container p={3}>
@@ -2224,36 +2261,7 @@ const Projects = ({ _history, tasks }) => {
                   </MainCard>
                 </div>
               </Grid>
-              <Grid>
-                <TableContainer component={Paper}>
-                  <MainCard title="Finance History">
-                    <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Date</TableCell>
-                          <TableCell align="right">Ref No/Bill</TableCell>
-                          <TableCell align="right">Amount</TableCell>
-                          <TableCell align="right">Tax</TableCell>
-                          <TableCell align="right">Status</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {Financeviewrows.map((row) => (
-                          <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                            <TableCell component="th" scope="row">
-                              {row.Date}
-                            </TableCell>
-                            <TableCell align="right">{row.Ref}</TableCell>
-                            <TableCell align="right">{row.Amount}</TableCell>
-                            <TableCell align="right">{row.Tax}</TableCell>
-                            <TableCell align="right">{row.Status}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </MainCard>
-                </TableContainer>
-              </Grid>
+              <Grid></Grid>
             </Grid>
           </MainCard>
         </>

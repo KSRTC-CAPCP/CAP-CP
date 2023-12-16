@@ -12,7 +12,7 @@ export const LEAD_CREATION = `${BASE_URL}/lead/create`;
 export const LEAD_GET = `${BASE_URL}/lead/get`;
 export const LEAD_GET_ID = (id) => `${BASE_URL}/lead/getbyid/${id}`;
 export const LEAD_UPDATE = (id) => `${BASE_URL}/lead/update/${id}`;
-export const LEAD_DELETE = (id) => `${BASE_URL}/lead//delete/${id}`;
+export const LEAD_DELETE = (id) => `${BASE_URL}/lead/delete/${id}`;
 
 //FOR RFQ API HERE
 export const RFQ_CREATION = `${BASE_URL}/rfq/create`;
@@ -29,15 +29,18 @@ export const PROFILES_GET = `${BASE_URL}/employee/getall`;
 export const PROFILES_GET_ID = (id) => `${BASE_URL}/employee/getbyid/${id}`;
 export const PROFILES_GET_ROLE = (id) => `${BASE_URL}/employees/role/${id}`;
 export const PROFILES_CREATE = `${BASE_URL}/employee/add`;
+export const PROFILES_UPLOAD = `${BASE_URL}/employee/bulk`;
 export const PROFILES_UPDATE = (id) => `${BASE_URL}/employee/update/${id}`;
 export const PROFILES_DELETE = (id) => `${BASE_URL}/employee/delete/${id}`;
-
+export const PROFILES_BULK_DELETE = `${BASE_URL}/employee/bulk/delete`;
+export const PROFILES_GETBY_CAE = `${BASE_URL}/employee/getbydirecthire`;
+export const PROFILES_GETBY_CAC = `${BASE_URL}/employee/getbyconsultanthire`;
 
 //FOR PROJECT
 export const PROJECT_GET = `${BASE_URL}/project/get-all`;
 export const PROJECT_CREATE = `${BASE_URL}/project/create`;
-export const PROJECT_DELETE =(id) => `${BASE_URL}/project/delete/${id}`;
-export const PROJECT_UPDATE =(id) => `${BASE_URL}/project/update/${id}`;
+export const PROJECT_DELETE = (id) => `${BASE_URL}/project/delete/${id}`;
+export const PROJECT_UPDATE = (id) => `${BASE_URL}/project/update/${id}`;
 
 //FOR CATEGORY
 export const CATEGORY_CREATE = `${BASE_URL}/categories`;

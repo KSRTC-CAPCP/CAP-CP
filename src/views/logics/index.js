@@ -526,8 +526,12 @@ const BusinessLeads = () => {
         tasks: taskTableData
         // ...update other fields
       };
-      console.log(values, 'selectedOption');
-      if (moveRFQ) {
+      console.log(
+        updatedData?.leadDescription.filter((item) => item.statusRequest === 'Move to RFQ' && item.status === 'Approval'),
+        '00000'
+      ); // Make the API call to update the data
+      const approval = updatedData?.leadDescription.filter((item) => item.statusRequest === 'Move to RFQ' && item.status === 'Approval');
+      if (approval.length !== 0) {
         const leadDescriptionArray = values.leadDescription
           ? values.leadDescription.split('\n').map((item) => ({
               description: item.trim()
@@ -551,11 +555,8 @@ const BusinessLeads = () => {
         const moveToRfq = await postData(RFQ_CREATION, newRfq, localData?.accessToken);
         console.log(moveToRfq, 'movetorfq');
       }
-      console.log(updatedData, '00000');
-      // Make the API call to update the data
       const endpoint = LEAD_UPDATE(updateId);
       await updateData(endpoint, updatedData, localData?.accessToken);
-
       // Reset the form and fetch updated data
       fetchFun();
       formik.resetForm();
@@ -569,6 +570,8 @@ const BusinessLeads = () => {
       console.error('API error:', error);
     }
   };
+
+  console.log(moveRFQ, 'moverfq');
   const formik = useFormik({
     initialValues: {
       date: '',
@@ -598,6 +601,7 @@ const BusinessLeads = () => {
             ...values,
             serialNumber: leadNumber
           };
+
           handleUpdate(formattedData);
         } else {
           console.log('handle submit');
@@ -611,7 +615,6 @@ const BusinessLeads = () => {
                 statusRequest: values.status // Set your default statusRequest here
               }))
             : [];
-
           const formattedData = {
             ...values,
             leadDescription: leadDescriptionArray
@@ -703,11 +706,11 @@ const BusinessLeads = () => {
         stsRequest: data.statusRequest
       }))
       .filter((item) => item.stsRequest === 'Move to RFQ');
-    if (categoryOption[0]?.stsRequest === 'Move to RFQ') {
-      setStsReq(categoryOption[0]?.stsRequest);
-    } else {
-      setStsReq(null);
-    }
+    // if (categoryOption[0]?.stsRequest === 'Move to RFQ') {
+    //   setStsReq(categoryOption[0]?.stsRequest);
+    // } else {
+    //   setStsReq(null);
+    // }
     console.log(categoryOption[0]?.stsRequest, 'categoryOption');
     // if(value?.leadDescription)
     // setStsReq()
@@ -743,14 +746,8 @@ const BusinessLeads = () => {
 
   console.log(stsReq, 'sts hereeeeeeeee');
   const handleStatusChange = (e) => {
-    //admin sts
-    if (stsReq === 'Move to RFQ' && e.target.value === 'Approval') {
-      setMoveRFQ(true);
-    } else {
-      setMoveRFQ(false);
-    }
+    console.log(e);
   };
-  console.log(moveRFQ, 'hereee');
   const handleSaveRowTask = (newData, oldData) => {
     console.log('handleSaveRowtask - newData:', newData);
     console.log('handleSaveRowtask - oldData:', oldData);

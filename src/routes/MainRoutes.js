@@ -9,7 +9,7 @@ import BusinessRFQ from 'views/logics/rfq';
 import Profiles from 'views/profiles';
 import Employee from 'views/Employee/Employee';
 import ManagerPanel from 'views/Manager/ManagerPanel';
-import Taskpanel from 'views/task/taskPanel';
+import TaskPanel from 'views/task';
 
 // import BusinessLeads from 'views/logics';
 
@@ -124,7 +124,7 @@ const MainRoutes = {
     },
     {
       path: '/task-panel',
-      element: <Taskpanel/>,
+      element: <TaskPanel/>,
     },
     {
       path: '/Employee-Panel',
