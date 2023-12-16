@@ -31,10 +31,11 @@ import {
     Slide,
     Input
 } from '@mui/material';
+import './Manager.css';
 import React, { forwardRef, useState } from 'react';
 import MainCard from 'ui-component/cards/MainCard';
 import { useTheme } from '@mui/material/styles';
-import { IconDownload, IconEdit, IconEye, IconHistoryToggle, IconPlus, IconTrash, IconUpload } from '@tabler/icons';
+import { IconDots, IconDotsVertical, IconDownload, IconEdit, IconEye, IconHistoryToggle, IconPlus, IconTrash, IconUpload } from '@tabler/icons';
 import { MaterialReactTable, createMRTColumnHelper, useMaterialReactTable } from 'material-react-table';
 import { mkConfig, generateCsv, download } from 'export-to-csv';
 import * as XLSX from 'xlsx';
@@ -119,11 +120,13 @@ const Transition = forwardRef(function Transition(props, ref) {
 
 
 const ManagerPanel = () => {
-
+    const [viewData, setViewData] = useState([])
 
     const [open, setOpen] = useState(false);
     const handleView = (id) => {
         setOpen(true);
+        setViewData(id?.original)
+        console.log(id, 'viewData');
     };
     const handleClose = () => {
         setOpen(false)
@@ -314,19 +317,57 @@ const ManagerPanel = () => {
                 </MainCard>
             )}
             <Dialog
-                fullWidth
+
                 open={open}
                 TransitionComponent={Transition}
                 keepMounted
             // onClose={handleClose}
             // aria-describedby="alert-dialog-slide-description"
             >
-                <DialogTitle className='d-flex justify-content-between'>
-                    <Typography variant="h3">Delete Lead</Typography>
+                {/* <DialogTitle className='d-flex justify-content-between'>
+                    <Typography variant="h3">Approval</Typography>
                     <Typography variant="h3" onClick={handleClose}>Close</Typography>
                 </DialogTitle>
                 <Divider />
-                <DialogContent>rrrrrrrrrrrrrrrrrr</DialogContent>
+                <Divider /> */}
+                <DialogContent>
+                    <section class="section-style">
+                        <div class="main-container">
+                            <div class="image-container">
+                                <img src="https://i.postimg.cc/bryMmCQB/profile-image.jpg" alt="Profile Image" />
+                            </div>
+                            <div class="id">
+                                <p>#CAE001</p>
+                            </div>
+                            <div class="details">
+                                <p class="name">Darla Joes</p>
+                                <p class="job-title">Developer</p>
+                                <div class="descriptions">
+                                    <div class="left-details">
+                                        <p class="location">Location: Chennai</p>
+                                        <p class="project">Project: Capcp</p>
+                                        <p class="in-time">In Time: 9.00am</p>
+                                    </div>
+                                    <div class="right-details">
+                                        <p class="out-time">Out Time: 6.00pm</p>
+                                        <p class="date">Date: 12-12-2023</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="button-popup">
+                                <div>
+                                    <button class="decline" type="button">Declined</button>
+                                </div>
+                                <div>
+                                    <button class="approve" type="button">Approve</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+
+                </DialogContent>
+
             </Dialog>
 
         </div>

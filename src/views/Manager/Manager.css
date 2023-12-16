@@ -1,0 +1,86 @@
+/* Apply styles to the section */
+section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #a4bdb7;
+}
+
+/* Apply styles to the container */
+section > div {
+    width: 350px;
+    height: fit-content;
+    border-radius: 20px;
+    padding: 10px;
+    text-align: center;
+    background: #ededed;
+    margin-top: 10px;
+}
+
+/* Apply styles to the image */
+section img {
+    height: auto;
+    width: 120px;
+    border-radius: 50%;
+    display: block;
+    margin: 0 auto 5px;
+}
+
+/* Apply styles to the levels and text */
+section .levels p,
+section .text p {
+    font-size: 0.8em;
+    color: #333;
+    margin: 5px 0;
+}
+
+/* Apply styles to name and job title */
+section .text > p:nth-child(3) {
+    font-weight: bold;
+    margin-bottom: 3px;
+}
+
+section .text > p:nth-child(4) {
+    font-size: 0.7em;
+    color: gray;
+    margin-top: -3px;
+}
+
+/* Apply styles to the job descriptions */
+section .text > div > div > p {
+    font-size: 0.9em;
+    color: gray;
+    margin: 8px 0;
+}
+
+/* Apply styles to the buttons */
+section .button-popup {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+}
+
+section .button-popup > div > button {
+    width: 100px;
+    height: 30px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+section .button-popup > div > button:nth-child(1) {
+    background: #ededed;
+    border: 2px solid #000;
+}
+
+section .button-popup > div > button:nth-child(2) {
+    background-color: green;
+    color: #ededed;
+    border: none;
+}
+
+section .button-popup > div > button:hover {
+    letter-spacing: 1px;
+    transition: 0.5s;
+}

@@ -76,6 +76,10 @@ video {
   justify-content: end !important;
 }
 
+.p-0{
+  padding: 0 !important;
+}
+
 .max {
   max-height: 86vh;
   overflow-y: scroll;
@@ -332,6 +336,11 @@ hr {
 .strong {
   font-weight: bold;
 }
+
+
+
+
+
 
 
 
