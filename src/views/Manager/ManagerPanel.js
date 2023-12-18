@@ -87,18 +87,21 @@ const data = [
         employeecode: 'EMP001',
         jobtitle: 'Testing',
         status: '',
+        action: '',
     },
     {
         name: 'Zara',
         employeecode: 'EMP001',
         jobtitle: 'Testing',
         status: '',
+        action: '',
     },
     {
         name: 'Bharathi',
         employeecode: 'EMP001',
         jobtitle: 'Testing',
         status: '',
+        action: '',
     }
 ];
 
@@ -174,6 +177,14 @@ const ManagerPanel = () => {
 
                 </div>
 
+            ),
+        }),
+        columnHelper.accessor('action', {
+            header: 'Action',
+            Cell: () => (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <IconDotsVertical /> 
+                </div>
             ),
         }),
 
@@ -294,6 +305,12 @@ const ManagerPanel = () => {
 
     });
 
+    const handleApprove = () => {
+        alert('Approved successfully!');
+        setOpen(false); 
+    };
+
+
     return (
         <div className="max">
 
@@ -336,30 +353,37 @@ const ManagerPanel = () => {
                             <div class="image-container">
                                 <img src="https://i.postimg.cc/bryMmCQB/profile-image.jpg" alt="Profile Image" />
                             </div>
-                            <div class="id">
-                                <p>#CAE001</p>
+                            <div class="level">
+                                <p >#CAE001</p>
                             </div>
                             <div class="details">
                                 <p class="name">Darla Joes</p>
-                                <p class="job-title">Developer</p>
-                                <div class="descriptions">
+                                <p class="job_title">Developer</p>
+                                <div class="details-container">
                                     <div class="left-details">
-                                        <p class="location">Location: Chennai</p>
-                                        <p class="project">Project: Capcp</p>
-                                        <p class="in-time">In Time: 9.00am</p>
+                                        <p class="text-muted">Location : </p>
+                                        <span>Chennai</span>
+                                        <p class="text-muted">Project: </p>
+                                        <span>Capcp</span>
+                                        <p class="text-muted">In Time:</p>
+                                        <span> 9.00am</span>
                                     </div>
                                     <div class="right-details">
-                                        <p class="out-time">Out Time: 6.00pm</p>
-                                        <p class="date">Date: 12-12-2023</p>
+                                        <p class="text-muted">Out Time: </p>
+                                        <span>6.00pm</span>
+                                        <p class="text-muted">Date: </p>
+                                        <span>12-12-2023</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="button-popup">
                                 <div>
-                                    <button class="decline" type="button">Declined</button>
+                                    <button class="decline" type="button" style={{ backgroundColor: 'red', color: 'white' }} onClick={handleClose}>Declined</button>
                                 </div>
                                 <div>
-                                    <button class="approve" type="button">Approve</button>
+                                    <button class="approve" type="button" style={{ backgroundColor: 'green', color: 'white' }} onClick={handleApprove}>
+                                        Approve
+                                    </button>
                                 </div>
                             </div>
                         </div>
