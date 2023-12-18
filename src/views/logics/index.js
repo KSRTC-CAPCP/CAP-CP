@@ -1359,15 +1359,11 @@ const BusinessLeads = () => {
                     label="Select"
                     placeholder="Select"
                   >
-                    <MenuItem value={'teardown'}>Tear Down</MenuItem>
-                    <MenuItem value={'operations'}>Operations</MenuItem>
-                    <MenuItem value={'concerns'}>Concerns</MenuItem>
+                    <MenuItem value={'teardown'}>TDBM - Tear Down</MenuItem>
+                    <MenuItem value={'operations'}>Testing</MenuItem>
                     <MenuItem value={'software'}>Software</MenuItem>
-                    <MenuItem value={'hr'}>HR</MenuItem>
-                    <MenuItem value={'finance'}>Finance</MenuItem>
                     <MenuItem value={'scanning'}>Scanning</MenuItem>
-                    <MenuItem value={'Modeling'}>Modeling</MenuItem>
-                    <MenuItem value={'drivingunit'}>Driving Unit</MenuItem>
+                    <MenuItem value={'hr'}>Human Resource</MenuItem>
                   </Select>
                 </FormControl>
                 {formik.touched.businessVertical && formik.errors.businessVertical && (
@@ -1681,15 +1677,11 @@ const BusinessLeads = () => {
                     label="Select"
                     placeholder="Select"
                   >
-                    <MenuItem value={'teardown'}>Tear Down</MenuItem>
-                    <MenuItem value={'operations'}>Operations</MenuItem>
-                    <MenuItem value={'concerns'}>Concerns</MenuItem>
+                    <MenuItem value={'teardown'}>TDBM - Tear Down</MenuItem>
+                    <MenuItem value={'operations'}>Testing</MenuItem>
                     <MenuItem value={'software'}>Software</MenuItem>
-                    <MenuItem value={'hr'}>HR</MenuItem>
-                    <MenuItem value={'finance'}>Finance</MenuItem>
                     <MenuItem value={'scanning'}>Scanning</MenuItem>
-                    <MenuItem value={'Modeling'}>Modeling</MenuItem>
-                    <MenuItem value={'drivingunit'}>Driving Unit</MenuItem>
+                    <MenuItem value={'hr'}>Human Resource</MenuItem>
                   </Select>
                 </FormControl>
                 {formik.touched.businessVertical && formik.errors.businessVertical && (
