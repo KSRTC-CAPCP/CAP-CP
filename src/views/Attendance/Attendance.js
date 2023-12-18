@@ -31,7 +31,7 @@ import {
     Slide,
     Input
 } from '@mui/material';
-import './Manager.css';
+import './Attendance.css';
 import React, { forwardRef, useState } from 'react';
 import MainCard from 'ui-component/cards/MainCard';
 import { useTheme } from '@mui/material/styles';
@@ -58,6 +58,8 @@ import {
     VisibilityRounded
 } from '@mui/icons-material';
 import theme from 'themes';
+import { useRef } from 'react';
+import TaskPanel from 'views/task';
 
 
 
@@ -87,21 +89,21 @@ const data = [
         employeecode: 'EMP001',
         jobtitle: 'Testing',
         status: '',
-        action: '',
+       
     },
     {
         name: 'Zara',
         employeecode: 'EMP001',
         jobtitle: 'Testing',
         status: '',
-        action: '',
+       
     },
     {
         name: 'Bharathi',
         employeecode: 'EMP001',
         jobtitle: 'Testing',
         status: '',
-        action: '',
+       
     }
 ];
 
@@ -122,7 +124,13 @@ const Transition = forwardRef(function Transition(props, ref) {
 });
 
 
-const ManagerPanel = () => {
+
+const Attendance = () => {
+
+
+
+
+
     const [viewData, setViewData] = useState([])
 
     const [open, setOpen] = useState(false);
@@ -177,14 +185,6 @@ const ManagerPanel = () => {
 
                 </div>
 
-            ),
-        }),
-        columnHelper.accessor('action', {
-            header: 'Action',
-            Cell: () => (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <IconDotsVertical /> 
-                </div>
             ),
         }),
 
@@ -307,7 +307,7 @@ const ManagerPanel = () => {
 
     const handleApprove = () => {
         alert('Approved successfully!');
-        setOpen(false); 
+        setOpen(false);
     };
 
 
@@ -397,6 +397,6 @@ const ManagerPanel = () => {
         </div>
     );
 };
-export default ManagerPanel;
+export default Attendance;
 
 

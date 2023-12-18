@@ -8,8 +8,10 @@ import Projects from 'views/logics/project';
 import BusinessRFQ from 'views/logics/rfq';
 import Profiles from 'views/profiles';
 import Employee from 'views/Employee/Employee';
-import ManagerPanel from 'views/Manager/ManagerPanel';
+
 import TaskPanel from 'views/task';
+import Attendance from 'views/Attendance/Attendance';
+import Manager from 'Manager/Manager';
 
 // import BusinessLeads from 'views/logics';
 
@@ -132,7 +134,11 @@ const MainRoutes = {
     },
     {
       path: '/Manager-Panel',
-      element: <ManagerPanel />,
+      element: <Manager />,
+    },
+    {
+      path: '/attendance-Panel',
+      element: <Attendance />,
     }
   ]
 };
