@@ -86,8 +86,8 @@ video {
 }
 
 ::-webkit-scrollbar {
-  width: 2px;
-  height: 3px;
+  width: 7px;
+  height: 8px;
 }
 
 /* Track */

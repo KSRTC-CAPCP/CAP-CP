@@ -247,10 +247,12 @@ const BusinessLeads = () => {
       muiEditTextFieldProps: {
         type: 'date',
         required: true
+        // min: ''
       },
       Cell: ({ renderedCellValue, row }) => (
         <Box component="span">
           <p>{row.original.date.slice(0, 10)}</p>
+          {/* <input type="date" min="2019-06-02" max="2019-06-08"/> */}
         </Box>
       )
     },
@@ -279,8 +281,19 @@ const BusinessLeads = () => {
     }
   ];
   const [historyTableColumns, setHistoryTableColumns] = useState(coumnsForHistory);
+  const [historyTableData, setHistoryTableData] = useState([]);
   const [profilesData, setProfilesData] = useState([]);
   console.log(stsReq, 'moveRFQ');
+  // const dateStrings = historyTableData?.map((item) => item?.date);
+  // const dateObjects = dateStrings.map((dateString) => new Date(dateString)).filter((dateObject) => !isNaN(dateObject.getTime()));
+  // const maxDate = new Date(Math.max.apply(null, dateObjects));
+  // const formattedDate = `${maxDate.getFullYear()}-${(maxDate.getMonth() + 1).toString().padStart(2, '0')}-${maxDate
+  //   .getDate()
+  //   .toString()
+  //   .padStart(2, '0')}`;
+  // console.log('maxDate', formattedDate);
+
+  // const formattedDate = maxDate.toISOString().split('T')[0];
   const coumnsForTask = [
     // {
     //   accessorKey: 'id',
@@ -367,7 +380,6 @@ const BusinessLeads = () => {
   const [selectedValue, setSelectedValue] = useState('');
   const generateTempId = () => `temp_${Math.random().toString(36).substr(2, 9)}`;
   const [taskTableData, setTaskTableData] = useState([]);
-  const [historyTableData, setHistoryTableData] = useState([]);
   const [isCreatingRow, setIsCreatingRow] = useState(false);
   const [editingRowId, setEditingRowId] = useState(null);
   const fileInputRef = React.createRef();
@@ -479,7 +491,14 @@ const BusinessLeads = () => {
   };
   const theme = useTheme();
   const handleExportData = () => {
-    const csv = generateCsv(csvConfig)(leadData);
+    // Exclude the fields you want to hide from each lead
+    const processedLeadData = leadData.map(lead => {
+      const { _id, __v, leadDescription, tasks, ...rest } = lead;
+      return rest;
+    });
+
+    // Use the processed data to generate and download the CSV
+    const csv = generateCsv(csvConfig)(processedLeadData);
     download(csvConfig)(csv);
   };
 
@@ -846,7 +865,7 @@ const BusinessLeads = () => {
     onCreatingRowSave: handleCreateRowHistory,
     onCreatingRowCancel: handleCancelCreateHistory,
     renderRowActions: ({ row, table }) => (
-      <Box sx={{ display: 'flex', gap: '1rem' }}>
+      <Box sx={{ display: 'none', gap: '1rem' }}>
         <Tooltip title="Edit">
           <IconButton
             onClick={() => {
