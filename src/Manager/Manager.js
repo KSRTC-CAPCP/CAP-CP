@@ -1,1988 +1,1746 @@
 /*eslint-disable */
 import {
-    Avatar,
-    Box,
-    ButtonBase,
-    Button,
-    Tooltip,
-    IconButton,
-    MenuItem,
-    Grid,
-    TextField,
-    FormControl,
-    InputLabel,
-    Select,
-    Divider,
-    Typography,
-    TableContainer,
-    Table,
-    TableHead,
-    TableRow,
-    TableBody,
-    TableCell,
-    Paper,
-    tableCellClasses,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogContentText,
-    DialogActions,
-    Slide,
-    Input,
-    Card,
-    Badge,
-    FormHelperText
-  } from '@mui/material';
-  import React, { forwardRef } from 'react';
-  import MainCard from 'ui-component/cards/MainCard';
-  import { useTheme } from '@mui/material/styles';
-  import { IconDownload, IconEdit, IconEye, IconHistoryToggle, IconPlus, IconTrash, IconUpload } from '@tabler/icons';
-  import { MaterialReactTable, createMRTColumnHelper, useMaterialReactTable } from 'material-react-table';
-  import { mkConfig, generateCsv, download } from 'export-to-csv';
-  import {
-    ConnectWithoutContact,
-    CreateTwoTone,
-    Delete,
-    DeleteRounded,
-    DeleteTwoTone,
-    Group,
-    History,
-    KeyboardBackspaceRounded,
-    Label,
-    ModeEditRounded,
-    NotStarted,
-    PeopleAltTwoTone,
-    PersonAdd,
-    TaskAlt,
-    ThumbDown,
-    ThumbDownAltSharp,
-    ThumbUpSharp,
-    VisibilityRounded,
-    VisibilityTwoTone
-  } from '@mui/icons-material';
-  import { useState } from 'react';
-  import styled from '@emotion/styled';
-  import { useFormik } from 'formik';
-  import * as Yup from 'yup';
-  import {
-    Timeline,
-    TimelineConnector,
-    TimelineContent,
-    TimelineDot,
-    TimelineItem,
-    TimelineOppositeContent,
-    TimelineSeparator
-  } from '@mui/lab';
-  import { useMemo } from 'react';
-  import { deleteData, fetchData, getById, postData, updateData } from 'utils/apiUtils';
-  import {
-    CATEGORY_CREATE,
-    CATEGORY_GET,
-    LEAD_CREATION,
-    LEAD_DELETE,
-    LEAD_GET,
-    LEAD_GET_ID,
-    LEAD_UPDATE,
-    PROFILES_GET,
-    RFQ_CREATION
-  } from 'api/apiEndPoint';
-  import { useEffect } from 'react';
-  import { Value } from 'sass';
-  
-  const columnHelper = createMRTColumnHelper();
-  const validationSchema = Yup.object({
-    date: Yup.string().required('Date is required'),
-    Source: Yup.string().required('Source is required'),
-    Pilot: Yup.string().required('Pilot is required'),
-    companyName: Yup.string().required('Company Name is required'),
-    category: Yup.string().required('Category is required'),
-    contactName: Yup.string().required('Contact Name is required'),
-    departmentName: Yup.string().required('Department Name is required'),
-    phoneNumber: Yup.string().required('Phone Number is required'),
-    email: Yup.string().required('Email is required'),
-    businessVertical: Yup.string().required('businessVertical is required')
-    // Add validation for other fields as needed
-  });
-  
-  const data = [
+  Avatar,
+  Box,
+  ButtonBase,
+  Button,
+  Tooltip,
+  IconButton,
+  MenuItem,
+  Grid,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  Divider,
+  Typography,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableBody,
+  TableCell,
+  Paper,
+  tableCellClasses,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Slide,
+  Input,
+  FormControlLabel,
+  Checkbox,
+  RadioGroup,
+  Radio,
+  FormLabel,
+  LinearProgress,
+  FormHelperText,
+  Card
+} from '@mui/material';
+import React, { forwardRef } from 'react';
+import { Link } from 'react-router-dom'
+import MainCard from 'ui-component/cards/MainCard';
+import { useTheme } from '@mui/material/styles';
+import { IconDownload, IconEdit, IconEye, IconHistoryToggle, IconPlus, IconTrash, IconUpload } from '@tabler/icons';
+import { MaterialReactTable, createMRTColumnHelper, useMaterialReactTable } from 'material-react-table';
+import { mkConfig, generateCsv, download } from 'export-to-csv';
+import * as XLSX from 'xlsx';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+
+import {
+  ConnectWithoutContact,
+  Delete,
+  DeleteRounded,
+  Group,
+  History,
+  KeyboardBackspaceRounded,
+  Label,
+  ModeEditRounded,
+  NotStarted,
+  PeopleAltTwoTone,
+  PersonAdd,
+  TaskAlt,
+  ThumbDown,
+  ThumbDownAltSharp,
+  ThumbUpSharp,
+  VisibilityRounded
+} from '@mui/icons-material';
+import { useState } from 'react';
+import styled from '@emotion/styled';
+import {
+  Timeline,
+  TimelineConnector,
+  TimelineContent,
+  TimelineDot,
+  TimelineItem,
+  TimelineOppositeContent,
+  TimelineSeparator
+} from '@mui/lab';
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { DatePicker } from 'rsuite';
+import {
+  MILESTONE_CREATE,
+  MILESTONE_GET,
+  PROFILES_CREATE,
+  PROFILES_GET,
+  PROFILES_GET_ROLE,
+  PROJECT_CREATE,
+  PROJECT_DELETE,
+  PROJECT_GET,
+  PROJECT_UPDATE,
+  RFQ_GET,
+  RFQ_GET_ID
+} from 'api/apiEndPoint';
+import { useEffect } from 'react';
+import { deleteData, fetchData, postData, updateData } from 'utils/apiUtils';
+import TaskPanel from 'views/task';
+
+const columnHelper = createMRTColumnHelper();
+const data = [
+  {
+    projectname: 222,
+    projectNumber: '22-04-2022',
+    companyname: '23-08-2023',
+    assignedDate: 'yes',
+    targetDate: '1234',
+    milestone: '1234',
+    description: 'abc'
+  },
+  {
+    projectname: 222,
+    projectNumber: '22-04-2022',
+    companyname: '23-08-2023',
+    assignedDate: 'yes',
+    targetDate: '1234',
+    milestone: '1234',
+    description: 'abc'
+  }
+];
+const columns = [
+  columnHelper.accessor('projectname', {
+    header: 'Project Name'
+  }),
+  columnHelper.accessor('projectNumber', {
+    header: 'Project Number'
+  }),
+  columnHelper.accessor('companyname', {
+    header: 'Company Name'
+  }),
+  columnHelper.accessor('assignedDate', {
+    header: 'Start Date',
+    Cell: ({ renderedCellValue, row }) => (
+      <Box component="span">
+        <p>{row.original.assignedDate?.slice(0, 10)}</p>
+      </Box>
+    )
+  }),
+  columnHelper.accessor('targetDate', {
+    header: 'End Date',
+    Cell: ({ renderedCellValue, row }) => (
+      <Box component="span">
+        <p>{row.original.targetDate?.slice(0, 10)}</p>
+      </Box>
+    )
+  }),
+  // columnHelper.accessor('status', {
+  //   header: 'Status'
+  // }),
+  columnHelper.accessor('description', {
+    header: 'Description'
+  }),
+  columnHelper.accessor('milestone', {
+    header: 'MileStone'
+  })
+];
+const optionsForHistoryApproval = ['Pending', 'Approval', 'Reject'];
+const optionsForHistoryStatus = [' OnGoing', 'Customer Review', 'Internal Review', 'Complete', 'Hold'];
+const optionsForTaskStatus = ['Not Started', 'On Going', 'Completed'];
+const optionsForteamproject = ['IT Team', 'Finance Team', 'Teardown Team'];
+const optionsForFinance = ['Credit', 'Invoice', 'Spent'];
+const optionsForlocation = ['Thiruvallur', 'Ambattur'];
+
+const csvConfig = mkConfig({
+  fieldSeparator: ',',
+  decimalSeparator: '.',
+  useKeysAsHeaders: true
+});
+const dataForHistory = [
+  {
+    date: '12-09-2023',
+    description: 'description',
+    remarks: 'remarks',
+    status: 'status',
+    assigneddate: '2-04-2001',
+    targetdate: '27-04-2001'
+  },
+  {
+    date: '12-09-2023',
+    description: 'description',
+    remarks: 'remarks',
+    status: 'status',
+    assigneddate: '2-04-2001',
+    targetdate: '27-04-2001'
+  }
+];
+
+const dataForproject = [
+  {
+    empcode: 'CAE0001',
+    name: 'Ram',
+    fromdate: '21-02-2001',
+    todate: '21-05-2001',
+    percentage: '50%',
+    team: 'IT Team',
+    location: 'Chennai'
+  },
+  {
+    empcode: 'CAE0002',
+    name: 'Anbu',
+    fromdate: '21-02-2001',
+    todate: '21-05-2001',
+    percentage: '50%',
+    team: 'IT Team',
+    location: 'Chennai'
+  }
+];
+const validationSchema = Yup.object({
+  rfqNumber: Yup.string().required('RFQ Number is required'),
+  companyName: Yup.string().required('Company Name is required'),
+  assignedDate: Yup.string().required('Assigned Date is required'),
+  status: Yup.string().required('Status is required'),
+  description: Yup.string().required('Description is required')
+  // Add validation for other fields as needed
+});
+const Transition = forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
+
+const Manager = ({ _history, tasks }) => {
+  const navigateToTaskpage = () => {
+    window.location.href = '/task-panel';
+  };
+  const [profilesData, setProfilesData] = useState([]);
+  const [managerData, setManagerData] = useState([]);
+  const [managerId, setManagerId] = useState('');
+  const handleEmployee = (e) => {
+    console.log(e.target.value.slice(0, 7), 'its worked');
+    const value = e.target.value;
+    const filterEmployee = profilesData.filter((employee) => employee?.EmployeeCode === value.slice(0, 7));
+    console.log(filterEmployee[0], 'filterEmployee');
+    setManagerId(filterEmployee[0]);
+  };
+  const columnsForproject = [
     {
-      date: '02-04-2001',
-      source: 'Berneice',
-      pilot: 'Feil',
-      companyname: 'Deckow, Leuschke and Jaskolski',
-      category: 'Millcreek',
-      contactname: 'Nepal',
-      department: 'Nepal',
-      phonenumber: 'Nepal',
-      email: 'Nepal',
-      businessverticle: 'Nepal',
-      leaddescription: 'Nepal',
-      status: 'Nepal'
+      accessorKey: 'employeeCode',
+      header: 'Employee Code',
+      editVariant: 'select',
+      editSelectOptions: profilesData.map((item) => item.EmployeeCode + '-' + item.NameOfCandidate),
+      muiEditTextFieldProps: {
+        select: true,
+        onChange: (e) => handleEmployee(e)
+      },
+      enableEditing: true
     },
     {
-      date: '02-04-2001',
-      source: 'Berneice',
-      pilot: 'Feil',
-      companyname: 'Deckow, Leuschke and Jaskolski',
-      category: 'Millcreek',
-      contactname: 'Nepal',
-      department: 'Nepal',
-      phonenumber: 'Nepal',
-      email: 'Nepal',
-      businessverticle: 'Nepal',
-      leaddescription: 'Nepal',
-      status: 'Nepal'
+      accessorKey: 'fromDate',
+      header: 'From Date',
+      muiEditTextFieldProps: {
+        type: 'date',
+        required: true
+      }
+    },
+    {
+      accessorKey: 'toDate',
+      header: 'To Date',
+      muiEditTextFieldProps: {
+        type: 'date',
+        required: true
+      }
+    },
+    {
+      accessorKey: 'percentage',
+      header: 'Percentage',
+      muiEditTextFieldProps: {
+        type: 'number',
+        required: true
+      },
+      enableEditing: true
+    },
+
+    {
+      accessorKey: 'team',
+      header: 'Team',
+      editVariant: 'select',
+      editSelectOptions: optionsForteamproject,
+      muiEditTextFieldProps: {
+        select: true
+      },
+      enableEditing: true
+    },
+    {
+      accessorKey: 'location',
+      header: 'Location',
+      editVariant: 'select',
+      editSelectOptions: optionsForlocation,
+      muiEditTextFieldProps: {
+        select: true
+      },
+      enableEditing: true
     }
   ];
-  const columns = [
-    columnHelper.accessor('serialNumber', {
-      header: 'Lead No',
-      Cell: ({ renderedCellValue, row }) => (
-        <Box component="span">
-          <p>{row.original.serialNumber}</p>
-        </Box>
-      )
-    }),
-    columnHelper.accessor('date', {
+  const columnsForFinance = [
+    {
+      accessorKey: 'date',
       header: 'Date',
-      Cell: ({ renderedCellValue, row }) => (
-        <Box component="span">
-          <p>{row.original.date.slice(0, 10)}</p>
-        </Box>
-      )
-    }),
-    columnHelper.accessor('Source', {
-      header: 'Source'
-    }),
-    columnHelper.accessor('Pilot', {
-      header: 'Pilot'
-    }),
-    columnHelper.accessor('companyName', {
-      header: 'Company Name'
-    }),
-    columnHelper.accessor('category', {
-      header: 'Category'
-    }),
-    columnHelper.accessor('contactName', {
-      header: 'Contact Name'
-    }),
-    columnHelper.accessor('departmentName', {
-      header: 'Department'
-    }),
-    columnHelper.accessor('phoneNumber', {
-      header: 'Phone Number'
-    }),
-    columnHelper.accessor('email', {
-      header: 'Email'
-    }),
-    columnHelper.accessor('businessVertical', {
-      header: 'Business Verticle'
-    }),
-    columnHelper.accessor('leaddescription', {
-      header: 'Lead Description',
-      Cell: ({ renderedCellValue, row }) => (
-        <Box component="span">
-          {row.original.leadDescription.length > 0 && (
-            <p>{row.original.leadDescription[row.original.leadDescription.length - 1].description}</p>
-          )}
-        </Box>
-      )
-    }),
-    columnHelper.accessor('status', {
-      header: 'Status',
-      Cell: ({ renderedCellValue, row }) => (
-        <Box component="span">
-          {row.original.leadDescription.length > 0 && (
-            <p>
-              {row.original.leadDescription[row.original.leadDescription.length - 1].statusRequest}&nbsp;
-              {row.original.leadDescription[row.original.leadDescription.length - 1].status}
-            </p>
-          )}
-        </Box>
-      )
-    })
-  ];
-  const optionsForHistoryApproval = ['Pending', 'Approval', 'Reject'];
-  const optionsForHistoryStatus = ['newlead', 'Contact Establish', 'Technicle Meeting', 'Hold', 'Reject', 'Move to RFQ']; //
-  const optionsForTaskStatus = ['Not Started', 'On Going', 'Completed'];
-  
-  const csvConfig = mkConfig({
-    fieldSeparator: ',',
-    decimalSeparator: '.',
-    useKeysAsHeaders: true
-  });
-  const dataForHistory = [
-    {
-      // id: '123',
-      date: '12-09-2023',
-      description: 'description',
-      remarks: 'remarks',
-      status: 'status',
-      assigneddate: '2-04-2001',
-      targetdate: '27-04-2001'
+      muiEditTextFieldProps: {
+        type: 'date',
+        required: true
+      }
     },
     {
-      // id: '123',
-      date: '12-09-2023',
-      description: 'description',
-      remarks: 'remarks',
-      status: 'status',
-      assigneddate: '2-04-2001',
-      targetdate: '27-04-2001'
+      accessorKey: 'refNumber',
+      header: 'Ref No/Bill',
+      muiEditTextFieldProps: {
+        type: 'number',
+        required: true
+      },
+      enableEditing: true
+    },
+    {
+      accessorKey: 'amount',
+      header: 'Amount',
+      muiEditTextFieldProps: {
+        type: 'number',
+        required: true
+      },
+      enableEditing: true
+    },
+    {
+      accessorKey: 'tax',
+      header: 'Tax',
+      muiEditTextFieldProps: {
+        type: 'number',
+        required: true
+      },
+      enableEditing: true
+    },
+
+    {
+      accessorKey: 'status',
+      header: 'Status',
+      editVariant: 'select',
+      editSelectOptions: optionsForFinance,
+      muiEditTextFieldProps: {
+        select: true
+      },
+      enableEditing: true
     }
   ];
-  
-  const Transition = forwardRef(function Transition(props, ref) {
-    return <Slide direction="up" ref={ref} {...props} />;
-  });
-  
-  const Manager = () => {
-    const [localData, setLocalData] = useState('');
-    const [moveRFQ, setMoveRFQ] = useState(false);
-    const [stsReq, setStsReq] = useState([]);
-    const coumnsForHistory = [
-      {
-        accessorKey: 'date',
-        header: 'Date',
-        muiEditTextFieldProps: {
-          type: 'date',
-          required: true
-        },
-        Cell: ({ renderedCellValue, row }) => (
-          <Box component="span">
-            <p>{row.original.date.slice(0, 10)}</p>
-          </Box>
-        )
-      },
-      {
-        accessorKey: 'description',
-        header: 'Lead Description',
-        enableEditing: true
-      },
-      {
-        accessorKey: 'statusRequest',
-        header: 'Request Status',
-        editVariant: 'select',
-        Cell: ({ renderedCellValue, row }) => (
-          <Box component="span">
-            <p>
-              {row.original.statusRequest}&nbsp;{row.original.status}
-            </p>
-          </Box>
-        ),
-        editSelectOptions: optionsForHistoryStatus,
-        muiEditTextFieldProps: {
-          select: true,
-          onChange: (e) => handleStsReq(e)
-        },
-        enableEditing: true
+  const columnsForHistory = [
+    {
+      accessorKey: 'date',
+      header: 'Date',
+      muiEditTextFieldProps: {
+        type: 'date',
+        required: true
       }
-    ];
-    const [historyTableColumns, setHistoryTableColumns] = useState(coumnsForHistory);
-    const [profilesData, setProfilesData] = useState([]);
-    console.log(stsReq, 'moveRFQ');
-    const coumnsForTask = [
-      // {
-      //   accessorKey: 'id',
-      //   header: 'Id'
-      // },
-      {
-        accessorKey: 'title',
-        header: 'Title'
+    },
+    {
+      accessorKey: 'projectDescription',
+      header: 'Lead Description',
+      enableEditing: true
+    },
+    {
+      accessorKey: 'requestStatus',
+      header: 'Request Status',
+      editVariant: 'select',
+      editSelectOptions: optionsForHistoryStatus,
+      muiEditTextFieldProps: {
+        select: true
       },
-      {
-        accessorKey: 'description',
-        header: 'Description',
-        enableEditing: true
+      enableEditing: true
+    },
+    {
+      accessorKey: 'approvalStatus',
+      header: 'Approval Status',
+      editVariant: 'select',
+      editSelectOptions: optionsForHistoryApproval,
+      muiEditTextFieldProps: {
+        select: true
       },
-      {
-        accessorKey: 'responsible',
-        header: 'Responsible',
-        editVariant: 'select',
-        editSelectOptions: profilesData.map((item) => item.EmployeeCode + '-' + item.NameOfCandidate),
-        muiEditTextFieldProps: {
-          select: true
-        },
-        enableEditing: true
+      enableEditing: true
+    }
+  ];
+  const columnsForTask = [
+    {
+      accessorKey: 'title',
+      header: 'Title'
+    },
+    {
+      accessorKey: 'description',
+      header: 'Description',
+      enableEditing: true
+    },
+    {
+      accessorKey: 'responsible',
+      header: 'Responsible',
+      enableEditing: true
+    },
+    {
+      accessorKey: 'remarks',
+      header: 'Remarks',
+      enableEditing: true
+    },
+    {
+      accessorKey: 'assignedDate',
+      header: 'Assigned Date',
+      muiEditTextFieldProps: {
+        type: 'date',
+        required: true
+      }
+    },
+    {
+      accessorKey: 'targetDate',
+      header: 'Target Date',
+      muiEditTextFieldProps: {
+        type: 'date',
+        required: true
+      }
+    },
+    {
+      accessorKey: 'status',
+      header: 'Status',
+      editVariant: 'select',
+      editSelectOptions: optionsForTaskStatus,
+      muiEditTextFieldProps: {
+        select: true
       },
-      {
-        accessorKey: 'remark',
-        header: 'Remarks',
-        enableEditing: true
-      },
-      {
-        accessorKey: 'assignedDate',
-        header: 'Assigned Date',
-        muiEditTextFieldProps: {
-          type: 'date',
-          required: true
-        },
-        Cell: ({ renderedCellValue, row }) => (
-          <Box component="span">
-            <p>{row.original.assignedDate.slice(0, 10)}</p>
-          </Box>
-        )
-      },
-      {
-        accessorKey: 'targetDate',
-        header: 'Target Date',
-        muiEditTextFieldProps: {
-          type: 'date',
-          required: true
-        },
-        Cell: ({ renderedCellValue, row }) => (
-          <Box component="span">
-            <p>{row.original.targetDate.slice(0, 10)}</p>
-          </Box>
-        )
-      },
-      {
-        accessorKey: 'status',
-        header: 'Status',
-        editVariant: 'select',
-        editSelectOptions: optionsForTaskStatus,
-        muiEditTextFieldProps: {
-          select: true
-        },
-        Cell: ({ renderedCellValue, row }) => (
-          <Box component="span">
-            <p className="">{row.original.status}</p>
-          </Box>
-        ),
-        enableEditing: true
-      }
-    ];
-    const [inputValue, setInputValue] = useState('');
-    const [leadSummary, setLeadSummary] = useState('');
-    const [leadData, setLeadData] = useState([]);
-    const [deleteId, setDeleteId] = useState('');
-    const [category, setCategory] = useState([]);
-    const [updateId, setUpdateId] = useState('');
-    const [updatedValue, setUpdatedValue] = useState([]);
-    const [selectedOption, setSelectedOption] = useState('');
-    const [leadNumber, setleadNumber] = useState('');
-    const [showSelect, setShowSelect] = useState(true);
-    const [customOption, setCustomOption] = useState('');
-    const [options, setOptions] = useState([]);
-    const [selectedValue, setSelectedValue] = useState('');
-    const generateTempId = () => `temp_${Math.random().toString(36).substr(2, 9)}`;
-    const [taskTableData, setTaskTableData] = useState([]);
-    const [historyTableData, setHistoryTableData] = useState([]);
-    const [isCreatingRow, setIsCreatingRow] = useState(false);
-    const [editingRowId, setEditingRowId] = useState(null);
-    const fileInputRef = React.createRef();
-    const handleImportClick = () => {
-      fileInputRef.current.click();
-    };
-    const handleFileUpload = async (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, { type: 'array' });
-          const sheetName = workbook.SheetNames[0];
-          const sheet = workbook.Sheets[sheetName];
-          const parsedData = XLSX.utils.sheet_to_json(sheet);
-          await uploadToServer(parsedData);
-        };
-        reader.readAsArrayBuffer(file);
-      }
-    };
-    const uploadToServer = async (data) => {
-      try {
-        const response = await fetch('http://localhost:3001/upload', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ data })
-        });
-        // Handle response if needed
-        console.log('Upload successful:', response);
-      } catch (error) {
-        console.error('Error uploading file:', error);
-      }
-    };
-    const handleSelectOnChange = (event) => {
-      const value = event.target.value;
-      formik.handleChange(event);
-      formik.setFieldTouched('category', true, false); // Manually mark the field as touched
-      // If "Add More Option" is selected, hide the select input and show the text input
-      if (value === 'addMore') {
-        setShowSelect(false);
-      } else {
-        setSelectedOption(value);
-  
-        setShowSelect(true);
-      }
-    };
-    const handleSelectInputChange = (event) => {
-      setCustomOption(event.target.value);
-    };
-    const handleSaveCustomOption = async () => {
-      if (customOption.trim() !== '') {
-        if (selectedOption === 'addMore') {
-          // If "Add More Option" is selected, set selectedOption to the customOption value
-          setSelectedOption(customOption);
-        }
-  
-        // Save the custom option to the backend
-        await postData(CATEGORY_CREATE, { name: customOption });
-  
-        // Fetch the updated category data
-        const categoryData = await fetchData(CATEGORY_GET);
-        setCategory(categoryData);
-  
-        // Reset the customOption state
-        setCustomOption('');
-  
-        // Show the select input
-        setShowSelect(true);
-      }
-    };
-    const handleAddOption = () => {
-      if (inputValue.trim() !== '') {
-        setOptions([...options, inputValue]);
-        setInputValue('');
-      }
-    };
-    const handleSelectChange = (event) => {
-      setSelectedValue(event.target.value);
-    };
-    const categoryOption = category?.map((data) => ({
-      label: data.name,
-      value: data.name
-    }));
-    const customOptions = [...categoryOption, { value: 'addMore', label: 'Add More Option' }];
-  
-    const [view, setView] = useState({
-      visible: false,
-      mode: 'Initial' // 'add', 'edit', 'view'
+      enableEditing: true
+    }
+  ];
+
+  const [selectedDate, setSelectedDate] = useState('');
+  const parseDate = (dateString) => {
+    // Check if dateString is provided and is a non-empty string
+    if (dateString && typeof dateString === 'string' && dateString.trim() !== '') {
+      // Assuming dateString is in the format 'dd-MM-yyyy'
+      const [day, month, year] = dateString.split('-');
+      const parsedDate = new Date(`${year}-${month}-${day}`);
+      return parsedDate;
+    } else {
+      // Return null or handle the case when dateString is not valid
+      // return null;
+    }
+  };
+
+  const handleEndDateChange = (event) => {
+    const inputDate = new Date(event);
+    const formattedDate = inputDate.toLocaleDateString('en-GB');
+    const [day, month, year] = formattedDate.split('/');
+    const formattedStartDate = `${day}-${month}-${year}`;
+    setEndDate(formattedStartDate);
+    formik.setValues({
+      ...formik.values,
+      targetDate: formattedStartDate
     });
-    const [open, setOpen] = useState(false);
-    const handleDelete = (e) => {
-      setOpen(true);
-      console.log('open', e.original._id);
-      setDeleteId(e.original._id);
-    };
-  
-    const confirmDelete = async () => {
-      try {
-        const apiEndPoint = LEAD_DELETE(deleteId);
-        await deleteData(apiEndPoint, localData?.accessToken);
-        fetchFun();
-        setOpen(false);
-      } catch (error) {
-        console.log(error, 'error');
-      }
-    };
-    const theme = useTheme();
-    const handleExportData = () => {
-      const csv = generateCsv(csvConfig)(leadData);
-      download(csvConfig)(csv);
-    };
-  
-    const populateFormFields = (leadData) => {
-      console.log(leadData, 'populateFormFields');
-      formik.setValues({
-        date: leadData?.date?.slice(0, 10),
-        Source: leadData.Source,
-        Pilot: leadData.Pilot,
-        companyName: leadData.companyName,
-        category: leadData.category,
-        contactName: leadData.contactName,
-        departmentName: leadData.departmentName,
-        phoneNumber: leadData.phoneNumber,
-        email: leadData.email,
-        businessVertical: leadData.businessVertical // ... Other fields
-        // ...populate other fields
+  };
+  const handleStartDateChange = (event) => {
+    const inputDate = new Date(event);
+    const formattedDate = inputDate.toLocaleDateString('en-GB');
+    const [day, month, year] = formattedDate.split('/');
+    const formattedStartDate = `${day}-${month}-${year}`;
+    setStartDate(formattedStartDate);
+    formik.setValues({
+      ...formik.values,
+      assignedDate: formattedStartDate
+    });
+  };
+
+  const [selectedOption, setSelectedOption] = React.useState('no');
+
+  const [mileselectedOption, setMileSelectedOption] = React.useState('');
+  const [textFieldText, setTextFieldText] = React.useState('PONO Number is Not Allocated');
+
+  const handleOptionChange = (event) => {
+    setSelectedOption(event.target.value);
+    if (event.target.value === 'yes') {
+      setTextFieldText('');
+    } else {
+      setTextFieldText('PONO Number is Not Allocated');
+    }
+  };
+
+  const fileInputRef = React.createRef();
+  const handleImportClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const parsedData = XLSX.utils.sheet_to_json(sheet);
+        await uploadToServer(parsedData);
+      };
+      reader.readAsArrayBuffer(file);
+    }
+  };
+
+  const uploadToServer = async (data) => {
+    try {
+      const response = await fetch('http://localhost:3001/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ data })
       });
-    };
-  
-    const fetchFun = async () => {
-      const data = await fetchData(LEAD_GET, localData?.accessToken);
-      setLeadData(data.data);
-    };
-  
-    console.log(moveRFQ, 'moveRFQ');
-    const handleUpdate = async (values) => {
+    } catch (error) {
+      console.error('Error uploading file:', error);
+    }
+  };
+
+  const [milestone, setMilestone] = useState([]);
+  const [showSelects, setShowSelects] = useState(true);
+  const [selectedOptions, setSelectedOptions] = useState('');
+  const [customOptiones, setCustomOptions] = useState('');
+  const [descriptionValues, setDescriptionValues] = useState({}); // State to store descriptions for options
+
+  const [view, setView] = useState({
+    visible: false,
+    mode: 'Initial' // 'add', 'edit', 'view'
+  });
+
+  const handleDescriptionChange = (optionValue, description) => {
+    setDescriptionValues({ ...descriptionValues, [optionValue]: description });
+  };
+
+  const [historyTableColumns, setHistoryTableColumns] = useState(columnsForHistory);
+  const [inputValue, setInputValue] = useState('');
+  const [options, setOptions] = useState([]);
+  const [selectedValue, setSelectedValue] = useState('');
+  const [date, setDate] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [localData, setLocalData] = useState('');
+  const [projectData, setProjectData] = useState([]);
+  const [rfqData, setRFQData] = useState([]);
+  const [selectedRFQ, setSelectedRFQ] = useState('');
+  const [selectedPR, setSelectedPR] = useState('');
+  const [teamData, setTeamData] = useState([]);
+  const [financeData, setFinanceData] = useState([]);
+  const [historyTableData, setHistoryTableData] = useState([]);
+  const [taskTableData, setTaskTableData] = useState([]);
+  const [editingRowId, setEditingRowId] = useState(null);
+  const generateTempId = () => `temp_${Math.random().toString(36).substr(2, 9)}`;
+  const [isCreatingRow, setIsCreatingRow] = useState(false);
+
+  const formik = useFormik({
+    initialValues: {
+      assignedDate: '',
+      targetDate: '',
+      companyName: '',
+      description: '',
+      manager: '',
+      milestone: '',
+      poNumber: '',
+      projectName: '',
+      projectAllocation: [],
+      finance: [],
+      history: [],
+      task: []
+      // Add initial values for other fields
+      // ...
+    },
+    // validationSchema,
+    onSubmit: async (values) => {
+      console.log('worked', values);
       try {
-        // Assuming values contain the updated data
-        console.log(values, 'vvvvvvvvvvv');
-        const updatedData = {
-          // Update fields as needed
-          date: values.date,
-          Source: values.Source,
-          Pilot: values.Pilot,
-          companyName: values.companyName,
-          category: values.category,
-          contactName: values.contactName,
-          departmentName: values.departmentName,
-          phoneNumber: values?.phoneNumber,
-          email: values?.email,
-          businessVertical: values?.businessVertical,
-          leadDescription: historyTableData,
-          tasks: taskTableData
-          // ...update other fields
-        };
-        console.log(
-          updatedData?.leadDescription.filter((item) => item.statusRequest === 'Move to RFQ' && item.status === 'Approval'),
-          '00000'
-        ); // Make the API call to update the data
-        const approval = updatedData?.leadDescription.filter((item) => item.statusRequest === 'Move to RFQ' && item.status === 'Approval');
-        if (approval.length !== 0) {
-          const leadDescriptionArray = values.leadDescription
-            ? values.leadDescription.split('\n').map((item) => ({
-                description: item.trim()
-              }))
+        if (editId) {
+          const teamsValue = teamData
+            ? teamData.map((item) => ({
+              fromDate: item.fromDate,
+              employeeCode: item.employeeCode?.slice(0, 7),
+              employeeId: managerId?._id,
+              toDate: item.toDate,
+              location: item.location,
+              percentage: Number(item.percentage),
+              team: item.team
+            }))
             : [];
-          const newRfq = {
-            date: values.date,
-            Source: values.Source,
-            Pilot: values.Pilot,
-            leadNumber: values?.serialNumber,
-            companyName: values.companyName,
-            category: values.category,
-            contactName: values.contactName,
-            departmentName: values.departmentName,
-            phoneNumber: values.departmentName,
-            email: values.email,
-            businessVertical: values.businessVertical,
-            leadDescription: leadDescriptionArray
+          const historyValue = historyTableData
+            ? historyTableData.map((data) => ({
+              date: data.date,
+              projectDescription: data.projectDescription,
+              requestStatus: data.requestStatus,
+              approvalStatus: data.approvalStatus
+            }))
+            : [];
+          const taskValue = taskTableData
+            ? taskTableData.map((data) => ({
+              title: data.title,
+              description: data.description,
+              responsible: data.responsible,
+              remarks: data.remarks,
+              assignedDate: data.assignedDate,
+              targetDate: data.targetDate,
+              status: data.status
+            }))
+            : [];
+          const financeValue = financeData
+            ? financeData.map((data) => ({
+              date: data.date,
+              refNumber: data.refNumber,
+              amount: data.amount,
+              tax: data.tax,
+              status: data.status
+            }))
+            : [];
+          console.log(values, 'upd');
+          const formattedData = {
+            ...values,
+            assignedDate: startDate,
+            targetDate: endDate,
+            companyName: selectedRFQ?.companyName,
+            projectName: selectedPR,
+            milestone: mileselectedOption,
+            projectAllocation: teamsValue,
+            finance: financeValue,
+            history: historyValue,
+            task: taskValue
           };
-  
-          const moveToRfq = await postData(RFQ_CREATION, newRfq, localData?.accessToken);
-          console.log(moveToRfq, 'movetorfq');
+          const endpoint = PROJECT_UPDATE(editId?.original?._id);
+          await updateData(endpoint, formattedData, localData?.accessToken);
+          setView({
+            visible: true,
+            mode: 'Initial'
+          });
+          fetchFun();
+        } else {
+          console.log('handle submit', values, startDate, endDate);
+          const teamsValue = teamData
+            ? teamData.map((item) => ({
+              fromDate: item.fromDate,
+              employeeCode: item.employeeCode?.slice(0, 7),
+              employeeId: managerId?._id,
+              toDate: item.toDate,
+              location: item.location,
+              percentage: Number(item.percentage),
+              team: item.team
+            }))
+            : [];
+          const historyValue = historyTableData
+            ? historyTableData.map((data) => ({
+              date: data.date,
+              projectDescription: data.description,
+              requestStatus: data.requeststatus,
+              approvalStatus: data.approvalstatus
+            }))
+            : [];
+          const taskValue = taskTableData
+            ? taskTableData.map((data) => ({
+              title: data.title,
+              description: data.description,
+              responsible: data.responsible,
+              remarks: data.remarks,
+              assignedDate: data.assigneddate,
+              targetDate: data.targetdate,
+              status: data.status
+            }))
+            : [];
+          const financeValue = financeData
+            ? financeData.map((data) => ({
+              date: data.date,
+              refNumber: data.refNumber,
+              amount: data.amount,
+              tax: data.tax,
+              status: data.status
+            }))
+            : [];
+          const formattedData = {
+            ...values,
+            assignedDate: startDate,
+            targetDate: endDate,
+            companyName: selectedRFQ?.companyName,
+            projectName: selectedPR,
+            projectAllocation: teamsValue,
+            finance: financeValue,
+            history: historyValue,
+            task: taskValue
+          };
+          console.log(formattedData, 'values');
+          const projectAllocate = await postData(PROJECT_CREATE, formattedData, localData?.accessToken);
+          console.log(projectAllocate, 'projectAllocate');
+          setView({
+            visible: true,
+            mode: 'Initial'
+          });
+          fetchFun();
+          console.log(data.data, 'fetched using API');
         }
-        const endpoint = LEAD_UPDATE(updateId);
-        await updateData(endpoint, updatedData, localData?.accessToken);
-        // Reset the form and fetch updated data
-        fetchFun();
-        formik.resetForm();
-  
-        // Optionally, set the view mode to 'Initial' or perform other actions
-        setView({
-          visible: true,
-          mode: 'Initial'
-        });
       } catch (error) {
         console.error('API error:', error);
       }
-    };
-  
-    console.log(moveRFQ, 'moverfq');
-    const formik = useFormik({
-      initialValues: {
-        date: '',
-        Source: '',
-        Pilot: '',
-        companyName: '',
-        category: '',
-        contactName: '',
-        serialNumber: '',
-        departmentName: '',
-        phoneNumber: '',
-        email: '',
-        businessVertical: '',
-        leadDescription: [], // Initialize as an array
-        tasks: [],
-        status: ''
-        // Add initial values for other fields
-        // ...
-      },
-      validationSchema,
-      onSubmit: async (values, { setSubmitting }) => {
-        console.log('worked', values);
-        try {
-          if (updateId) {
-            console.log('handle update', updateId);
-            const formattedData = {
-              ...values,
-              serialNumber: leadNumber
-            };
-  
-            handleUpdate(formattedData);
-          } else {
-            console.log('handle submit');
-            console.log(values, 'sts');
-            // Create leadDescription array from leadDescription field
-            const leadDescriptionArray = values.leadDescription
-              ? values.leadDescription.split('\n').map((item) => ({
-                  date: values.date,
-                  description: item.trim(),
-                  status: 'pending', // Set your default status here
-                  statusRequest: values.status // Set your default statusRequest here
-                }))
-              : [];
-            const formattedData = {
-              ...values,
-              leadDescription: leadDescriptionArray
-            };
-  
-            await postData(LEAD_CREATION, formattedData, localData?.accessToken);
-            setView({
-              visible: true,
-              mode: 'Initial'
-            });
-            fetchFun();
-            console.log(data.data, 'fetched using API');
-          }
-        } catch (error) {
-          console.error('API error:', error);
-        }
-      }
-    });
-    const table = useMaterialReactTable({
-      columns,
-      data: leadData,
-      enableRowActions: true,
-      positionActionsColumn: 'last',
-      renderRowActions: ({ row }) => (
-        <div style={{ display: 'flex' }}>
-          <IconButton onClick={() => handleDelete(row)}>
-            <DeleteTwoTone style={{ color: '#2196f3' }} />
-          </IconButton>
-          <IconButton onClick={() => handleView(row)}>
-            <VisibilityTwoTone style={{ color: '#2196f3' }} />
-          </IconButton>
-          <IconButton onClick={() => handleEdit(row)}>
-            <CreateTwoTone style={{ color: '#2196f3' }} />
-          </IconButton>
-        </div>
-      ),
-  
-      enableRowSelection: true,
-      columnFilterDisplayMode: 'popover',
-      paginationDisplayMode: 'pages',
-      positionToolbarAlertBanner: 'bottom',
-      renderTopToolbarCustomActions: () => (
-        <>
-          <div style={{ marginLeft: '0.5rem' }}>
-            <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileUpload} accept=".xls,.xlsx" />
-            <Button
-              variant="contained"
-              style={{ marginRight: '1rem' }}
-              color="primary"
-              onClick={handleImportClick}
-              startIcon={<IconUpload />}
-            >
-              Import
-            </Button>
-            <Button onClick={handleExportData} variant="contained" color="primary" startIcon={<IconDownload />}>
-              Export
-            </Button>
-          </div>
-        </>
-      )
-    });
-  
-    const handleEdit = async (e) => {
-      console.log('worked', e.original._id);
-      const endpoint = LEAD_GET_ID(e.original._id);
-      const getByIdData = await fetchData(endpoint, localData?.accessToken);
-      // setUpdatedValue(getByIdData)
-      setUpdateId(e.original._id);
-      // console.log(getByIdData?.data, 'getby');
-      const value = getByIdData?.data;
-      setleadNumber(value?.serialNumber);
-      setSelectedOption(value?.category);
-      formik.setValues({
-        date: value?.date?.slice(0, 10),
-        Source: value?.Source,
-        Pilot: value?.Pilot,
-        companyName: value?.companyName,
-        serialNumber: value?.serialNumber,
-        // category: value?.category,
-        contactName: value?.contactName,
-        departmentName: value?.departmentName,
-        phoneNumber: value?.phoneNumber,
-        email: value?.email,
-        businessVertical: value?.businessVertical // ... Other fields
-      });
-      console.log(value, 'value');
-      const categoryOption = value?.leadDescription
-        ?.map((data) => ({
-          stsRequest: data.statusRequest
-        }))
-        .filter((item) => item.stsRequest === 'Move to RFQ');
-      // if (categoryOption[0]?.stsRequest === 'Move to RFQ') {
-      //   setStsReq(categoryOption[0]?.stsRequest);
-      // } else {
-      //   setStsReq(null);
-      // }
-      console.log(categoryOption[0]?.stsRequest, 'categoryOption');
-      // if(value?.leadDescription)
-      // setStsReq()
-      populateFormFields(value);
-      // setUpdatedValue(e.original);
-      setView({
-        visible: true,
-        mode: 'Edit'
-      });
-    };
-    const handleView = async (e) => {
-      console.log('worked', localData, e.original._id);
-      // setLeadSummary(e.original._id);
-      const endpoint = LEAD_GET_ID(e.original._id);
-      const getByIdData = await fetchData(endpoint, localData?.accessToken);
-      setLeadSummary(getByIdData.data);
-      console.log('worked', getByIdData.data);
-  
-      setView({
-        visible: true,
-        mode: 'View'
-      });
-    };
-  
-    const handleStsReq = (e) => {
-      //emp sts
-      if (e.target.value === 'Move to RFQ') {
-        setStsReq(e.target.value);
-      } else {
-        setStsReq(null);
-      }
-    };
-  
-    console.log(stsReq, 'sts hereeeeeeeee');
-    const handleStatusChange = (e) => {
-      console.log(e);
-    };
-    const handleSaveRowTask = (newData, oldData) => {
-      console.log('handleSaveRowtask - newData:', newData);
-      console.log('handleSaveRowtask - oldData:', oldData);
-      const updatedData = taskTableData.map((row) => {
-        if (
-          row._id === oldData._id || // For existing rows
-          (row && !row._id && oldData && oldData._tempId && row._tempId === oldData._tempId) // For new rows
-        ) {
-          return { ...row, ...newData };
-        } else {
-          return row;
-        }
-      });
-      console.log('handleSaveRowHistory - updatedData:', updatedData);
-      setEditingRowId(null);
-      setTaskTableData(updatedData);
-    };
-    const handleCancelEditTask = () => {
-      setEditingRowId(null);
-    };
-    const handleCreateRowTask = (newData) => {
-      const tempId = generateTempId(); // Generate a temporary ID
-      const newTask = { ...newData.values, _id: tempId };
-      setTaskTableData([...taskTableData, newTask]);
-      setIsCreatingRow(false);
-    };
-    const handleEditRowTask = (row) => {
-      const editingId = row._id; // Use _id if available, otherwise use _tempId
-      setEditingRowId(editingId);
-    };
-    const handleCancelCreateTask = () => {
-      setIsCreatingRow(false);
-    };
-    const handleDeleteRowTask = (row) => {
-      const updatedData = taskTableData.filter((item) => item._id !== row.id);
-      setTaskTableData(updatedData);
-    };
-    const handleSaveRowHistory = (newData, oldData) => {
-      console.log('handleSaveRowHistory - newData:', newData);
-      console.log('handleSaveRowHistory - oldData:', oldData);
-      const updatedData = historyTableData.map((row) => {
-        if (
-          row._id === oldData._id || // For existing rows
-          (row && !row._id && oldData && oldData._tempId && row._tempId === oldData._tempId) // For new rows
-        ) {
-          return { ...row, ...newData };
-        } else {
-          return row;
-        }
-      });
-      console.log('handleSaveRowHistory - updatedData:', updatedData);
-      setHistoryTableData(updatedData);
-      setEditingRowId(null);
-    };
-    console.log(historyTableData, 'history');
-    const handleCancelEditHistory = () => {
-      setEditingRowId(null);
-    };
-    const handleCreateRowHistory = (newData) => {
-      const tempId = generateTempId(); // Generate a temporary ID
-      const newTask = { ...newData.values, _id: tempId };
-      setHistoryTableData([...historyTableData, newTask]);
-      setIsCreatingRow(false);
-    };
-    const handleEditRowHistory = (row) => {
-      console.log(row, 'looooogg');
-      const editingId = row._id || row._tempId; // Use _id if available, otherwise use _tempId
-      setEditingRowId(editingId);
-    };
-    const handleCancelCreateHistory = () => {
-      setIsCreatingRow(false);
-    };
-    const handleDeleteRowHistory = (row) => {
-      const updatedData = historyTableData.filter((item) => item._id !== row.id);
-      setHistoryTableData(updatedData);
-    };
-    const editableForHistory = useMaterialReactTable({
-      columns: historyTableColumns,
-      data: historyTableData, // Provide an empty array if leadDescription is undefined
-      createDisplayMode: 'row', // ('modal', and 'custom' are also available)
-      editDisplayMode: 'row', // ('modal', 'cell', 'table', and 'custom' are also available)
-      enableEditing: true,
-      positionActionsColumn: 'last',
-      enableColumnFilters: false,
-      enableFilters: false,
-      enableDensityToggle: false,
-      enablePagination: false,
-      enableHiding: false,
-      enableFullScreenToggle: false,
-      getRowId: (row) => row._id,
-      onEditingRowSave: ({ row, values, exitEditingMode }) => {
-        handleSaveRowHistory(values, row.original); // Pass the original row data to handleSaveRowHistory
-        exitEditingMode(); // Call exitEditingMode to exit editing mode
-      },
-      onEditingRowCancel: handleCancelEditHistory,
-      onCreatingRowSave: handleCreateRowHistory,
-      onCreatingRowCancel: handleCancelCreateHistory,
-      renderRowActions: ({ row, table }) => (
-        <Box sx={{ display: 'flex', gap: '1rem' }}>
-          <Tooltip title="Edit">
-            <IconButton
-              onClick={() => {
-                handleEditRowHistory(row), table.setEditingRow(row);
-              }}
-            >
-              <ModeEditRounded style={{ color: '#2196f3' }} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Delete">
-            <IconButton color="error" onClick={() => handleDeleteRowHistory(row)}>
-              <DeleteRounded style={{ color: '#2196f3' }} />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      ),
-      renderTopToolbarCustomActions: ({ table }) => (
-        // <Button
-        //   variant="contained"
-        //   onClick={() => {
-        //     table.setCreatingRow(true);
-        //   }}
-        // >
-        //   Create History
-        // </Button>
-        <div className="title-bar">
-          <div className="custum-header">
-            <p style={{ fontWeight: 'bold', fontSize: 'large' }}>History Creation</p>
-            <ButtonBase sx={{ borderRadius: '12px' }}>
-              <Avatar
-                variant="rounded"
-                sx={{
-                  ...theme.typography.commonAvatar,
-                  ...theme.typography.mediumAvatar,
-                  transition: 'all .2s ease-in-out',
-                  background: theme.palette.secondary.light,
-                  color: theme.palette.secondary.dark,
-                  '&[aria-controls="menu-list-grow"],&:hover': {
-                    background: theme.palette.secondary.dark,
-                    color: theme.palette.secondary.light
-                  }
-                }}
-                onClick={() => {
-                  table.setCreatingRow(true);
-                }}
-                color="inherit"
-              >
-                <IconPlus />
-              </Avatar>
-            </ButtonBase>
-          </div>
-        </div>
-      )
-    });
-    const editableForTask = useMaterialReactTable({
-      columns: coumnsForTask,
-      data: taskTableData, // Provide an empty array if leadDescription is undefined
-      createDisplayMode: 'row', // ('modal', and 'custom' are also available)
-      editDisplayMode: 'row', // ('modal', 'cell', 'table', and 'custom' are also available)
-      enableEditing: true,
-      positionActionsColumn: 'last',
-      enableColumnFilters: false,
-      enableFilters: false,
-      enableDensityToggle: false,
-      enablePagination: false,
-      enableHiding: false,
-      enableFullScreenToggle: false,
-      getRowId: (row) => row._id,
-      onEditingRowSave: ({ row, values, exitEditingMode }) => {
-        handleSaveRowTask(values, row.original); // Pass the original row data to handleSaveRowHistory
-        exitEditingMode(); // Call exitEditingMode to exit editing mode
-      },
-      onEditingRowCancel: handleCancelEditTask,
-      onCreatingRowSave: handleCreateRowTask,
-      onCreatingRowCancel: handleCancelCreateTask,
-      renderRowActions: ({ row, table }) => (
-        <Box sx={{ display: 'flex', gap: '1rem' }}>
-          <Tooltip title="Edit">
-            <IconButton
-              onClick={() => {
-                handleEditRowHistory(row), table.setEditingRow(row);
-              }}
-            >
-              <ModeEditRounded style={{ color: '#2196f3' }} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Delete">
-            <IconButton color="error" onClick={() => handleDeleteRowTask(row)}>
-              <DeleteRounded style={{ color: '#2196f3' }} />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      ),
-      renderTopToolbarCustomActions: ({ table }) => (
-        // <Button
-        //   variant="contained"
-        //   onClick={() => {
-        //     table.setCreatingRow(true);
-        //   }}
-        // >
-        //   Create History
-        // </Button>
-        <div className="title-bar">
-          <div className="custum-header">
-            <p style={{ fontWeight: 'bold', fontSize: 'large' }}>Task Creation</p>
-            <ButtonBase sx={{ borderRadius: '12px' }}>
-              <Avatar
-                variant="rounded"
-                sx={{
-                  ...theme.typography.commonAvatar,
-                  ...theme.typography.mediumAvatar,
-                  transition: 'all .2s ease-in-out',
-                  background: theme.palette.secondary.light,
-                  color: theme.palette.secondary.dark,
-                  '&[aria-controls="menu-list-grow"],&:hover': {
-                    background: theme.palette.secondary.dark,
-                    color: theme.palette.secondary.light
-                  }
-                }}
-                onClick={() => {
-                  table.setCreatingRow(true);
-                }}
-                color="inherit"
-              >
-                <IconPlus />
-              </Avatar>
-            </ButtonBase>
-          </div>
-        </div>
-      )
-    });
-  
-    function createData(name, calories, fat, carbs) {
-      return { name, calories, fat, carbs };
     }
-  
-    const rows = [
-      createData('Frozen yoghurt', 159, 6.0, 24),
-      createData('Ice cream sandwich', 237, 9.0, 3),
-      createData('Eclair', 262, 16.0, 24),
-      createData('Cupcake', 305, 3.7, 67),
-      createData('Gingerbread', 356, 16.0, 49)
-    ];
-    const handleToggle = () => {
-      setView({
-        visible: true,
-        mode: 'Add'
-      });
-      formik.resetForm();
-      setUpdateId('');
-      setSelectedOption('');
-    };
-    const handleClose = () => {
-      setView({
-        visible: true,
-        mode: 'Initial'
-      });
-    };
-  
-    // Update the useEffect hook
-    useEffect(() => {
-      const fetchDataAndUpdate = async () => {
-        try {
-          const localStore = localStorage.getItem('userData');
+  });
+  const [deleteId, setDeleteId] = useState('');
+  const [viewId, setViewId] = useState('');
+  const [editId, setEditId] = useState('');
+  const [open, setOpen] = useState(false);
+  const fetchFun = async () => {
+    const data = await fetchData(PROJECT_GET, localData?.accessToken);
+    setProjectData(data.data);
+  };
+  const handleDelete = (e) => {
+    setOpen(true);
+    console.log('open', e.original._id);
+    setDeleteId(e.original._id);
+  };
+  const confirmDelete = async () => {
+    try {
+      const apiEndPoint = PROJECT_DELETE(deleteId);
+      await deleteData(apiEndPoint, localData?.accessToken);
+      fetchFun();
+      setOpen(false);
+    } catch (error) {
+      console.log(error, 'error');
+    }
+  };
+
+  const [milestoneOptions, setMilestoneOptions] = useState([]);
+
+  const theme = useTheme();
+  const handleExportData = () => {
+    const csv = generateCsv(csvConfig)(data);
+    download(csvConfig)(csv);
+  };
+  const handleEdit = (row) => {
+    console.log('worked', row);
+    setView({
+      visible: true,
+      mode: 'Edit'
+    });
+    setEditId(row);
+    setMileSelectedOption(row?.original?.milestone);
+    setSelectedRFQ(row?.original);
+    setSelectedPR(row?.original?.projectName);
+    setStartDate(row?.original?.assignedDate);
+    setEndDate(row?.original?.targetDate);
+    formik.setValues({
+      rfqNumber: row?.original?.rfqNumber,
+      // companyName: row?.original?.companyName,
+      status: row?.original?.status,
+      assignedDate: row?.original?.assignedDate,
+      targetDate: row?.original?.targetDate,
+      description: row?.original?.description,
+      manager: row?.original?.manager,
+      milestone: row?.original?.milestone
+    });
+    setTeamData(row?.original?.projectAllocation);
+    setHistoryTableData(row?.original?.history);
+    setFinanceData(row?.original?.finance);
+    setTaskTableData(row?.original?.task);
+    // setSelectedOption(row?.original?.requirePO === true ? 'yes' : 'no');
+  };
+
+  console.log(formik.values, 'formik');
+  const handleView = (row) => {
+    console.log('worked', row);
+    setView({
+      visible: true,
+      mode: 'View'
+    });
+    setViewId(row?.original);
+  };
+
+  const table = useMaterialReactTable({
+    columns,
+    data: projectData,
+    enableRowActions: true,
+    positionActionsColumn: 'last',
+    renderRowActions: ({ row }) => (
+      <div style={{ display: 'flex' }}>
+        {/* <IconButton onClick={() => handleDelete(row)}>
+          <DeleteRounded style={{ color: '#2196f3' }} />
+        </IconButton> */}
+        <IconButton onClick={() => handleView(row)}>
+          <VisibilityRounded style={{ color: '#2196f3' }} />
+        </IconButton>
+        <Link to='/task-panel' >
+        <IconButton >
+        <IconPlus style={{ color: '#2196f3' }}/>
+        </IconButton></Link>
+      </div>
+    ),
+    enableRowSelection: true,
+    columnFilterDisplayMode: 'popover',
+    paginationDisplayMode: 'pages',
+    positionToolbarAlertBanner: 'bottom',
+    renderTopToolbarCustomActions: () => (
+      <>
+        <div style={{ marginLeft: '0.5rem' }}>
+          <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileUpload} accept=".xls,.xlsx" />
+          <Button
+            variant="contained"
+            style={{ marginRight: '1rem' }}
+            color="primary"
+            onClick={handleImportClick}
+            startIcon={<IconUpload />}
+          >
+            Import
+          </Button>
+          <Button onClick={handleExportData} variant="contained" color="primary" startIcon={<IconDownload />}>
+            Export
+          </Button>
+        </div>
+      </>
+    )
+  });
+
+  //Project
+  const handleSaveRowProject = (newData, oldData) => {
+    console.log('handleSaveRowProject - newData:', newData);
+    console.log('handleSaveRowProject - oldData:', oldData);
+    const updatedData = teamData.map((row) => {
+      if (
+        row._id === oldData._id || // For existing rows
+        (row && !row._id && oldData && oldData._tempId && row._tempId === oldData._tempId) // For new rows
+      ) {
+        return { ...row, ...newData };
+      } else {
+        return row;
+      }
+    });
+    console.log('handleSaveRowProject - updatedData:', updatedData);
+    setTeamData(updatedData);
+    setEditingRowId(null);
+  };
+  const handleEditRowProjects = (row) => {
+    console.log(row, 'looooogg');
+    const editingId = row._id || row._tempId; // Use _id if available, otherwise use _tempId
+    setEditingRowId(editingId);
+  };
+  const handleDeleteRowProjects = (row) => {
+    const updatedData = teamData.filter((item) => item._id !== row.id);
+    setTeamData(updatedData);
+  };
+  const handleCancelEditProjects = () => {
+    setEditingRowId(null);
+  };
+  const handleCreateRowProjects = (newData) => {
+    const tempId = generateTempId(); // Generate a temporary ID
+    const newTask = { ...newData.values, _id: tempId };
+    setTeamData([...teamData, newTask]);
+    setIsCreatingRow(false);
+  };
+  const handleCancelCreateProjects = () => {
+    setIsCreatingRow(false);
+  };
+  //History
+  // projectAllocation: teamsValue,
+  //           finance: financeData,
+  //           history: historyTableData,
+  //           task: taskTableData
+  const handleSaveRowHistory = (newData, oldData) => {
+    const updatedData = historyTableData.map((row) => {
+      if (
+        row._id === oldData._id || // For existing rows
+        (row && !row._id && oldData && oldData._tempId && row._tempId === oldData._tempId) // For new rows
+      ) {
+        return { ...row, ...newData };
+      } else {
+        return row;
+      }
+    });
+    setHistoryTableData(updatedData);
+    setEditingRowId(null);
+  };
+  const handleEditRowHistorys = (row) => {
+    console.log(row, 'looooogg');
+    const editingId = row._id || row._tempId; // Use _id if available, otherwise use _tempId
+    setEditingRowId(editingId);
+  };
+  const handleDeleteRowHistorys = (row) => {
+    const updatedData = historyTableData.filter((item) => item._id !== row.id);
+    setHistoryTableData(updatedData);
+  };
+  const handleCancelEditHistorys = () => {
+    setEditingRowId(null);
+  };
+  const handleCreateRowHistorys = (newData) => {
+    const tempId = generateTempId(); // Generate a temporary ID
+    const newTask = { ...newData.values, _id: tempId };
+    setHistoryTableData([...historyTableData, newTask]);
+    setIsCreatingRow(false);
+  };
+  const handleCancelCreateHistorys = () => {
+    setIsCreatingRow(false);
+  };
+  //Task
+  const handleSaveRowTask = (newData, oldData) => {
+    const updatedData = taskTableData.map((row) => {
+      if (
+        row._id === oldData._id || // For existing rows
+        (row && !row._id && oldData && oldData._tempId && row._tempId === oldData._tempId) // For new rows
+      ) {
+        return { ...row, ...newData };
+      } else {
+        return row;
+      }
+    });
+    setTaskTableData(updatedData);
+    setEditingRowId(null);
+  };
+  const handleEditRowTasks = (row) => {
+    console.log(row, 'looooogg');
+    const editingId = row._id || row._tempId; // Use _id if available, otherwise use _tempId
+    setEditingRowId(editingId);
+  };
+  const handleDeleteRowTasks = (row) => {
+    const updatedData = taskTableData.filter((item) => item._id !== row.id);
+    setTaskTableData(updatedData);
+  };
+  const handleCancelEditTasks = () => {
+    setEditingRowId(null);
+  };
+  const handleCreateRowTasks = (newData) => {
+    const tempId = generateTempId(); // Generate a temporary ID
+    const newTask = { ...newData.values, _id: tempId };
+    setTaskTableData([...taskTableData, newTask]);
+    setIsCreatingRow(false);
+  };
+  const handleCancelCreateTasks = () => {
+    setIsCreatingRow(false);
+  };
+  //Finance
+  const handleSaveRowFinance = (newData, oldData) => {
+    const updatedData = financeData.map((row) => {
+      if (
+        row._id === oldData._id || // For existing rows
+        (row && !row._id && oldData && oldData._tempId && row._tempId === oldData._tempId) // For new rows
+      ) {
+        return { ...row, ...newData };
+      } else {
+        return row;
+      }
+    });
+    setFinanceData(updatedData);
+    setEditingRowId(null);
+  };
+  const handleEditRowFinances = (row) => {
+    console.log(row, 'looooogg');
+    const editingId = row._id || row._tempId; // Use _id if available, otherwise use _tempId
+    setEditingRowId(editingId);
+  };
+  const handleDeleteRowFinances = (row) => {
+    const updatedData = financeData.filter((item) => item._id !== row.id);
+    setFinanceData(updatedData);
+  };
+  const handleCancelEditFinances = () => {
+    setEditingRowId(null);
+  };
+  const handleCreateRowFinances = (newData) => {
+    const tempId = generateTempId(); // Generate a temporary ID
+    const newTask = { ...newData.values, _id: tempId };
+    setFinanceData([...financeData, newTask]);
+    setIsCreatingRow(false);
+  };
+  const handleCancelCreateFinances = () => {
+    setIsCreatingRow(false);
+  };
+  const editableForproject = useMaterialReactTable({
+    columns: columnsForproject,
+    data: teamData,
+    createDisplayMode: 'row',
+    editDisplayMode: 'row',
+    enableEditing: true,
+    positionActionsColumn: 'last',
+    enableColumnFilters: false,
+    enableFilters: false,
+    enableDensityToggle: false,
+    enablePagination: false,
+    enableHiding: false,
+    enableFullScreenToggle: false,
+    getRowId: (row) => row._id,
+    onEditingRowSave: ({ row, values, exitEditingMode }) => {
+      handleSaveRowProject(values, row.original); // Pass the original row data to handleSaveRowProject
+      exitEditingMode(); // Call exitEditingMode to exit editing mode
+    },
+    onEditingRowCancel: handleCancelEditProjects,
+    onCreatingRowSave: handleCreateRowProjects,
+    onCreatingRowCancel: handleCancelCreateProjects,
+    renderRowActions: ({ row, table }) => (
+      <Box sx={{ display: 'flex', gap: '1rem' }}>
+        <Tooltip title="Edit">
+          <IconButton
+            onClick={() => {
+              handleEditRowProjects(row), table.setEditingRow(row);
+            }}
+          >
+            <ModeEditRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Delete">
+          <IconButton color="error" onClick={() => handleDeleteRowProjects(row)}>
+            <DeleteRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    ),
+
+    renderTopToolbarCustomActions: ({ table }) => (
+      <div className="title-bar">
+        <div className="custum-header">
+          <p style={{ fontWeight: 'bold', fontSize: 'large' }}>Team Allocation</p>
+          <ButtonBase sx={{ borderRadius: '12px' }}>
+            <Avatar
+              variant="rounded"
+              sx={{
+                ...theme.typography.commonAvatar,
+                ...theme.typography.mediumAvatar,
+                transition: 'all .2s ease-in-out',
+                background: theme.palette.secondary.light,
+                color: theme.palette.secondary.dark,
+                '&[aria-controls="menu-list-grow"],&:hover': {
+                  background: theme.palette.secondary.dark,
+                  color: theme.palette.secondary.light
+                }
+              }}
+              onClick={() => {
+                table.setCreatingRow(true);
+              }}
+              color="inherit"
+            >
+              <IconPlus />
+            </Avatar>
+          </ButtonBase>
+        </div>
+      </div>
+    )
+  });
+  const editableForHistory = useMaterialReactTable({
+    columns: columnsForHistory,
+    data: historyTableData,
+    createDisplayMode: 'row',
+    editDisplayMode: 'row',
+    enableEditing: true,
+    positionActionsColumn: 'last',
+    enableColumnFilters: false,
+    enableFilters: false,
+    enableDensityToggle: false,
+    enablePagination: false,
+    enableHiding: false,
+    enableFullScreenToggle: false,
+    getRowId: (row) => row._id,
+    onEditingRowSave: ({ row, values, exitEditingMode }) => {
+      handleSaveRowHistory(values, row.original); // Pass the original row data to handleSaveRowProject
+      exitEditingMode(); // Call exitEditingMode to exit editing mode
+    },
+    onEditingRowCancel: handleCancelEditHistorys,
+    onCreatingRowSave: handleCreateRowHistorys,
+    onCreatingRowCancel: handleCancelCreateHistorys,
+    renderRowActions: ({ row, table }) => (
+      <Box sx={{ display: 'flex', gap: '1rem' }}>
+        <Tooltip title="Edit">
+          <IconButton
+            onClick={() => {
+              handleEditRowHistorys(row), table.setEditingRow(row);
+            }}
+          >
+            <ModeEditRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Delete">
+          <IconButton color="error" onClick={() => handleDeleteRowHistorys(row)}>
+            <DeleteRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    ),
+
+    renderTopToolbarCustomActions: ({ table }) => (
+      <div className="title-bar">
+        <div className="custum-header">
+          <p style={{ fontWeight: 'bold', fontSize: 'large' }}>History</p>
+          <ButtonBase sx={{ borderRadius: '12px' }}>
+            <Avatar
+              variant="rounded"
+              sx={{
+                ...theme.typography.commonAvatar,
+                ...theme.typography.mediumAvatar,
+                transition: 'all .2s ease-in-out',
+                background: theme.palette.secondary.light,
+                color: theme.palette.secondary.dark,
+                '&[aria-controls="menu-list-grow"],&:hover': {
+                  background: theme.palette.secondary.dark,
+                  color: theme.palette.secondary.light
+                }
+              }}
+              onClick={() => {
+                table.setCreatingRow(true);
+              }}
+              color="inherit"
+            >
+              <IconPlus />
+            </Avatar>
+          </ButtonBase>
+        </div>
+      </div>
+    )
+  });
+  const financeHistorytable = useMaterialReactTable({
+    columns: columnsForFinance,
+    data: financeData,
+    createDisplayMode: 'row',
+    editDisplayMode: 'row',
+    enableEditing: true,
+    positionActionsColumn: 'last',
+    enableColumnFilters: false,
+    enableFilters: false,
+    enableDensityToggle: false,
+    enablePagination: false,
+    enableHiding: false,
+    enableFullScreenToggle: false,
+    getRowId: (row) => row._id,
+    onEditingRowSave: ({ row, values, exitEditingMode }) => {
+      handleSaveRowFinance(values, row.original); // Pass the original row data to handleSaveRowFinance
+      exitEditingMode(); // Call exitEditingMode to exit editing mode
+    },
+    onEditingRowCancel: handleCancelEditFinances,
+    onCreatingRowSave: handleCreateRowFinances,
+    onCreatingRowCancel: handleCancelCreateFinances,
+    renderRowActions: ({ row, table }) => (
+      <Box sx={{ display: 'flex', gap: '1rem' }}>
+        <Tooltip title="Edit">
+          <IconButton
+            onClick={() => {
+              handleEditRowFinances(row), table.setEditingRow(row);
+            }}
+          >
+            <ModeEditRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Delete">
+          <IconButton color="error" onClick={() => handleDeleteRowFinances(row)}>
+            <DeleteRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    ),
+
+    renderTopToolbarCustomActions: ({ table }) => (
+      <div className="title-bar">
+        <div className="custum-header">
+          <p style={{ fontWeight: 'bold', fontSize: 'large' }}>Finance History</p>
+          <ButtonBase sx={{ borderRadius: '12px' }}>
+            <Avatar
+              variant="rounded"
+              sx={{
+                ...theme.typography.commonAvatar,
+                ...theme.typography.mediumAvatar,
+                transition: 'all .2s ease-in-out',
+                background: theme.palette.secondary.light,
+                color: theme.palette.secondary.dark,
+                '&[aria-controls="menu-list-grow"],&:hover': {
+                  background: theme.palette.secondary.dark,
+                  color: theme.palette.secondary.light
+                }
+              }}
+              onClick={() => {
+                table.setCreatingRow(true);
+              }}
+              color="inherit"
+            >
+              <IconPlus />
+            </Avatar>
+          </ButtonBase>
+        </div>
+      </div>
+    )
+  });
+  const editableForTask = useMaterialReactTable({
+    columns: columnsForTask,
+    data: taskTableData,
+    createDisplayMode: 'row',
+    editDisplayMode: 'row',
+    enableEditing: true,
+    positionActionsColumn: 'last',
+    enableColumnFilters: false,
+    enableFilters: false,
+    enableDensityToggle: false,
+    enablePagination: false,
+    enableHiding: false,
+    enableFullScreenToggle: false,
+    getRowId: (row) => row._id,
+    onEditingRowSave: ({ row, values, exitEditingMode }) => {
+      handleSaveRowTask(values, row.original); // Pass the original row data to handleSaveRowTask
+      exitEditingMode(); // Call exitEditingMode to exit editing mode
+    },
+    onEditingRowCancel: handleCancelEditTasks,
+    onCreatingRowSave: handleCreateRowTasks,
+    onCreatingRowCancel: handleCancelCreateTasks,
+    renderRowActions: ({ row, table }) => (
+      <Box sx={{ display: 'flex', gap: '1rem' }}>
+        <Tooltip title="Edit">
+          <IconButton
+            onClick={() => {
+              handleEditRowTasks(row), table.setEditingRow(row);
+            }}
+          >
+            <ModeEditRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Delete">
+          <IconButton color="error" onClick={() => handleDeleteRowTasks(row)}>
+            <DeleteRounded style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    ),
+
+    renderTopToolbarCustomActions: ({ table }) => (
+      <div className="title-bar">
+        <div className="custum-header">
+          <p style={{ fontWeight: 'bold', fontSize: 'large' }}>Task Allocation</p>
+          <ButtonBase sx={{ borderRadius: '12px' }}>
+            <Avatar
+              variant="rounded"
+              sx={{
+                ...theme.typography.commonAvatar,
+                ...theme.typography.mediumAvatar,
+                transition: 'all .2s ease-in-out',
+                background: theme.palette.secondary.light,
+                color: theme.palette.secondary.dark,
+                '&[aria-controls="menu-list-grow"],&:hover': {
+                  background: theme.palette.secondary.dark,
+                  color: theme.palette.secondary.light
+                }
+              }}
+              onClick={() => {
+                table.setCreatingRow(true);
+              }}
+              color="inherit"
+            >
+              <IconPlus />
+            </Avatar>
+          </ButtonBase>
+        </div>
+      </div>
+    )
+  });
+  console.log('history---->', historyTableData);
+  console.log('teams---->', teamData);
+  console.log('tasks---->', taskTableData);
+  console.log('finance---->', financeData);
+  function createData(name, calories, fat, carbs) {
+    return { name, calories, fat, carbs };
+  }
+
+  const rows = [
+    createData('Frozen yoghurt', 159, 6.0, 24),
+    createData('Ice cream sandwich', 237, 9.0, 3),
+    createData('Eclair', 262, 16.0, 24),
+    createData('Cupcake', 305, 3.7, 67),
+    createData('Gingerbread', 356, 16.0, 49)
+  ];
+  const handleToggle = () => {
+    setView({
+      visible: true,
+      mode: 'Add'
+    });
+    formik.resetForm();
+    setEditId('');
+    setSelectedPR('');
+    setMileSelectedOption('');
+    setSelectedRFQ('');
+  };
+  const handleClose = () => {
+    setView({
+      visible: true,
+      mode: 'Initial'
+    });
+  };
+  const [description, setDescription] = useState('');
+  const [showSelect, setShowSelect] = useState(true);
+  const [customOption, setCustomOption] = useState('');
+
+  const categoryOption = milestoneOptions?.map((data) => ({
+    label: data.name,
+    value: data.name
+  }));
+  const customOptions = [...categoryOption, { value: 'addMore', label: 'Add More Option' }];
+  const [showDescription, setShowDescription] = useState(false);
+
+  const handleSelectClick = () => {
+    setShowDescription(true);
+  };
+
+  function createData(Date = '', Ref = 0, Amount = 0, Tax = 0, Status = '') {
+    return { Date, Ref, Amount, Tax, Status };
+  }
+
+  const Financeviewrows = [
+    createData('27-04-2001', 1579, 6.0, 24, 'Invoice'),
+    createData('28-05-2001', 1599, 6.07, 24, 'Credit'),
+    createData('29-06-2001', 1559, 6.08, 24, 'Spent')
+  ];
+
+  const handleSelectOnChange = (event) => {
+    const value = event.target.value;
+    formik.handleChange(event);
+    formik.setFieldTouched('milestone', true, false); // Manually mark the field as touched
+    // If "Add More Option" is selected, hide the select input and show the text input
+    if (value === 'addMore') {
+      setShowSelect(false);
+    } else {
+      setMileSelectedOption(value);
+      setShowSelect(true);
+    }
+  };
+  const handleSelectInputChange = (event) => {
+    setCustomOption(event.target.value);
+  };
+  const handleSaveCustomOption = async () => {
+    // if (customOption.trim() !== '') {
+    //   const newOption = { value: customOption, label: customOption };
+    //   setMilestoneOptions([...milestoneOptions, newOption]);
+    //   setMileSelectedOption(customOption);
+    //   setCustomOption('');
+    //   setShowSelect(true);
+    // }
+    if (customOption.trim() !== '') {
+      if (mileselectedOption === 'addMore') {
+        // If "Add More Option" is selected, set selectedOption to the customOption value
+        setMileSelectedOption(customOption);
+      }
+      // Save the custom option to the backend
+      await postData(MILESTONE_CREATE, { name: customOption });
+      // Fetch the updated category data
+      const categoryData = await fetchData(MILESTONE_GET);
+      setMilestoneOptions(categoryData);
+      // Reset the customOption state
+      setCustomOption('');
+      // Show the select input
+      setShowSelect(true);
+    }
+  };
+
+  const rfqNumber = rfqData.map((item) => ({
+    label: item.serialNumber + '  ' + item.companyName,
+    value: item.serialNumber
+  }));
+  const managerList = managerData.map((item) => ({
+    label: item.EmployeeCode + ' - ' + item.NameOfCandidate,
+    value: item.EmployeeCode
+  }));
+
+  const handleSelectChange = async (event) => {
+    const selectedValue = event.target.value;
+    setSelectedValue(selectedValue);
+    console.log(selectedValue, 'DATA');
+
+    try {
+      const fetchedRFQAll = await fetchData(RFQ_GET, localData?.accessToken);
+      console.log(fetchedRFQAll.data, 'ffff');
+      const filteredData = fetchedRFQAll.data.filter((data) => data.serialNumber === selectedValue);
+      if (filteredData.length > 0) {
+        const selectedRFQ = filteredData[0];
+        console.log(selectedRFQ, 'Selected RFQ');
+        setSelectedRFQ(selectedRFQ);
+        const projectNameSchema = selectedRFQ?.companyName + '-' + selectedRFQ?.contactName + '-' + selectedRFQ?.category;
+        setSelectedPR(projectNameSchema);
+      } else {
+        console.log('No matching data found for the selected serialNumber');
+      }
+    } catch (error) {
+      console.error('Error fetching or filtering data:', error);
+      // Handle error as needed
+    }
+  };
+
+  console.log(startDate, '11111111111111');
+  useEffect(() => {
+    const fetchDataAndUpdate = async () => {
+      console.log('inside useeffect');
+      try {
+        const localStore = localStorage.getItem('userData');
+        console.log(localStore, 'inside localStore');
+
+        if (localStore) {
           setLocalData(JSON.parse(localStore));
-  
-          if (localStore) {
-            const parsedData = JSON.parse(localStore);
-  
-            // Fetch leads data
-            const data = await fetchData(LEAD_GET, parsedData?.accessToken);
-            setLeadData(data.data);
-            console.log(data.data, 'fetched');
-            // Fetch leads data
-            const categoryData = await fetchData(CATEGORY_GET);
-            setCategory(categoryData);
-            console.log(categoryData, 'fetched using categoryData db');
-  
-            const data4Employee = await fetchData(PROFILES_GET, parsedData?.accessToken);
-            console.log(data, 'parsedddd');
-            setProfilesData(data4Employee?.data);
-            // Fetch updateId data
-            if (updateId) {
-              const endPointId = LEAD_GET_ID(updateId);
-              const fetchUpdateId = await fetchData(endPointId, parsedData?.accessToken);
-              setUpdatedValue(fetchUpdateId);
-              setTaskTableData(fetchUpdateId?.data?.tasks);
-  
-              // Check if the user has the "Admin" role
-              console.log(parsedData?.Roles, 'who?');
-              if (parsedData?.role === 'Admin') {
-                // Include the "Approval Status" column for Admin
-                setHistoryTableColumns([
-                  ...coumnsForHistory,
-                  {
-                    accessorKey: 'status',
-                    header: 'Approval Status',
-                    editVariant: 'select',
-                    editSelectOptions: optionsForHistoryApproval,
-                    muiEditTextFieldProps: {
-                      select: true,
-                      onChange: (e) => handleStatusChange(e)
-                    },
-                    enableEditing: true
-                  }
-                ]);
-              } else {
-                // Exclude the "Approval Status" column for non-Admin users
-                setHistoryTableColumns([...coumnsForHistory.filter((col) => col.accessorKey !== 'status')]);
-              }
-  
-              setHistoryTableData(fetchUpdateId?.data?.leadDescription);
-              console.log(fetchUpdateId, 'fetched updateId');
-            }
-          }
-        } catch (error) {
-          console.error('Error in fetchDataAndUpdate:', error);
         }
-      };
-  
-      fetchDataAndUpdate(); // Invoke the async function
-    }, [updateId]); // Add dependencies if needed
-  
-    console.log(taskTableData, 'red');
-    return (
-      <div className="max">
-        {view.mode === 'Initial' && (
-          <MainCard
-            title="Manager Panel"
-            secondary={
-              <Box
-                sx={{
-                  ml: 2,
-                  // mr: 3,
-                  [theme.breakpoints.down('md')]: {
-                    mr: 2
-                  }
-                }}
-              >
-                <ButtonBase sx={{ borderRadius: '12px' }}>
-                  <Avatar
-                    variant="rounded"
-                    sx={{
-                      ...theme.typography.commonAvatar,
-                      ...theme.typography.mediumAvatar,
-                      transition: 'all .2s ease-in-out',
-                      background: theme.palette.secondary.light,
-                      color: theme.palette.secondary.dark,
-                      '&[aria-controls="menu-list-grow"],&:hover': {
-                        background: theme.palette.secondary.dark,
-                        color: theme.palette.secondary.light
-                      }
-                    }}
-                    aria-haspopup="true"
-                    onClick={handleToggle}
-                    color="inherit"
-                  >
-                    <IconPlus stroke={2} size="1.3rem" />
-                  </Avatar>
-                </ButtonBase>
-              </Box>
-            }
-          >
-            <MaterialReactTable table={table} />
-          </MainCard>
-        )}
-        {view.mode === 'Add' && (
-          <MainCard
-            title="Leads Creation"
-            secondary={
-              <Box
-                sx={{
-                  ml: 2,
-                  // mr: 3,
-                  [theme.breakpoints.down('md')]: {
-                    mr: 2
-                  }
-                }}
-              >
-                <ButtonBase sx={{ borderRadius: '12px' }}>
-                  <Avatar
-                    variant="rounded"
-                    sx={{
-                      ...theme.typography.commonAvatar,
-                      ...theme.typography.mediumAvatar,
-                      transition: 'all .2s ease-in-out',
-                      background: theme.palette.secondary.light,
-                      color: theme.palette.secondary.dark,
-                      '&[aria-controls="menu-list-grow"],&:hover': {
-                        background: theme.palette.secondary.dark,
-                        color: theme.palette.secondary.light
-                      }
-                    }}
-                    aria-haspopup="true"
-                    onClick={handleClose}
-                    color="inherit"
-                  >
-                    <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
-                  </Avatar>
-                </ButtonBase>
-              </Box>
-            }
-          >
-            <form onSubmit={formik.handleSubmit}>
-              <Grid container>
-                <Grid xs={4} p={2}>
-                  <TextField
-                    error={Boolean(formik.touched.date && formik.errors.date)}
-                    fullWidth
-                    type="date"
-                    variant="outlined"
-                    name="date"
-                    className="w-100"
-                    value={formik.values.date}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                  />
-                  {formik.touched.date && formik.errors.date && (
-                    <FormHelperText error id="standard-weight-helper-text-Password-login">
-                      {formik.errors.date}
-                    </FormHelperText>
-                  )}
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <FormControl fullWidth error={Boolean(formik.touched.Source && formik.errors.Source)}>
-                    <InputLabel id="demo-simple-select-label">Source</InputLabel>
-                    <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      label="Age"
-                      name="Source"
-                      value={formik.values.Source}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                    >
-                      <MenuItem value={'website'}>Website</MenuItem>
-                      <MenuItem value={'Expo'}>Expo</MenuItem>
-                      <MenuItem value={'Reference'}>Reference</MenuItem>
-                      <MenuItem value={'coldcalls'}>Cold Calls</MenuItem>
-                      <MenuItem value={'others'}>Others</MenuItem>
-                    </Select>
-                    {formik.touched.Source && formik.errors.Source && (
-                      <FormHelperText error id="standard-weight-helper-text-Password-login">
-                        {formik.errors.Source}
-                      </FormHelperText>
-                    )}
-                  </FormControl>
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <TextField
-                    error={Boolean(formik.touched.Pilot && formik.errors.Pilot)}
-                    name="Pilot"
-                    value={formik.values.Pilot}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    fullWidth
-                    id="outlined-basic"
-                    label="Pilot"
-                    variant="outlined"
-                  />
-                  {formik.touched.Pilot && formik.errors.Pilot && (
-                    <FormHelperText error id="standard-weight-helper-text-Password-login">
-                      {formik.errors.Pilot}
-                    </FormHelperText>
-                  )}
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <TextField
-                    error={Boolean(formik.touched.companyName && formik.errors.companyName)}
-                    name="companyName"
-                    value={formik.values.companyName}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    fullWidth
-                    id="outlined-basic"
-                    label="Company Name"
-                    variant="outlined"
-                  />
-                  {formik.touched.companyName && formik.errors.companyName && (
-                    <FormHelperText error id="standard-weight-helper-text-Password-login">
-                      {formik.errors.companyName}
-                    </FormHelperText>
-                  )}
-                </Grid>{' '}
-                <Grid xs={4} p={2}>
-                  {showSelect ? (
-                    <FormControl fullWidth>
-                      <InputLabel id="demo-simple-select-label">Category</InputLabel>
-                      <Select
-                        error={Boolean(formik.touched.category && formik.errors.category)}
-                        value={selectedOption}
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        fullWidth
-                        name="category"
-                        onChange={handleSelectOnChange}
-                        label="Select"
-                        placeholder="Select"
-                      >
-                        {customOptions.map((option) => (
-                          <MenuItem key={option.value} value={option.value}>
-                            {option.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                      {formik.touched.category && formik.errors.category && (
-                        <FormHelperText error id="standard-weight-helper-text-Password-login">
-                          {formik.errors.category}
-                        </FormHelperText>
-                      )}
-                    </FormControl>
-                  ) : (
-                    <>
-                      <div style={{ display: 'flex' }}>
-                        <TextField
-                          type="text"
-                          fullWidth
-                          value={customOption}
-                          onChange={handleSelectInputChange}
-                          placeholder="Enter custom option"
-                        />
-                        <Button onClick={handleSaveCustomOption}>Save</Button>
-                      </div>
-                    </>
-                  )}
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <TextField
-                    error={Boolean(formik.touched.contactName && formik.errors.contactName)}
-                    name="contactName"
-                    value={formik.values.contactName}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    fullWidth
-                    id="outlined-basic"
-                    label="Contact Name"
-                    variant="outlined"
-                  />
-                  {formik.touched.contactName && formik.errors.contactName && (
-                    <FormHelperText error id="standard-weight-helper-text-Password-login">
-                      {formik.errors.contactName}
-                    </FormHelperText>
-                  )}
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <TextField
-                    error={Boolean(formik.touched.departmentName && formik.errors.departmentName)}
-                    name="departmentName"
-                    value={formik.values.departmentName}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    fullWidth
-                    id="outlined-basic"
-                    label="Department"
-                    variant="outlined"
-                  />
-                  {formik.touched.departmentName && formik.errors.departmentName && (
-                    <FormHelperText error id="standard-weight-helper-text-Password-login">
-                      {formik.errors.departmentName}
-                    </FormHelperText>
-                  )}
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <TextField
-                    error={Boolean(formik.touched.phoneNumber && formik.errors.phoneNumber)}
-                    name="phoneNumber"
-                    value={formik.values.phoneNumber}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    fullWidth
-                    id="outlined-basic"
-                    label="Phone Number"
-                    variant="outlined"
-                  />
-                  {formik.touched.phoneNumber && formik.errors.phoneNumber && (
-                    <FormHelperText error id="standard-weight-helper-text-Password-login">
-                      {formik.errors.phoneNumber}
-                    </FormHelperText>
-                  )}
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <TextField
-                    error={Boolean(formik.touched.email && formik.errors.email)}
-                    name="email"
-                    value={formik.values.email}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    fullWidth
-                    id="outlined-basic"
-                    label="Email"
-                    variant="outlined"
-                  />
-                  {formik.touched.email && formik.errors.email && (
-                    <FormHelperText error id="standard-weight-helper-text-Password-login">
-                      {formik.errors.email}
-                    </FormHelperText>
-                  )}
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <FormControl fullWidth>
-                    <InputLabel id="demo-simple-select-label">Business Verticle</InputLabel>
-                    <Select
-                      error={Boolean(formik.touched.businessVertical && formik.errors.businessVertical)}
-                      value={formik.values.businessVertical}
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      fullWidth
-                      name="businessVertical"
-                      onChange={formik.handleChange}
-                      label="Select"
-                      placeholder="Select"
-                    >
-                      <MenuItem value={'teardown'}>Tear Down</MenuItem>
-                      <MenuItem value={'operations'}>Operations</MenuItem>
-                      <MenuItem value={'concerns'}>Concerns</MenuItem>
-                      <MenuItem value={'software'}>Software</MenuItem>
-                      <MenuItem value={'hr'}>HR</MenuItem>
-                      <MenuItem value={'finance'}>Finance</MenuItem>
-                      <MenuItem value={'scanning'}>Scanning</MenuItem>
-                      <MenuItem value={'Modeling'}>Modeling</MenuItem>
-                      <MenuItem value={'drivingunit'}>Driving Unit</MenuItem>
-                    </Select>
-                  </FormControl>
-                  {formik.touched.businessVertical && formik.errors.businessVertical && (
-                    <FormHelperText error id="standard-weight-helper-text-Password-login">
-                      {formik.errors.businessVertical}
-                    </FormHelperText>
-                  )}
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <TextField
-                    error={Boolean(formik.touched.leadDescription && formik.errors.leadDescription)}
-                    name="leadDescription"
-                    value={formik.values.leadDescription}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    fullWidth
-                    id="outlined-basic"
-                    label="Lead Description"
-                    variant="outlined"
-                  />
-                  {formik.touched.leadDescription && formik.errors.leadDescription && (
-                    <FormHelperText error id="standard-weight-helper-text-Password-login">
-                      {formik.errors.leadDescription}
-                    </FormHelperText>
-                  )}
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <FormControl fullWidth>
-                    <InputLabel id="demo-simple-select-label">Status</InputLabel>
-                    <Select
-                      error={Boolean(formik.touched.status && formik.errors.status)}
-                      value={formik.values.status}
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      fullWidth
-                      name="status"
-                      onChange={formik.handleChange}
-                      label="Select"
-                      placeholder="Select"
-                    >
-                      <MenuItem value={'newlead'}>New Lead</MenuItem>
-                    </Select>
-                  </FormControl>
-                  {formik.touched.status && formik.errors.status && (
-                    <FormHelperText error id="standard-weight-helper-text-Password-login">
-                      {formik.errors.status}
-                    </FormHelperText>
-                  )}
-                </Grid>
-              </Grid>
-              <Button variant="contained" style={{ float: 'right', margin: '2rem' }} type="submit">
-                Save
-              </Button>
-            </form>
-          </MainCard>
-        )}
-        {view.mode === 'Edit' && (
-          <MainCard
-            title="Leads Updations"
-            secondary={
-              <Box
-                sx={{
-                  ml: 2,
-                  // mr: 3,
-                  [theme.breakpoints.down('md')]: {
-                    mr: 2
-                  }
-                }}
-              >
-                <ButtonBase sx={{ borderRadius: '12px' }}>
-                  <Avatar
-                    variant="rounded"
-                    sx={{
-                      ...theme.typography.commonAvatar,
-                      ...theme.typography.mediumAvatar,
-                      transition: 'all .2s ease-in-out',
-                      background: theme.palette.secondary.light,
-                      color: theme.palette.secondary.dark,
-                      '&[aria-controls="menu-list-grow"],&:hover': {
-                        background: theme.palette.secondary.dark,
-                        color: theme.palette.secondary.light
-                      }
-                    }}
-                    aria-haspopup="true"
-                    onClick={handleClose}
-                    color="inherit"
-                  >
-                    <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
-                  </Avatar>
-                </ButtonBase>
-              </Box>
-            }
-          >
-            <form onSubmit={formik.handleSubmit}>
-              <Grid container>
-                <Grid xs={4} p={2}>
-                  <TextField
-                    error={Boolean(formik.touched.date && formik.errors.date)}
-                    fullWidth
-                    type="date"
-                    variant="outlined"
-                    name="date"
-                    className="w-100"
-                    value={formik.values.date}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                  />
-  
-                  {formik.touched.date && formik.errors.date && (
-                    <FormHelperText error id="standard-weight-helper-text-Password-login">
-                      {formik.errors.date}
-                    </FormHelperText>
-                  )}
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <FormControl fullWidth error={Boolean(formik.touched.Source && formik.errors.Source)}>
-                    <InputLabel id="demo-simple-select-label">Source</InputLabel>
-                    <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      label="Age"
-                      name="Source"
-                      value={formik.values.Source}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                    >
-                      <MenuItem value={'website'}>Website</MenuItem>
-                      <MenuItem value={'Expo'}>Expo</MenuItem>
-                      <MenuItem value={'Reference'}>Reference</MenuItem>
-                      <MenuItem value={'coldcalls'}>Cold Calls</MenuItem>
-                      <MenuItem value={'others'}>Others</MenuItem>
-                    </Select>
-                    {formik.touched.Source && formik.errors.Source && (
-                      <FormHelperText error id="standard-weight-helper-text-Password-login">
-                        {formik.errors.Source}
-                      </FormHelperText>
-                    )}
-                  </FormControl>
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <TextField
-                    error={Boolean(formik.touched.Pilot && formik.errors.Pilot)}
-                    name="Pilot"
-                    value={formik.values.Pilot}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    fullWidth
-                    id="outlined-basic"
-                    label="Pilot"
-                    variant="outlined"
-                  />
-                  {formik.touched.Pilot && formik.errors.Pilot && (
-                    <FormHelperText error id="standard-weight-helper-text-Password-login">
-                      {formik.errors.Pilot}
-                    </FormHelperText>
-                  )}
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <TextField
-                    error={Boolean(formik.touched.companyName && formik.errors.companyName)}
-                    name="companyName"
-                    value={formik.values.companyName}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    fullWidth
-                    id="outlined-basic"
-                    label="Company Name"
-                    variant="outlined"
-                  />
-                  {formik.touched.companyName && formik.errors.companyName && (
-                    <FormHelperText error id="standard-weight-helper-text-Password-login">
-                      {formik.errors.companyName}
-                    </FormHelperText>
-                  )}
-                </Grid>{' '}
-                <Grid xs={4} p={2}>
-                  {/* <FormControl fullWidth>
-                    <InputLabel id="demo-simple-select-label">Category</InputLabel>
-                    <Select labelId="demo-simple-select-label" id="demo-simple-select" label="Age">
-                      <MenuItem value={'website'}>Website</MenuItem>
-                      <MenuItem value={'Expo'}>Expo</MenuItem>
-                      <MenuItem value={'Reference'}>Reference</MenuItem>
-                      <MenuItem value={'coldcalls'}>Cold Calls</MenuItem>
-                      <MenuItem value={'others'}>Others</MenuItem>
-                    </Select>
-                  </FormControl> */}
-                  {showSelect ? (
-                    <FormControl fullWidth>
-                      <InputLabel id="demo-simple-select-label">Category</InputLabel>
-                      <Select
-                        error={Boolean(formik.touched.category && formik.errors.category)}
-                        value={selectedOption}
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        fullWidth
-                        name="category"
-                        onChange={handleSelectOnChange}
-                        label="Select"
-                        placeholder="Select"
-                      >
-                        {customOptions.map((option) => (
-                          <MenuItem key={option.value} value={option.value}>
-                            {option.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                      {formik.touched.category && formik.errors.category && (
-                        <FormHelperText error id="standard-weight-helper-text-Password-login">
-                          {formik.errors.category}
-                        </FormHelperText>
-                      )}
-                    </FormControl>
-                  ) : (
-                    <>
-                      <div style={{ display: 'flex' }}>
-                        <TextField
-                          type="text"
-                          fullWidth
-                          value={customOption}
-                          onChange={handleSelectInputChange}
-                          placeholder="Enter custom option"
-                        />
-                        <Button onClick={handleSaveCustomOption}>Save</Button>
-                      </div>
-                    </>
-                  )}
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <TextField
-                    error={Boolean(formik.touched.contactName && formik.errors.contactName)}
-                    name="contactName"
-                    value={formik.values.contactName}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    fullWidth
-                    id="outlined-basic"
-                    label="Contact Name"
-                    variant="outlined"
-                  />
-                  {formik.touched.contactName && formik.errors.contactName && (
-                    <FormHelperText error id="standard-weight-helper-text-Password-login">
-                      {formik.errors.contactName}
-                    </FormHelperText>
-                  )}
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <TextField
-                    error={Boolean(formik.touched.departmentName && formik.errors.departmentName)}
-                    name="departmentName"
-                    value={formik.values.departmentName}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    fullWidth
-                    id="outlined-basic"
-                    label="Department"
-                    variant="outlined"
-                  />
-                  {formik.touched.departmentName && formik.errors.departmentName && (
-                    <FormHelperText error id="standard-weight-helper-text-Password-login">
-                      {formik.errors.departmentName}
-                    </FormHelperText>
-                  )}
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <TextField
-                    error={Boolean(formik.touched.phoneNumber && formik.errors.phoneNumber)}
-                    name="phoneNumber"
-                    value={formik.values.phoneNumber}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    fullWidth
-                    id="outlined-basic"
-                    label="Phone Number"
-                    variant="outlined"
-                  />
-                  {formik.touched.phoneNumber && formik.errors.phoneNumber && (
-                    <FormHelperText error id="standard-weight-helper-text-Password-login">
-                      {formik.errors.phoneNumber}
-                    </FormHelperText>
-                  )}
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <TextField
-                    error={Boolean(formik.touched.email && formik.errors.email)}
-                    name="email"
-                    value={formik.values.email}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    fullWidth
-                    id="outlined-basic"
-                    label="Email"
-                    variant="outlined"
-                  />
-                  {formik.touched.email && formik.errors.email && (
-                    <FormHelperText error id="standard-weight-helper-text-Password-login">
-                      {formik.errors.email}
-                    </FormHelperText>
-                  )}
-                </Grid>
-                <Grid xs={4} p={2}>
-                  <FormControl fullWidth>
-                    <InputLabel id="demo-simple-select-label">Business Verticle</InputLabel>
-                    <Select
-                      error={Boolean(formik.touched.businessVertical && formik.errors.businessVertical)}
-                      value={formik.values.businessVertical}
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      fullWidth
-                      name="businessVertical"
-                      onChange={formik.handleChange}
-                      label="Select"
-                      placeholder="Select"
-                    >
-                      <MenuItem value={'teardown'}>Tear Down</MenuItem>
-                      <MenuItem value={'operations'}>Operations</MenuItem>
-                      <MenuItem value={'concerns'}>Concerns</MenuItem>
-                      <MenuItem value={'software'}>Software</MenuItem>
-                      <MenuItem value={'hr'}>HR</MenuItem>
-                      <MenuItem value={'finance'}>Finance</MenuItem>
-                      <MenuItem value={'scanning'}>Scanning</MenuItem>
-                      <MenuItem value={'Modeling'}>Modeling</MenuItem>
-                      <MenuItem value={'drivingunit'}>Driving Unit</MenuItem>
-                    </Select>
-                  </FormControl>
-                  {formik.touched.businessVertical && formik.errors.businessVertical && (
-                    <FormHelperText error id="standard-weight-helper-text-Password-login">
-                      {formik.errors.businessVertical}
-                    </FormHelperText>
-                  )}
-                </Grid>
-              </Grid>
-              {/* <Divider /> */}
-              <Box p={2} className="edit-table-container">
-                <MaterialReactTable table={editableForHistory} />
-              </Box>
-              <Box p={2} className="edit-table-container">
-                <MaterialReactTable table={editableForTask} />
-              </Box>
-              <Button variant="contained" type="submit" style={{ float: 'right', margin: '2rem' }}>
-                Update
-              </Button>
-            </form>
-          </MainCard>
-        )}
-        {view.mode === 'View' && (
-          <>
-            <MainCard
-              title="Note"
-              secondary={
-                <Box
+        if (localStore) {
+          const parsedData = JSON.parse(localStore);
+          console.log(parsedData, 'parsed');
+          const data = await fetchData(PROJECT_GET, parsedData?.accessToken);
+          const data4Rfq = await fetchData(RFQ_GET, parsedData?.accessToken);
+          const data4Employee = await fetchData(PROFILES_GET_ROLE('Employee'), parsedData?.accessToken);
+          const EmployeeRole = await fetchData(PROFILES_GET_ROLE('Manager'), parsedData?.accessToken);
+          const categoryData = await fetchData(MILESTONE_GET);
+          setMilestoneOptions(categoryData);
+          setManagerData(EmployeeRole?.data);
+          console.log(EmployeeRole, 'EmployeeRole');
+          setProfilesData(data4Employee?.data);
+          setRFQData(data4Rfq?.data);
+          console.log(data, 'parsedddd');
+          setProjectData(data?.data);
+          console.log(data?.data, 'fetched using db');
+          // Fetch updateId data
+        }
+      } catch (error) {
+        console.error('Error in fetchDataAndUpdate:', error);
+      }
+    };
+
+    fetchDataAndUpdate(); // Invoke the async function
+  }, []); // Add dependencies if needed
+  console.log(startDate, '1 date');
+  console.log(endDate, '2 date');
+  return (
+    <div className="max">
+
+      {view.mode === 'Initial' && (
+        <MainCard
+          title="Manager Panel"
+          secondary={
+            <Box
+              sx={{
+                ml: 2,
+                // mr: 3,
+                [theme.breakpoints.down('md')]: {
+                  mr: 2
+                }
+              }}
+            >
+               <ButtonBase sx={{ borderRadius: '12px' }}>
+                {/* <Avatar
+                  variant="rounded"
                   sx={{
-                    ml: 2,
-                    // mr: 3,
-                    [theme.breakpoints.down('md')]: {
-                      mr: 2
+                    ...theme.typography.commonAvatar,
+                    ...theme.typography.mediumAvatar,
+                    transition: 'all .2s ease-in-out',
+                    background: theme.palette.secondary.light,
+                    color: theme.palette.secondary.dark,
+                    '&[aria-controls="menu-list-grow"],&:hover': {
+                      background: theme.palette.secondary.dark,
+                      color: theme.palette.secondary.light
                     }
                   }}
+                  aria-haspopup="true"
+                  onClick={handleToggle}
+                  color="inherit"
                 >
-                  <ButtonBase sx={{ borderRadius: '12px' }}>
-                    <Avatar
-                      variant="rounded"
-                      sx={{
-                        ...theme.typography.commonAvatar,
-                        ...theme.typography.mediumAvatar,
-                        transition: 'all .2s ease-in-out',
-                        background: theme.palette.secondary.light,
-                        color: theme.palette.secondary.dark,
-                        '&[aria-controls="menu-list-grow"],&:hover': {
-                          background: theme.palette.secondary.dark,
-                          color: theme.palette.secondary.light
-                        }
-                      }}
-                      aria-haspopup="true"
-                      onClick={handleClose}
-                      color="inherit"
-                    >
-                      <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
-                    </Avatar>
-                  </ButtonBase>
-                </Box>
-              }
-            >
-              <Grid container m={3}>
-                <Grid xs={3} p={2}>
-                  <label className="text-muted">Lead Number</label>
-                  <p>{leadSummary?.serialNumber}</p>
-                </Grid>
-                <Grid xs={3} p={2}>
-                  <label className="text-muted">Date</label>
-                  <p>{leadSummary?.date?.slice(0, 10)}</p>
-                </Grid>
-                <Grid xs={3} p={2}>
-                  <label className="text-muted">Source</label>
-                  <p>{leadSummary?.Source}</p>
-                </Grid>
-                <Grid xs={3} p={2}>
-                  <label className="text-muted">Pilot</label>
-                  <p>{leadSummary?.Pilot}</p>
-                </Grid>
-                <Grid xs={3} p={2}>
-                  <label className="text-muted">Company Name</label>
-                  <p>{leadSummary?.companyName}</p>
-                </Grid>
-                <Grid xs={3} p={2}>
-                  <label className="text-muted">Category</label>
-                  <p>{leadSummary?.category}</p>
-                </Grid>
-                <Grid xs={3} p={2}>
-                  <label className="text-muted">Contact Name</label>
-                  <p>{leadSummary?.contactName}</p>
-                </Grid>
-                <Grid xs={3} p={2}>
-                  <label className="text-muted">Department</label>
-                  <p>{leadSummary?.departmentName}</p>
-                </Grid>
-                <Grid xs={3} p={2}>
-                  <label className="text-muted">Phone Number</label>
-                  <p>{leadSummary?.phoneNumber}</p>
-                </Grid>
-                <Grid xs={3} p={2}>
-                  <label className="text-muted">Email</label>
-                  <p>{leadSummary?.email}</p>
-                </Grid>
-                <Grid xs={3} p={2}>
-                  <label className="text-muted">Business Verticle</label>
-                  <p>{leadSummary?.businessVertical}</p>
+                 
+                </Avatar> */}
+              </ButtonBase>
+            </Box>
+          }
+        >
+          <MaterialReactTable table={table} />
+        </MainCard>
+      )}
+     
+      {view.mode === 'View' && (
+        <>
+          <MainCard
+            title="Note"
+            secondary={
+              <Box
+                sx={{
+                  ml: 2,
+
+                  [theme.breakpoints.down('md')]: {
+                    mr: 2
+                  }
+                }}
+              >
+                <ButtonBase sx={{ borderRadius: '12px' }}>
+                  <Avatar
+                    variant="rounded"
+                    sx={{
+                      ...theme.typography.commonAvatar,
+                      ...theme.typography.mediumAvatar,
+                      transition: 'all .2s ease-in-out',
+                      background: theme.palette.secondary.light,
+                      color: theme.palette.secondary.dark,
+                      '&[aria-controls="menu-list-grow"],&:hover': {
+                        background: theme.palette.secondary.dark,
+                        color: theme.palette.secondary.light
+                      }
+                    }}
+                    aria-haspopup="true"
+                    onClick={handleClose}
+                    color="inherit"
+                  >
+                    <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
+                  </Avatar>
+                </ButtonBase>
+              </Box>
+            }
+          >
+            <Grid container m={3}>
+              <Grid xs={6}>
+                <Grid container>
+                  <Grid xs={6} p={2}>
+                    <label className="text-muted">Project Number</label>
+                    <p>{viewId?.projectNumber}</p>
+                  </Grid>
+                  <Grid xs={6} p={2}>
+                    <label className="text-muted">Project Name</label>
+                    <p>{viewId?.projectName}</p>
+                  </Grid>
+                  <Grid xs={6} p={2}>
+                    <label className="text-muted">RFQ Number</label>
+                    <p>{viewId?.rfqNumber}</p>
+                  </Grid>
+                  <Grid xs={6} p={2}>
+                    <label className="text-muted">Company Name</label>
+                    <p>{viewId?.companyName}</p>
+                  </Grid>
+                  <Grid xs={6} p={2}>
+                    <label className="text-muted">Assigned Date</label>
+                    <p>{viewId?.assignedDate?.slice(0, 10)}</p>
+                  </Grid>
+                  <Grid xs={6} p={2}>
+                    <label className="text-muted">Target Date</label>
+                    <p>{viewId?.targetDate?.slice(0, 10)}</p>
+                  </Grid>
+                  <Grid xs={6} p={2}>
+                    <label className="text-muted">Description</label>
+                    <p>{viewId?.description}</p>
+                  </Grid>
+                  <Grid xs={6} p={2}>
+                    <label className="text-muted">Manager</label>
+                    <p>{viewId?.manager}</p>
+                  </Grid>
+                  <Grid xs={6} p={2}>
+                    <label className="text-muted">MileStone</label>
+                    <p>{viewId?.milestone}</p>
+                  </Grid>
                 </Grid>
               </Grid>
-              <Grid container p={3}>
-                <Grid xs={4} p={2}>
-                  <div className="history-container">
-                    <MainCard
-                      title="History"
-                      secondary={
-                        <Box
-                          sx={{
-                            ml: 2,
-                            // mr: 3,
-                            [theme.breakpoints.down('md')]: {
-                              mr: 2
-                            }
-                          }}
-                        >
-                          <ButtonBase sx={{ borderRadius: '12px' }}>
-                            <Avatar
-                              variant="rounded"
-                              sx={{
-                                ...theme.typography.commonAvatar,
-                                ...theme.typography.mediumAvatar,
-                                transition: 'all .2s ease-in-out',
-                                background: theme.palette.secondary.light,
-                                color: theme.palette.secondary.dark,
-                                '&[aria-controls="menu-list-grow"],&:hover': {
-                                  background: theme.palette.secondary.dark,
-                                  color: theme.palette.secondary.light
-                                }
-                              }}
-                              aria-haspopup="true"
-                              color="inherit"
-                            >
-                              <History stroke={2} size="1.3rem" />
-                            </Avatar>
-                          </ButtonBase>
-                        </Box>
-                      }
-                    >
-                      <Timeline>
-                        {leadSummary?.leadDescription.map((item) => (
-                          <TimelineItem>
-                            <TimelineOppositeContent style={{ display: 'none' }}></TimelineOppositeContent>
-                            <TimelineSeparator>
-                              <Tooltip title="New Lead" placement="top" arrow>
-                                <TimelineDot color="secondary">
-                                  {item.statusRequest === 'newlead' && <PersonAdd />}
-                                  {item.statusRequest === 'Contact Establish' && <ConnectWithoutContact />}
-                                  {item.statusRequest === 'Technicle Meeting' && <Group />}
-                                  {item.statusRequest === 'Hold' && <NotStarted />}
-                                  {item.statusRequest === 'Reject' && <ThumbDown />}
-                                  {item.statusRequest === 'Move to RFQ' && <ThumbUpSharp />}
-                                </TimelineDot>
-                              </Tooltip>
-                              <TimelineConnector />
-                            </TimelineSeparator>
-                            <TimelineContent>
-                              <Typography variant="h6" component="span" className="text-muted">
-                                {item.date?.slice(0, 10)}
-                              </Typography>
-                              <br />
-                              <Typography variant="h6" component="span" className="strong">
-                                {item.statusRequest === 'newlead' ? 'New Lead' : item.statusRequest}
-                              </Typography>
-                              <li> {item.description}</li>
-                            </TimelineContent>
-                          </TimelineItem>
+              <Grid xs={6}>
+                <TableContainer component={Paper}>
+                  <MainCard title="Finance History">
+                    <Table aria-label="simple table">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Date</TableCell>
+                          <TableCell align="right">Ref No/Bill</TableCell>
+                          <TableCell align="right">Amount</TableCell>
+                          <TableCell align="right">Tax</TableCell>
+                          <TableCell align="right">Status</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {Financeviewrows.map((row) => (
+                          <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                            <TableCell component="th" scope="row">
+                              {row.Date}
+                            </TableCell>
+                            <TableCell align="right">{row.Ref}</TableCell>
+                            <TableCell align="right">{row.Amount}</TableCell>
+                            <TableCell align="right">{row.Tax}</TableCell>
+                            <TableCell align="right">{row.Status}</TableCell>
+                          </TableRow>
                         ))}
-                      </Timeline>
-                    </MainCard>
-                  </div>
-                </Grid>
-                <Grid xs={8} p={2}>
-                  <div className="history-container">
-                    <MainCard
-                      title="Task"
-                      secondary={
-                        <Box
-                          sx={{
-                            ml: 2,
-                            // mr: 3,
-                            [theme.breakpoints.down('md')]: {
-                              mr: 2
-                            }
-                          }}
-                        >
-                          <ButtonBase sx={{ borderRadius: '12px' }}>
-                            <Avatar
-                              variant="rounded"
-                              sx={{
-                                ...theme.typography.commonAvatar,
-                                ...theme.typography.mediumAvatar,
-                                transition: 'all .2s ease-in-out',
-                                background: theme.palette.secondary.light,
-                                color: theme.palette.secondary.dark,
-                                '&[aria-controls="menu-list-grow"],&:hover': {
-                                  background: theme.palette.secondary.dark,
-                                  color: theme.palette.secondary.light
-                                }
-                              }}
-                              aria-haspopup="true"
-                              color="inherit"
-                            >
-                              <TaskAlt stroke={2} size="1.3rem" />
-                            </Avatar>
-                          </ButtonBase>
-                        </Box>
-                      }
-                    >
-                      {leadSummary?.tasks?.map((data) => (
-                        <Card sx={{ margin: '1rem', padding: '1rem' }} className="card-hover">
-                          <div className="d-flex justify-content-between">
-                            <div className="d-flex">
-                              <Avatar sx={{ bgcolor: '#ede7f6', color: '#5e35b1' }}>{data?.responsible[0]}</Avatar>
-                              <div className="ms-1">
-                                <p className="avatar-name">{data?.responsible}</p>
-                                <p className="text-muted-light m-0">{data?.taskId}</p> &nbsp;
-                                {/* / */}
-                                {/* <PeopleAltTwoTone style={{ fontSize: 'medium' }} />
-                                  <span className="ms-01">{}</span> */}
+                      </TableBody>
+                    </Table>
+                  </MainCard>
+                </TableContainer>
+              </Grid>
+            </Grid>
+            <Grid container p={3}>
+              <Grid xs={12} p={2}>
+                <div className="teamallocation-container">
+                  <MainCard
+                    title="Team Allocation"
+                    secondary={
+                      <Box
+                        sx={{
+                          ml: 2,
+
+                          [theme.breakpoints.down('md')]: {
+                            mr: 2
+                          }
+                        }}
+                      >
+                        <ButtonBase sx={{ borderRadius: '12px' }}>
+                          <Avatar
+                            variant="rounded"
+                            sx={{
+                              ...theme.typography.commonAvatar,
+                              ...theme.typography.mediumAvatar,
+                              transition: 'all .2s ease-in-out',
+                              background: theme.palette.secondary.light,
+                              color: theme.palette.secondary.dark,
+                              '&[aria-controls="menu-list-grow"],&:hover': {
+                                background: theme.palette.secondary.dark,
+                                color: theme.palette.secondary.light
+                              }
+                            }}
+                            aria-haspopup="true"
+                            color="inherit"
+                          >
+                            <TaskAlt stroke={2} size="1.3rem" />
+                          </Avatar>
+                        </ButtonBase>
+                      </Box>
+                    }
+                  >
+                    {viewId?.projectAllocation.map((data) => (
+                      <Card sx={{ margin: '1rem', padding: '1rem' }} className="card-hovered">
+                        <div className="d-flex justify-content-between">
+                          <div className="d-flex">
+                            {/* <Avatar sx={{ bgcolor: '#ede7f6', color: '#5e35b1' }}>{data?.employeeName[0]}</Avatar> */}
+                            <div className="ms-1">
+                              <p className="avatar-name">{data?.employeeCode}</p>
+                              <div className="d-flex align-items-center">
+                                <p className="text-muted-light m-0">{data?.team}</p> &nbsp; /
+                                <div>
+                                  <PeopleAltTwoTone style={{ fontSize: 'medium' }} />
+                                  <span className="ms-01">{data.location}</span>
+                                </div>
                               </div>
                             </div>
-                            <div className="float-end">
-                              <p className="text-muted-light m-0 text-end">Assigned Date : &nbsp; {data?.assignedDate.slice(0, 10)}</p>
-                              <p className="text-muted-light m-0 text-end">Target Date : &nbsp; {data?.targetDate.slice(0, 10)}</p>
-                              <div className="d-flex justify-content-end">
-                                <p
-                                  className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${
-                                    data?.status === 'completed' ? 'badge-success max-width' : ''
+                          </div>
+                          <div className="float-end">
+                            <p className="text-muted-light m-0 text-end">Assigned Date : &nbsp; {data?.fromDate}</p>
+                            <p className="text-muted-light m-0 text-end">Target Date : &nbsp; {data?.toDate}</p>
+                            <div className="d-flex justify-content-end">
+                              <p
+                                className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${data?.status === 'completed' ? 'badge-success max-width' : ''
                                   }${data?.status === 'not-started' ? 'badge-danger max-width' : ''}`}
-                                >
-                                  {data?.statusRequest} {data?.status}
-                                </p>
-                              </div>
+                              >
+                                {data?.statusRequest} {data?.status}
+                              </p>
                             </div>
                           </div>
-                          <div className="mt-2 ms-1">
-                            <p className="text-muted m-0">{data?.title}</p>
-                            <p className="">
-                              <span>{data?.description}</span>
-                            </p>
-                            <p className="text-muted m-0">Remarks</p>
-                            <p className="">
-                              <span> {data?.remark}</span>
-                            </p>
-                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </MainCard>
+                </div>
+              </Grid>
+              <Grid xs={4} p={2}>
+                <div className="history-container">
+                  <MainCard
+                    title="History"
+                    secondary={
+                      <Box
+                        sx={{
+                          ml: 2,
+                          // mr: 3,
+                          [theme.breakpoints.down('md')]: {
+                            mr: 2
+                          }
+                        }}
+                      >
+                        <ButtonBase sx={{ borderRadius: '12px' }}>
+                          <Avatar
+                            variant="rounded"
+                            sx={{
+                              ...theme.typography.commonAvatar,
+                              ...theme.typography.mediumAvatar,
+                              transition: 'all .2s ease-in-out',
+                              background: theme.palette.secondary.light,
+                              color: theme.palette.secondary.dark,
+                              '&[aria-controls="menu-list-grow"],&:hover': {
+                                background: theme.palette.secondary.dark,
+                                color: theme.palette.secondary.light
+                              }
+                            }}
+                            aria-haspopup="true"
+                            color="inherit"
+                          >
+                            <History stroke={2} size="1.3rem" />
+                          </Avatar>
+                        </ButtonBase>
+                      </Box>
+                    }
+                  ></MainCard>
+                </div>
+              </Grid>
+              <Grid xs={8} p={2}>
+                <div className="task-container">
+                  <MainCard
+                    title="Task"
+                    secondary={
+                      <Box
+                        sx={{
+                          ml: 2,
+                          [theme.breakpoints.down('md')]: {
+                            mr: 2
+                          }
+                        }}
+                      >
+                        <ButtonBase sx={{ borderRadius: '12px' }}>
+                          <Avatar
+                            variant="rounded"
+                            sx={
+                              {
+                                // Avatar styles
+                              }
+                            }
+                            aria-haspopup="true"
+                            color="inherit"
+                          >
+                            <TaskAlt stroke={2} size="1.3rem" />
+                          </Avatar>
+                        </ButtonBase>
+                      </Box>
+                    }
+                  >
+                    {tasks &&
+                      Array.isArray(tasks) &&
+                      tasks.map((data, index) => (
+                        <Card key={index} sx={{ margin: '1rem', padding: '1rem' }} className="card-hover">
+                          <Typography variant="h6" component="span">
+                            {data?.title}
+                          </Typography>
+                          <Typography variant="body1">{data?.description}</Typography>
                         </Card>
                       ))}
-                    </MainCard>
-                  </div>
-                </Grid>
+                  </MainCard>
+                </div>
               </Grid>
-            </MainCard>
-          </>
-        )}
-        <Dialog
-          fullWidth
-          open={open}
-          TransitionComponent={Transition}
-          keepMounted
-          // onClose={handleClose}
-          // aria-describedby="alert-dialog-slide-description"
-        >
-          <DialogTitle>
-            <Typography variant="h3">Delete Lead</Typography>
-          </DialogTitle>
-          <Divider />
-          <DialogContent>
-            <DialogContentText id="alert-dialog-slide-description" className="d-flex justify-content-center align-item-center">
-              <div className="bg-red rounded ">
-                <Delete style={{ fontSize: '32' }} />
-              </div>
-            </DialogContentText>
-            <Typography variant="h4" className="muted" display="block" gutterBottom style={{ textAlign: 'center' }} mt={2}>
-              Are you want to Delete ?
-            </Typography>
-          </DialogContent>
-          <DialogActions className="d-flex justify-content-center mb-1">
-            <Button variant="outlined" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="contained" onClick={confirmDelete}>
-              Delete
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </div>
-    );
-  };
-  export default Manager;
-  
+              <Grid></Grid>
+            </Grid>
+          </MainCard>
+        </>
+      )}
+      <Dialog fullWidth open={open} TransitionComponent={Transition} keepMounted>
+        <DialogTitle>
+          <Typography variant="h3">Delete Lead</Typography>
+        </DialogTitle>
+        <Divider />
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description" className="d-flex justify-content-center align-item-center">
+            <div className="bg-light rounded ">
+              <Delete style={{ fontSize: '32' }} />
+            </div>
+          </DialogContentText>
+          <Typography variant="h4" className="muted" display="block" gutterBottom style={{ textAlign: 'center' }} mt={2}>
+            Are you want to Delete ?
+          </Typography>
+        </DialogContent>
+        <DialogActions className="d-flex justify-content-center mb-1">
+          <Button variant="outlined" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={confirmDelete}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
+  );
+};
+export default Manager;

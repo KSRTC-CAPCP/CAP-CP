@@ -90,7 +90,7 @@ const TaskView = ({ tasks }) => {
           <div className="container-task">
             <div className="drag_column">
               <div className="drag_row">
-                <h4 className="h4-task">New Orders</h4>
+                <h4 >Backlogs</h4>
                 {renderTasks(
                   stateTasks.filter((data) => data.status === "New Order")
                 )}
@@ -136,7 +136,7 @@ const TaskView = ({ tasks }) => {
           <div className="container-task">
             <div className="drag_column">
               <div className="drag_row">
-                <h4>Waiting for buyer</h4>
+                <h4>Review</h4>
                 {renderTasks(
                   stateTasks.filter((data) => data.status === "Delivered")
                 )}
@@ -159,7 +159,7 @@ const TaskView = ({ tasks }) => {
           <div className="container-task">
             <div className="drag_column">
               <div className="drag_row">
-                <h4>Completed</h4>
+                <h4>Done</h4>
                 {renderTasks(
                   stateTasks.filter((data) => data.status === "Completed")
                 )}
