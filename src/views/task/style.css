@@ -14,12 +14,14 @@
    .img-task img {
      width: 40px;
      height: 40px;
+     margin-top: 37px;
    }
    .status-task,
    .days,
    .time {
      font-size: 14px;
      margin-bottom: 7px;
+     margin-left: 96px;
    }
    .card_right {
      width: auto;
@@ -55,8 +57,8 @@
    }
 
    .h4-task {
-     font-family: sans-serif;
-     font-size: 12px;
+     font-family: Monospace;
+     /* font-size: 10px; */
      text-transform: uppercase;
      margin-top: 0px;
      color: #416183;
@@ -82,7 +84,7 @@
    }
    .small-box {
      width: 22%;
-     background: #f7f8fa;
+     /* background: #f7f8fa; */
      height: max-content;
    }
    
@@ -109,3 +111,42 @@
     margin: 0;
   }
  
+.backmargin{
+  margin-left: 36px;
+  margin-right: 11px;
+}
+ 
+
+h4{
+  margin-top: -24px;
+  font-size: 20px;
+}
+.container-task{
+  margin-top: 21px;
+}
+
+.img-task img{
+  margin-bottom: -38px;
+}
+
+.bold-text {
+  font-weight: bolder;
+}
+
+
+
+.custom-file-upload {
+  border: 2px solid #ccc;
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.custom-file-upload:hover {
+  background-color: #e0e0e0;
+}
+.file-upload{
+  margin-left: 10px;
+}
