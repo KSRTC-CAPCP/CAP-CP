@@ -6,7 +6,7 @@ import FlagIcon from '@mui/icons-material/Flag';
 export const TASKS = [
   {
     id: 1,
-    status: "New Order",
+    status: "In Backlog",
     image: IconBox,
     time: "8 hrs",
     days: "5 days left",
@@ -40,7 +40,7 @@ export const TASKS = [
   },
   {
     id: 4,
-    status: "New Order",
+    status: "In Backlog",
     image: IconBoxs,
     time: "22 hrs",
     days: "2 days left",
@@ -74,7 +74,7 @@ export const TASKS = [
   },
   {
     id: 5,
-    status: "Delivered",
+    status: "In Review",
     image: IconBox,
     time: "2 hrs",
     days: "1 day left",

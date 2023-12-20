@@ -13,7 +13,7 @@
 }
 
 .Mui-selected,
-.Mui-selected>.MuiListItemIcon-root,
+.Mui-selected > .MuiListItemIcon-root,
 .MuiListItemButton-root:hover {
   color: #5e35b1 !important;
   background-color: #fff !important;
@@ -76,7 +76,7 @@ video {
   justify-content: end !important;
 }
 
-.p-0{
+.p-0 {
   padding: 0 !important;
 }
 
@@ -177,7 +177,9 @@ main {
   border: 1px solid #5e35b18e !important;
   background-color: #fff !important;
 }
-
+.border-left {
+  border-right: 1px solid #e3e8ef;
+}
 .text-muted-light {
   color: #a3a3a3;
   margin: 0 !important;
@@ -268,7 +270,7 @@ main {
 }
 
 .css-17pmaar-MuiCardContent-root:last-child {
-  margin-left: 13px;
+  /* margin-left: 13px; */
 }
 
 p {
@@ -336,28 +338,6 @@ hr {
 .strong {
   font-weight: bold;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /* :root {
   --primary-color: rgb(62, 100, 255);

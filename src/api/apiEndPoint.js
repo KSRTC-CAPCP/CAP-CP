@@ -45,5 +45,11 @@ export const PROJECT_UPDATE = (id) => `${BASE_URL}/project/update/${id}`;
 //FOR CATEGORY
 export const CATEGORY_CREATE = `${BASE_URL}/categories`;
 export const CATEGORY_GET = `${BASE_URL}/categories`;
+
+//FOR MILESTONE
 export const MILESTONE_GET = `${BASE_URL}/milestones`;
 export const MILESTONE_CREATE = `${BASE_URL}/milestone`;
+
+//FOR LOCATION
+export const LOCATION_GET = `${BASE_URL}/locations`;
+export const LOCATION_CREATE = `${BASE_URL}/location`;

@@ -31,7 +31,8 @@ import {
   Input,
   Card,
   Badge,
-  FormHelperText
+  FormHelperText,
+  Alert
 } from '@mui/material';
 import React, { forwardRef } from 'react';
 import MainCard from 'ui-component/cards/MainCard';
@@ -163,6 +164,9 @@ const columns = [
   columnHelper.accessor('category', {
     header: 'Category'
   }),
+  columnHelper.accessor('remark', {
+    header: 'Remark'
+  }),
   columnHelper.accessor('contactName', {
     header: 'Contact Name'
   }),
@@ -240,14 +244,31 @@ const BusinessLeads = () => {
   const [localData, setLocalData] = useState('');
   const [moveRFQ, setMoveRFQ] = useState(false);
   const [stsReq, setStsReq] = useState([]);
+  const [profilesData, setProfilesData] = useState([]);
+  const [maxDateHistory, setMaxDateHistory] = useState('');
+  const [historyTableData, setHistoryTableData] = useState([]);
+  const getMaxDate = () => {
+    const dateStrings = historyTableData?.map((item) => item?.date);
+    const dateObjects = dateStrings.map((dateString) => new Date(dateString)).filter((dateObject) => !isNaN(dateObject.getTime()));
+    const maxDate = new Date(Math.max.apply(null, dateObjects));
+    return `${maxDate.getFullYear()}-${(maxDate.getMonth() + 1).toString().padStart(2, '0')}-${maxDate
+      .getDate()
+      .toString()
+      .padStart(2, '0')}`;
+  };
+  useEffect(() => {
+    setMaxDateHistory(getMaxDate());
+  }, [historyTableData]);
+  console.log('maxDateHistory in Cell:', maxDateHistory);
   const coumnsForHistory = [
     {
       accessorKey: 'date',
       header: 'Date',
       muiEditTextFieldProps: {
         type: 'date',
-        required: true
-        // min: ''
+        required: true,
+        minDate: new Date(maxDateHistory).toString()
+        // maxDate :new Date(maxDateHistory).toString()
       },
       Cell: ({ renderedCellValue, row }) => (
         <Box component="span">
@@ -281,17 +302,8 @@ const BusinessLeads = () => {
     }
   ];
   const [historyTableColumns, setHistoryTableColumns] = useState(coumnsForHistory);
-  const [historyTableData, setHistoryTableData] = useState([]);
-  const [profilesData, setProfilesData] = useState([]);
+
   console.log(stsReq, 'moveRFQ');
-  // const dateStrings = historyTableData?.map((item) => item?.date);
-  // const dateObjects = dateStrings.map((dateString) => new Date(dateString)).filter((dateObject) => !isNaN(dateObject.getTime()));
-  // const maxDate = new Date(Math.max.apply(null, dateObjects));
-  // const formattedDate = `${maxDate.getFullYear()}-${(maxDate.getMonth() + 1).toString().padStart(2, '0')}-${maxDate
-  //   .getDate()
-  //   .toString()
-  //   .padStart(2, '0')}`;
-  // console.log('maxDate', formattedDate);
 
   // const formattedDate = maxDate.toISOString().split('T')[0];
   const coumnsForTask = [
@@ -491,10 +503,24 @@ const BusinessLeads = () => {
   };
   const theme = useTheme();
   const handleExportData = () => {
-    // Exclude the fields you want to hide from each lead
-    const processedLeadData = leadData.map(lead => {
+    // Process the lead data
+    const processedLeadData = leadData.map((lead) => {
       const { _id, __v, leadDescription, tasks, ...rest } = lead;
-      return rest;
+
+      // Extract the first object from leadDescription
+      const firstLeadDescription = leadDescription.length > 0 ? leadDescription[0] : {};
+
+      // Find the last "Approval" status in leadDescription
+      const lastApprovalStatus = leadDescription.filter((item) => item.status === 'Approval').pop();
+
+      // Add separate columns for description, lastApprovalStatusRequest, and lastApprovalStatus
+      const processedLead = {
+        ...rest,
+        leadDescriptionDescription: firstLeadDescription.description || '',
+        lastApprovalStatus: lastApprovalStatus ? lastApprovalStatus.statusRequest + lastApprovalStatus?.status : ''
+      };
+
+      return processedLead;
     });
 
     // Use the processed data to generate and download the CSV
@@ -511,6 +537,7 @@ const BusinessLeads = () => {
       companyName: leadData.companyName,
       category: leadData.category,
       contactName: leadData.contactName,
+      remark: leadData.remark,
       departmentName: leadData.departmentName,
       phoneNumber: leadData.phoneNumber,
       email: leadData.email,
@@ -536,6 +563,7 @@ const BusinessLeads = () => {
         Pilot: values.Pilot,
         companyName: values.companyName,
         category: values.category,
+        remark: values.remark,
         contactName: values.contactName,
         departmentName: values.departmentName,
         phoneNumber: values?.phoneNumber,
@@ -563,6 +591,7 @@ const BusinessLeads = () => {
           leadNumber: values?.serialNumber,
           companyName: values.companyName,
           category: values.category,
+          remark: values.remark,
           contactName: values.contactName,
           departmentName: values.departmentName,
           phoneNumber: values.departmentName,
@@ -601,6 +630,7 @@ const BusinessLeads = () => {
       contactName: '',
       serialNumber: '',
       departmentName: '',
+      remark: '',
       phoneNumber: '',
       email: '',
       businessVertical: '',
@@ -628,7 +658,7 @@ const BusinessLeads = () => {
           // Create leadDescription array from leadDescription field
           const leadDescriptionArray = values.leadDescription
             ? values.leadDescription.split('\n').map((item) => ({
-                date: values.date,
+                date: values?.date,
                 description: item.trim(),
                 status: 'pending', // Set your default status here
                 statusRequest: values.status // Set your default statusRequest here
@@ -712,6 +742,7 @@ const BusinessLeads = () => {
       Pilot: value?.Pilot,
       companyName: value?.companyName,
       serialNumber: value?.serialNumber,
+      remark: value?.remark,
       // category: value?.category,
       contactName: value?.contactName,
       departmentName: value?.departmentName,
@@ -942,7 +973,7 @@ const BusinessLeads = () => {
     onCreatingRowSave: handleCreateRowTask,
     onCreatingRowCancel: handleCancelCreateTask,
     renderRowActions: ({ row, table }) => (
-      <Box sx={{ display: 'flex', gap: '1rem' }}>
+      <Box sx={{ display: 'none', gap: '1rem' }}>
         <Tooltip title="Edit">
           <IconButton
             onClick={() => {
@@ -1088,8 +1119,13 @@ const BusinessLeads = () => {
 
     fetchDataAndUpdate(); // Invoke the async function
   }, [updateId]); // Add dependencies if needed
+  // useEffect(() => {
+  //   const formattedDate = getMaxDate(historyTableData);
+  //   console.log('maxDate', formattedDate);
+  //   setmaxDateHistory(formattedDate);
+  // }, [historyTableData]); // Ensure that historyTableData is the correct dependency
 
-  console.log(taskTableData, 'red');
+  console.log(maxDateHistory, 'red');
   return (
     <div className="max">
       {view.mode === 'Initial' && (
@@ -1410,6 +1446,24 @@ const BusinessLeads = () => {
                 )}
               </Grid>
               <Grid xs={4} p={2}>
+                <TextField
+                  error={Boolean(formik.touched.remark && formik.errors.remark)}
+                  name="remark"
+                  value={formik.values.remark}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  fullWidth
+                  id="outlined-basic"
+                  label="Remark"
+                  variant="outlined"
+                />
+                {formik.touched.remark && formik.errors.remark && (
+                  <FormHelperText error id="standard-weight-helper-text-Password-login">
+                    {formik.errors.remark}
+                  </FormHelperText>
+                )}
+              </Grid>
+              <Grid xs={4} p={2}>
                 <FormControl fullWidth>
                   <InputLabel id="demo-simple-select-label">Status</InputLabel>
                   <Select
@@ -1712,7 +1766,7 @@ const BusinessLeads = () => {
             </Grid>
             {/* <Divider /> */}
             <Box p={2} className="edit-table-container">
-              <MaterialReactTable table={editableForHistory} />
+              <MaterialReactTable table={editableForHistory} key={maxDateHistory} />
             </Box>
             <Box p={2} className="edit-table-container">
               <MaterialReactTable table={editableForTask} />
@@ -1845,7 +1899,7 @@ const BusinessLeads = () => {
                       </Box>
                     }
                   >
-                    <Timeline>
+                    <Timeline position="">
                       {leadSummary?.leadDescription.map((item) => (
                         <TimelineItem>
                           <TimelineOppositeContent style={{ display: 'none' }}></TimelineOppositeContent>
@@ -1862,13 +1916,15 @@ const BusinessLeads = () => {
                             </Tooltip>
                             <TimelineConnector />
                           </TimelineSeparator>
+
                           <TimelineContent>
                             <Typography variant="h6" component="span" className="text-muted">
                               {item.date?.slice(0, 10)}
                             </Typography>
                             <br />
                             <Typography variant="h6" component="span" className="strong">
-                              {item.statusRequest === 'newlead' ? 'New Lead' : item.statusRequest}
+                              {item.statusRequest === 'newlead' ? 'New Lead' : item.statusRequest} &nbsp; - &nbsp;
+                              {item.status === '' ? 'Pending' : item.status}
                             </Typography>
                             <li> {item.description}</li>
                           </TimelineContent>

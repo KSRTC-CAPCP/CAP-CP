@@ -34,9 +34,10 @@ import {
   RadioGroup,
   Radio,
   FormLabel,
-  LinearProgress,
   FormHelperText,
-  Card
+  Card,
+  CardContent,
+  CardActions
 } from '@mui/material';
 import React, { forwardRef } from 'react';
 import MainCard from 'ui-component/cards/MainCard';
@@ -59,12 +60,15 @@ import {
   ModeEditRounded,
   NotStarted,
   PeopleAltTwoTone,
+  LocationOnTwoTone,
   PersonAdd,
   TaskAlt,
   ThumbDown,
   ThumbDownAltSharp,
   ThumbUpSharp,
-  VisibilityRounded
+  VisibilityRounded,
+  Money,
+  CurrencyRupee
 } from '@mui/icons-material';
 import { useState } from 'react';
 import styled from '@emotion/styled';
@@ -150,7 +154,7 @@ const columns = [
   columnHelper.accessor('manager', {
     header: 'Manager'
   }),
-  columnHelper.accessor('milestone', {
+  columnHelper.accessor('milestone1', {
     header: 'MileStone'
   }),
   columnHelper.accessor('companyName', {
@@ -234,6 +238,7 @@ const Projects = ({ _history, tasks }) => {
     console.log(filterEmployee[0], 'filterEmployee');
     setManagerId(filterEmployee[0]);
   };
+  console.log(managerId, 'managerId');
   const columnsForproject = [
     {
       accessorKey: 'employeeCode',
@@ -244,6 +249,19 @@ const Projects = ({ _history, tasks }) => {
         select: true,
         onChange: (e) => handleEmployee(e)
       },
+      enableEditing: true
+    },
+    {
+      accessorKey: 'employeeName',
+      header: 'Employee Name',
+      editVariant: 'text',
+      // editSelectOptions: optionsForteamproject,
+      muiEditTextFieldProps: ({ cell, row, table }) => (
+        console.log('mui', cell, row, table),
+        {
+          value: managerId?.NameOfCandidate
+        }
+      ),
       enableEditing: true
     },
     {
@@ -275,22 +293,28 @@ const Projects = ({ _history, tasks }) => {
     {
       accessorKey: 'team',
       header: 'Team',
-      editVariant: 'select',
-      editSelectOptions: optionsForteamproject,
+      editVariant: 'text',
+      // editSelectOptions: optionsForteamproject,
       muiEditTextFieldProps: {
-        select: true
+        value: managerId?.Team
       },
       enableEditing: true
+      // Cell: ({ renderedCellValue, row }) => (
+      //   <Box component="span">
+      //     <p>{row.original.Team}</p>
+      //   </Box>
+      // )
     },
+
     {
       accessorKey: 'location',
       header: 'Location',
-      editVariant: 'select',
-      editSelectOptions: optionsForlocation,
+      editVariant: 'text',
+      // editSelectOptions: optionsForlocation,
+      enableEditing: true,
       muiEditTextFieldProps: {
-        select: true
-      },
-      enableEditing: true
+        value: managerId?.Location
+      }
     }
   ];
   const columnsForFinance = [
@@ -352,7 +376,7 @@ const Projects = ({ _history, tasks }) => {
     },
     {
       accessorKey: 'projectDescription',
-      header: 'Lead Description',
+      header: 'Description',
       enableEditing: true
     },
     {
@@ -553,7 +577,11 @@ const Projects = ({ _history, tasks }) => {
       companyName: '',
       description: '',
       manager: '',
-      milestone: '',
+      milestone1: '',
+      milestone2: '',
+      milestone3: '',
+      milestone4: '',
+      milestone5: '',
       poNumber: '',
       projectName: '',
       projectAllocation: [],
@@ -572,11 +600,12 @@ const Projects = ({ _history, tasks }) => {
             ? teamData.map((item) => ({
                 fromDate: item.fromDate,
                 employeeCode: item.employeeCode?.slice(0, 7),
-                employeeId: managerId?._id,
+                employeeId: item.employeeId,
+                employeeName: item.employeeName,
                 toDate: item.toDate,
-                location: item.location,
+                location: item?.location,
                 percentage: Number(item.percentage),
-                team: item.team
+                team: item?.team
               }))
             : [];
           const historyValue = historyTableData
@@ -614,7 +643,6 @@ const Projects = ({ _history, tasks }) => {
             targetDate: endDate,
             companyName: selectedRFQ?.companyName,
             projectName: selectedPR,
-            milestone: mileselectedOption,
             projectAllocation: teamsValue,
             finance: financeValue,
             history: historyValue,
@@ -635,9 +663,9 @@ const Projects = ({ _history, tasks }) => {
                 employeeCode: item.employeeCode?.slice(0, 7),
                 employeeId: managerId?._id,
                 toDate: item.toDate,
-                location: item.location,
+                location: managerId?.location,
                 percentage: Number(item.percentage),
-                team: item.team
+                team: managerId?.team
               }))
             : [];
           const historyValue = historyTableData
@@ -745,7 +773,11 @@ const Projects = ({ _history, tasks }) => {
       targetDate: row?.original?.targetDate,
       description: row?.original?.description,
       manager: row?.original?.manager,
-      milestone: row?.original?.milestone
+      milestone1: row?.original?.milestone1,
+      milestone2: row?.original?.milestone2,
+      milestone3: row?.original?.milestone3,
+      milestone4: row?.original?.milestone4,
+      milestone5: row?.original?.milestone5
     });
     setTeamData(row?.original?.projectAllocation);
     setHistoryTableData(row?.original?.history);
@@ -763,7 +795,7 @@ const Projects = ({ _history, tasks }) => {
     });
     setViewId(row?.original);
   };
-
+  console.log(viewId, 'projectAllocation');
   const table = useMaterialReactTable({
     columns,
     data: projectData,
@@ -838,8 +870,20 @@ const Projects = ({ _history, tasks }) => {
     setEditingRowId(null);
   };
   const handleCreateRowProjects = (newData) => {
+    console.log(teamData, managerId, 'handleSave');
+
     const tempId = generateTempId(); // Generate a temporary ID
-    const newTask = { ...newData.values, _id: tempId };
+    const filtered = {
+      employeeCode: newData?.values?.employeeCode,
+      employeeName: managerId?.NameOfCandidate,
+      fromDate: newData?.values?.fromDate,
+      toDate: newData?.values?.toDate,
+      percentage: newData?.values?.percentage,
+      team: managerId?.Team,
+      employeeId: managerId?._id,
+      location: managerId?.Location
+    };
+    const newTask = { ...filtered, _id: tempId };
     setTeamData([...teamData, newTask]);
     setIsCreatingRow(false);
   };
@@ -980,7 +1024,7 @@ const Projects = ({ _history, tasks }) => {
     onCreatingRowSave: handleCreateRowProjects,
     onCreatingRowCancel: handleCancelCreateProjects,
     renderRowActions: ({ row, table }) => (
-      <Box sx={{ display: 'flex', gap: '1rem' }}>
+      <Box sx={{ display: 'none', gap: '1rem' }}>
         <Tooltip title="Edit">
           <IconButton
             onClick={() => {
@@ -1050,7 +1094,7 @@ const Projects = ({ _history, tasks }) => {
     onCreatingRowSave: handleCreateRowHistorys,
     onCreatingRowCancel: handleCancelCreateHistorys,
     renderRowActions: ({ row, table }) => (
-      <Box sx={{ display: 'flex', gap: '1rem' }}>
+      <Box sx={{ display: 'none', gap: '1rem' }}>
         <Tooltip title="Edit">
           <IconButton
             onClick={() => {
@@ -1120,7 +1164,7 @@ const Projects = ({ _history, tasks }) => {
     onCreatingRowSave: handleCreateRowFinances,
     onCreatingRowCancel: handleCancelCreateFinances,
     renderRowActions: ({ row, table }) => (
-      <Box sx={{ display: 'flex', gap: '1rem' }}>
+      <Box sx={{ display: 'none', gap: '1rem' }}>
         <Tooltip title="Edit">
           <IconButton
             onClick={() => {
@@ -1190,7 +1234,7 @@ const Projects = ({ _history, tasks }) => {
     onCreatingRowSave: handleCreateRowTasks,
     onCreatingRowCancel: handleCancelCreateTasks,
     renderRowActions: ({ row, table }) => (
-      <Box sx={{ display: 'flex', gap: '1rem' }}>
+      <Box sx={{ display: 'none', gap: '1rem' }}>
         <Tooltip title="Edit">
           <IconButton
             onClick={() => {
@@ -1260,6 +1304,10 @@ const Projects = ({ _history, tasks }) => {
     });
     formik.resetForm();
     setEditId('');
+    setTeamData([]);
+    setHistoryTableData([]);
+    setTaskTableData([]);
+    setFinanceData([]);
     setSelectedPR('');
     setMileSelectedOption('');
     setSelectedRFQ('');
@@ -1599,8 +1647,72 @@ const Projects = ({ _history, tasks }) => {
                   </Select>
                 </FormControl>
               </Grid>
-
               <Grid xs={4} p={2}>
+                <TextField
+                  error={Boolean(formik.touched.milestone1 && formik.errors.milestone1)}
+                  name="milestone1"
+                  value={formik.values.milestone1}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  fullWidth
+                  id="outlined-basic"
+                  label="Milestone 1"
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid xs={4} p={2}>
+                <TextField
+                  error={Boolean(formik.touched.milestone2 && formik.errors.milestone2)}
+                  name="milestone2"
+                  value={formik.values.milestone2}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  fullWidth
+                  id="outlined-basic"
+                  label="Milestone 2"
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid xs={4} p={2}>
+                <TextField
+                  error={Boolean(formik.touched.milestone3 && formik.errors.milestone3)}
+                  name="milestone3"
+                  value={formik.values.milestone3}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  fullWidth
+                  id="outlined-basic"
+                  label="Milestone 3"
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid xs={4} p={2}>
+                <TextField
+                  error={Boolean(formik.touched.milestone4 && formik.errors.milestone4)}
+                  name="milestone4"
+                  value={formik.values.milestone4}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  fullWidth
+                  id="outlined-basic"
+                  label="Milestone 4"
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid xs={4} p={2}>
+                <TextField
+                  error={Boolean(formik.touched.milestone5 && formik.errors.milestone5)}
+                  name="milestone5"
+                  value={formik.values.milestone5}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  fullWidth
+                  id="outlined-basic"
+                  label="Milestone 5"
+                  variant="outlined"
+                />
+              </Grid>
+              {/* <Grid xs={4} p={2}>
                 {showSelect ? (
                   <FormControl fullWidth>
                     <InputLabel id="demo-simple-select-label">MileStone</InputLabel>
@@ -1642,8 +1754,8 @@ const Projects = ({ _history, tasks }) => {
                     </div>
                   </>
                 )}
-              </Grid>
-              <Grid item>
+              </Grid> */}
+              {/* <Grid item>
                 {showDescription && (
                   <TextField
                     type="text"
@@ -1654,7 +1766,7 @@ const Projects = ({ _history, tasks }) => {
                     style={{ marginTop: '10px' }}
                   />
                 )}
-              </Grid>
+              </Grid> */}
               <Grid item xs={4} p={2}>
                 <FormLabel id="demo-row-radio-buttons-group-label">P0.NO</FormLabel>
                 <RadioGroup aria-label="yesno" name="yesno" value={selectedOption} onChange={handleOptionChange} row>
@@ -1864,7 +1976,6 @@ const Projects = ({ _history, tasks }) => {
                   value={parseDate(formik.values.targetDate)}
                 />
               </Grid>
-
               <Grid xs={4} p={2}>
                 <TextField
                   error={Boolean(formik.touched.description && formik.errors.description)}
@@ -1901,8 +2012,72 @@ const Projects = ({ _history, tasks }) => {
                   </Select>
                 </FormControl>
               </Grid>
-
               <Grid xs={4} p={2}>
+                <TextField
+                  error={Boolean(formik.touched.milestone1 && formik.errors.milestone1)}
+                  name="milestone1"
+                  value={formik.values.milestone1}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  fullWidth
+                  id="outlined-basic"
+                  label="Milestone 1"
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid xs={4} p={2}>
+                <TextField
+                  error={Boolean(formik.touched.milestone2 && formik.errors.milestone2)}
+                  name="milestone2"
+                  value={formik.values.milestone2}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  fullWidth
+                  id="outlined-basic"
+                  label="Milestone 2"
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid xs={4} p={2}>
+                <TextField
+                  error={Boolean(formik.touched.milestone3 && formik.errors.milestone3)}
+                  name="milestone3"
+                  value={formik.values.milestone3}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  fullWidth
+                  id="outlined-basic"
+                  label="Milestone 3"
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid xs={4} p={2}>
+                <TextField
+                  error={Boolean(formik.touched.milestone4 && formik.errors.milestone4)}
+                  name="milestone4"
+                  value={formik.values.milestone4}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  fullWidth
+                  id="outlined-basic"
+                  label="Milestone 4"
+                  variant="outlined"
+                />
+              </Grid>
+              <Grid xs={4} p={2}>
+                <TextField
+                  error={Boolean(formik.touched.milestone5 && formik.errors.milestone5)}
+                  name="milestone5"
+                  value={formik.values.milestone5}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  fullWidth
+                  id="outlined-basic"
+                  label="Milestone 5"
+                  variant="outlined"
+                />
+              </Grid>
+              {/* <Grid xs={4} p={2}>
                 {showSelect ? (
                   <FormControl fullWidth>
                     <InputLabel id="demo-simple-select-label">MileStone</InputLabel>
@@ -1956,7 +2131,7 @@ const Projects = ({ _history, tasks }) => {
                     style={{ marginTop: '10px' }}
                   />
                 )}
-              </Grid>
+              </Grid> */}
               <Grid item xs={4} p={2}>
                 <FormLabel id="demo-row-radio-buttons-group-label">P0.NO</FormLabel>
                 <RadioGroup aria-label="yesno" name="yesno" value={selectedOption} onChange={handleOptionChange} row>
@@ -2035,75 +2210,61 @@ const Projects = ({ _history, tasks }) => {
             }
           >
             <Grid container m={3}>
-              <Grid xs={6}>
+              <Grid xs={12}>
                 <Grid container>
-                  <Grid xs={6} p={2}>
+                  <Grid xs={3} p={2}>
                     <label className="text-muted">Project Number</label>
                     <p>{viewId?.projectNumber}</p>
                   </Grid>
-                  <Grid xs={6} p={2}>
+                  <Grid xs={3} p={2}>
                     <label className="text-muted">Project Name</label>
                     <p>{viewId?.projectName}</p>
                   </Grid>
-                  <Grid xs={6} p={2}>
+                  <Grid xs={3} p={2}>
                     <label className="text-muted">RFQ Number</label>
                     <p>{viewId?.rfqNumber}</p>
                   </Grid>
-                  <Grid xs={6} p={2}>
+                  <Grid xs={3} p={2}>
                     <label className="text-muted">Company Name</label>
                     <p>{viewId?.companyName}</p>
                   </Grid>
-                  <Grid xs={6} p={2}>
+                  <Grid xs={3} p={2}>
                     <label className="text-muted">Assigned Date</label>
                     <p>{viewId?.assignedDate?.slice(0, 10)}</p>
                   </Grid>
-                  <Grid xs={6} p={2}>
+                  <Grid xs={3} p={2}>
                     <label className="text-muted">Target Date</label>
                     <p>{viewId?.targetDate?.slice(0, 10)}</p>
                   </Grid>
-                  <Grid xs={6} p={2}>
+                  <Grid xs={3} p={2}>
                     <label className="text-muted">Description</label>
                     <p>{viewId?.description}</p>
                   </Grid>
-                  <Grid xs={6} p={2}>
+                  <Grid xs={3} p={2}>
                     <label className="text-muted">Manager</label>
                     <p>{viewId?.manager}</p>
                   </Grid>
-                  <Grid xs={6} p={2}>
-                    <label className="text-muted">MileStone</label>
-                    <p>{viewId?.milestone}</p>
+                  <Grid xs={3} p={2}>
+                    <label className="text-muted">MileStone 1</label>
+                    <p>{viewId?.milestone1 ? viewId?.milestone1 : '-'}</p>
+                  </Grid>
+                  <Grid xs={3} p={2}>
+                    <label className="text-muted">MileStone 2</label>
+                    <p>{viewId?.milestone2 ? viewId?.milestone2 : '-'}</p>
+                  </Grid>
+                  <Grid xs={3} p={2}>
+                    <label className="text-muted">MileStone 3</label>
+                    <p>{viewId?.milestone3 ? viewId?.milestone3 : '-'}</p>
+                  </Grid>
+                  <Grid xs={3} p={2}>
+                    <label className="text-muted">MileStone 4</label>
+                    <p>{viewId?.milestone4 ? viewId?.milestone4 : '-'}</p>
+                  </Grid>
+                  <Grid xs={3} p={2}>
+                    <label className="text-muted">MileStone 5</label>
+                    <p>{viewId?.milestone5 ? viewId?.milestone5 : '-'}</p>
                   </Grid>
                 </Grid>
-              </Grid>
-              <Grid xs={6}>
-                <TableContainer component={Paper}>
-                  <MainCard title="Finance History">
-                    <Table aria-label="simple table">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Date</TableCell>
-                          <TableCell align="right">Ref No/Bill</TableCell>
-                          <TableCell align="right">Amount</TableCell>
-                          <TableCell align="right">Tax</TableCell>
-                          <TableCell align="right">Status</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {Financeviewrows.map((row) => (
-                          <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                            <TableCell component="th" scope="row">
-                              {row.Date}
-                            </TableCell>
-                            <TableCell align="right">{row.Ref}</TableCell>
-                            <TableCell align="right">{row.Amount}</TableCell>
-                            <TableCell align="right">{row.Tax}</TableCell>
-                            <TableCell align="right">{row.Status}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </MainCard>
-                </TableContainer>
               </Grid>
             </Grid>
             <Grid container p={3}>
@@ -2115,7 +2276,6 @@ const Projects = ({ _history, tasks }) => {
                       <Box
                         sx={{
                           ml: 2,
-
                           [theme.breakpoints.down('md')]: {
                             mr: 2
                           }
@@ -2144,38 +2304,50 @@ const Projects = ({ _history, tasks }) => {
                       </Box>
                     }
                   >
-                    {viewId?.projectAllocation.map((data) => (
-                      <Card sx={{ margin: '1rem', padding: '1rem' }} className="card-hovered">
-                        <div className="d-flex justify-content-between">
-                          <div className="d-flex">
-                            {/* <Avatar sx={{ bgcolor: '#ede7f6', color: '#5e35b1' }}>{data?.employeeName[0]}</Avatar> */}
-                            <div className="ms-1">
-                              <p className="avatar-name">{data?.employeeCode}</p>
-                              <div className="d-flex align-items-center">
-                                <p className="text-muted-light m-0">{data?.team}</p> &nbsp; /
-                                <div>
-                                  <PeopleAltTwoTone style={{ fontSize: 'medium' }} />
-                                  <span className="ms-01">{data.location}</span>
+                    <Grid container p={2}>
+                      {viewId?.projectAllocation?.map((data) => (
+                        <Grid xs={3} p={2}>
+                          <Card sx={{ margin: '1rem', padding: '1rem' }} className="card-hovered">
+                            <div className="">
+                              <div className="">
+                                <div className="d-flex align-items-center w-100" style={{ justifyContent: 'space-between' }}>
+                                  <div>
+                                    <p className="avatar-name">{data?.employeeName}</p>
+                                    <p className="avatar-name">{data?.employeeCode}</p>
+                                  </div>
+                                  <div>
+                                    <Avatar sx={{ bgcolor: '#ede7f6', color: '#5e35b1', width: '60px', height: '60px' }}>
+                                      {data?.employeeName ? data?.employeeName[0] : ''}
+                                    </Avatar>
+                                  </div>
+                                </div>
+                                <div className="d-flex align-items-center">
+                                  <p className="text-muted-light m-0">{data?.team}</p> / &nbsp;
+                                  <div className="d-flex align-items-center">
+                                    <LocationOnTwoTone style={{ fontSize: 'medium' }} />
+                                    <span className="">{data.location}</span>
+                                  </div>
                                 </div>
                               </div>
+                              <div className="">
+                                <p className="text-muted-light m-0">Assigned Date : &nbsp; {data?.fromDate}</p>
+                                <p className="text-muted-light m-0">Target Date : &nbsp; {data?.toDate}</p>
+                                <div className="d-flex justify-content-end">
+                                  <p
+                                    className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${
+                                      data?.status === 'completed' ? 'badge-success max-width' : ''
+                                    }${data?.status === 'not-started' ? 'badge-danger max-width' : ''}`}
+                                  >
+                                    {data?.statusRequest} {data?.status}
+                                  </p>
+                                </div>
+                              </div>
+                              {/* <Progress value={'12'} /> */}
                             </div>
-                          </div>
-                          <div className="float-end">
-                            <p className="text-muted-light m-0 text-end">Assigned Date : &nbsp; {data?.fromDate}</p>
-                            <p className="text-muted-light m-0 text-end">Target Date : &nbsp; {data?.toDate}</p>
-                            <div className="d-flex justify-content-end">
-                              <p
-                                className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${
-                                  data?.status === 'completed' ? 'badge-success max-width' : ''
-                                }${data?.status === 'not-started' ? 'badge-danger max-width' : ''}`}
-                              >
-                                {data?.statusRequest} {data?.status}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
+                          </Card>
+                        </Grid>
+                      ))}
+                    </Grid>
                   </MainCard>
                 </div>
               </Grid>
@@ -2215,10 +2387,104 @@ const Projects = ({ _history, tasks }) => {
                         </ButtonBase>
                       </Box>
                     }
-                  ></MainCard>
+                  >
+                    <Timeline>
+                      {viewId?.history?.map((item) => (
+                        <TimelineItem>
+                          <TimelineOppositeContent style={{ display: 'none' }}></TimelineOppositeContent>
+                          <TimelineSeparator>
+                            <TimelineDot color="secondary">
+                              {/* {item.statusRequest === 'newlead' && <PersonAdd />}
+                                {item.statusRequest === 'Contact Establish' && <ConnectWithoutContact />}
+                                {item.statusRequest === 'Technicle Meeting' && <Group />}
+                                {item.statusRequest === 'Hold' && <NotStarted />}
+                                {item.statusRequest === 'Reject' && <ThumbDown />}
+                                {item.statusRequest === 'Move to RFQ' && <ThumbUpSharp />} */}
+                            </TimelineDot>
+                            <TimelineConnector />
+                          </TimelineSeparator>
+                          <TimelineContent>
+                            <Typography variant="h6" component="span" className="text-muted">
+                              {item.date?.slice(0, 10)}
+                            </Typography>
+                            <br />
+                            <Typography variant="h6" component="span" className="strong">
+                              {item.requestStatus} &nbsp; - &nbsp;
+                              {item.approvalStatus === '' ? 'Pending' : item.approvalStatus}
+                            </Typography>
+                            <li> {item.projectDescription}</li>
+                          </TimelineContent>
+                        </TimelineItem>
+                      ))}
+                    </Timeline>
+                  </MainCard>
                 </div>
               </Grid>
               <Grid xs={8} p={2}>
+                <div className="history-container">
+                  <MainCard
+                    title="Finance History"
+                    secondary={
+                      <Box
+                        sx={{
+                          ml: 2,
+                          // mr: 3,
+                          [theme.breakpoints.down('md')]: {
+                            mr: 2
+                          }
+                        }}
+                      >
+                        <ButtonBase sx={{ borderRadius: '12px' }}>
+                          <Avatar
+                            variant="rounded"
+                            sx={{
+                              ...theme.typography.commonAvatar,
+                              ...theme.typography.mediumAvatar,
+                              transition: 'all .2s ease-in-out',
+                              background: theme.palette.secondary.light,
+                              color: theme.palette.secondary.dark,
+                              '&[aria-controls="menu-list-grow"],&:hover': {
+                                background: theme.palette.secondary.dark,
+                                color: theme.palette.secondary.light
+                              }
+                            }}
+                            aria-haspopup="true"
+                            color="inherit"
+                          >
+                            <CurrencyRupee stroke={2} size="1.3rem" />
+                          </Avatar>
+                        </ButtonBase>
+                      </Box>
+                    }
+                  >
+                    <Table aria-label="simple table">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Date</TableCell>
+                          <TableCell align="right">Ref No/Bill</TableCell>
+                          <TableCell align="right">Amount</TableCell>
+                          <TableCell align="right">Tax</TableCell>
+                          <TableCell align="right">Status</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {viewId?.finance?.map((row) => (
+                          <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                            <TableCell>{row.date}</TableCell>
+                            <TableCell align="right">{row.refNumber}</TableCell>
+                            <TableCell align="right">{row.amount}</TableCell>
+                            <TableCell align="right">{row.tax}</TableCell>
+                            <TableCell align="right">{row.status}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </MainCard>
+                </div>
+              </Grid>
+            </Grid>
+            <Grid container p={3}>
+              <Grid xs={12}>
                 <div className="task-container">
                   <MainCard
                     title="Task"
@@ -2234,11 +2500,17 @@ const Projects = ({ _history, tasks }) => {
                         <ButtonBase sx={{ borderRadius: '12px' }}>
                           <Avatar
                             variant="rounded"
-                            sx={
-                              {
-                                // Avatar styles
+                            sx={{
+                              ...theme.typography.commonAvatar,
+                              ...theme.typography.mediumAvatar,
+                              transition: 'all .2s ease-in-out',
+                              background: theme.palette.secondary.light,
+                              color: theme.palette.secondary.dark,
+                              '&[aria-controls="menu-list-grow"],&:hover': {
+                                background: theme.palette.secondary.dark,
+                                color: theme.palette.secondary.light
                               }
-                            }
+                            }}
                             aria-haspopup="true"
                             color="inherit"
                           >
@@ -2248,20 +2520,38 @@ const Projects = ({ _history, tasks }) => {
                       </Box>
                     }
                   >
-                    {tasks &&
-                      Array.isArray(tasks) &&
-                      tasks.map((data, index) => (
-                        <Card key={index} sx={{ margin: '1rem', padding: '1rem' }} className="card-hover">
-                          <Typography variant="h6" component="span">
-                            {data?.title}
-                          </Typography>
-                          <Typography variant="body1">{data?.description}</Typography>
-                        </Card>
-                      ))}
+                    {viewId?.task?.map((data) => (
+                      <div>
+                        <Grid container>
+                          <Grid xs={4} className="d-flex border-left ">
+                            <Avatar sx={{ bgcolor: '#ede7f6', color: '#5e35b1', marginTop: '15px' }}>
+                              {data?.responsible ? data?.responsible[0] : ''}
+                            </Avatar>
+                            <div className="ms-1">
+                              <p className="avatar-name">{data?.responsible}</p>
+                              <p className="text-muted-light m-0">Assigned Date : &nbsp; {data?.assignedDate?.slice(0, 10)}</p>
+                              <p className="text-muted-light m-0">Target Date : &nbsp; {data?.targetDate?.slice(0, 10)}</p>
+                            </div>
+                          </Grid>
+                          <Grid xs={8}>
+                            <div className="ms-1">
+                              <p className="text-muted m-0">{data?.title}</p>
+                              <p className="m-0">
+                                <span>{data?.description}</span>
+                              </p>
+                              <p className="text-muted m-0">Remarks</p>
+                              <p className="m-0">
+                                <span> {data?.remarks}</span>
+                              </p>
+                            </div>
+                            <hr />
+                          </Grid>
+                        </Grid>
+                      </div>
+                    ))}
                   </MainCard>
                 </div>
               </Grid>
-              <Grid></Grid>
             </Grid>
           </MainCard>
         </>

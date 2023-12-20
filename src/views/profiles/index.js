@@ -76,6 +76,8 @@ import { deleteData, fetchData, postData, updateData } from 'utils/apiUtils';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import {
+  LOCATION_CREATE,
+  LOCATION_GET,
   PROFILES_CREATE,
   PROFILES_DELETE,
   PROFILES_GET,
@@ -229,6 +231,10 @@ const Profiles = () => {
   const [employeeData, setEmployeeData] = useState([]);
   const [employeeViewData, setEmployeeViewData] = useState([]);
   const [editId, setEditId] = useState('');
+  const [showSelect, setShowSelect] = useState(true);
+  const [selectedOption4Locat, setSelectedOption4Locat] = React.useState('');
+  const [locationData, setLocationData] = useState([]);
+  const [customOption, setCustomOption] = useState('');
   const [viewId, setViewId] = useState('');
   const teamsOption = teamsData.map((data) => ({
     label: data.Team,
@@ -238,6 +244,44 @@ const Profiles = () => {
   const handleDOBChange = (event) => {
     setDOB(event.target.value);
   };
+  const handleSelectOnChange = (event) => {
+    const value = event.target.value;
+    formik.handleChange(event);
+    formik.setFieldTouched('Location', true, false); // Manually mark the field as touched
+    // If "Add More Option" is selected, hide the select input and show the text input
+    if (value === 'addMore') {
+      setShowSelect(false);
+    } else {
+      setSelectedOption4Locat(value);
+      setShowSelect(true);
+    }
+  };
+  const handleSelectInputChange = (event) => {
+    setCustomOption(event.target.value);
+  };
+  const handleSaveCustomOption = async () => {
+    if (customOption.trim() !== '') {
+      if (selectedOption4Locat === 'addMore') {
+        // If "Add More Option" is selected, set selectedOption to the customOption value
+        setSelectedOption4Locat(customOption);
+      }
+      // Save the custom option to the backend
+      await postData(LOCATION_CREATE, { name: customOption });
+      // Fetch the updated category data
+      const categoryData = await fetchData(LOCATION_GET);
+      setLocationData(categoryData);
+      // Reset the customOption state
+      setCustomOption('');
+      // Show the select input
+      setShowSelect(true);
+    }
+  };
+  const categoryOption = locationData?.map((data) => ({
+    label: data.name,
+    value: data.name
+  }));
+  const customOptions = [...categoryOption, { value: 'addMore', label: 'Add More Option' }];
+
   const data = [
     {
       NameOfCandidate: 'Thara',
@@ -267,7 +311,6 @@ const Profiles = () => {
     columnHelper.accessor('NameOfCandidate', {
       header: 'Name Of Candidate'
     }),
-
     columnHelper.accessor('PercentageOfEffort', {
       header: 'Effort',
       Cell: ({ renderedCellValue, row }) => (
@@ -281,6 +324,9 @@ const Profiles = () => {
     }),
     columnHelper.accessor('Team', {
       header: 'Team'
+    }),
+    columnHelper.accessor('Location', {
+      header: 'Location'
     }),
     columnHelper.accessor('Role', {
       header: 'Role'
@@ -535,6 +581,7 @@ const Profiles = () => {
       Designation: '',
       Team: '',
       ContactNumber: '',
+      Location: '',
       Role: '',
       status: '',
       Category: ''
@@ -630,6 +677,9 @@ const Profiles = () => {
           // Set local data and teams data in the state
           setLocalData(parsedData);
           setTeamsData(fetchTeams);
+          const categoryData = await fetchData(LOCATION_GET);
+          setLocationData(categoryData);
+          console.log(categoryData, 'fetched using categoryData db');
           // Fetch profiles data using the access token
           if (hired) {
             const fetchProfiles = await fetchData(PROFILES_GETBY_CAC, localData?.accessToken);
@@ -814,6 +864,48 @@ const Profiles = () => {
                   <FormHelperText error id="standard-weight-helper-text-Password-login">
                     {formik.errors.Role}
                   </FormHelperText>
+                )}
+              </Grid>
+              <Grid xs={4} p={2}>
+                {showSelect ? (
+                  <FormControl fullWidth>
+                    <InputLabel id="demo-simple-select-label">Location</InputLabel>
+                    <Select
+                      error={Boolean(formik.touched.Location && formik.errors.Location)}
+                      value={selectedOption4Locat}
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      fullWidth
+                      name="Location"
+                      onChange={handleSelectOnChange}
+                      label="Select"
+                      placeholder="Select"
+                    >
+                      {customOptions.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {formik.touched.Location && formik.errors.Location && (
+                      <FormHelperText error id="standard-weight-helper-text-Password-login">
+                        {formik.errors.Location}
+                      </FormHelperText>
+                    )}
+                  </FormControl>
+                ) : (
+                  <>
+                    <div style={{ display: 'flex' }}>
+                      <TextField
+                        type="text"
+                        fullWidth
+                        value={customOption}
+                        onChange={handleSelectInputChange}
+                        placeholder="Enter custom option"
+                      />
+                      <Button onClick={handleSaveCustomOption}>Save</Button>
+                    </div>
+                  </>
                 )}
               </Grid>
               <Grid item xs={4} p={2}>

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import './style.css'
+import React, { useState, useEffect } from 'react';
+import './style.css';
 const TaskView = ({ tasks }) => {
   const [stateTasks, setStateTasks] = useState([]);
 
@@ -9,41 +9,40 @@ const TaskView = ({ tasks }) => {
 
   const onDragStart = (evt) => {
     let element = evt.currentTarget;
-    element.classList.add("dragged");
-    evt.dataTransfer.setData("text/plain", evt.currentTarget.id);
-    evt.dataTransfer.effectAllowed = "move";
+    element.classList.add('dragged');
+    evt.dataTransfer.setData('text/plain', evt.currentTarget.id);
+    evt.dataTransfer.effectAllowed = 'move';
   };
 
   const onDragEnd = (evt) => {
-    evt.currentTarget.classList.remove("dragged");
+    evt.currentTarget.classList.remove('dragged');
   };
 
   const onDragEnter = (evt) => {
     evt.preventDefault();
     let element = evt.currentTarget;
-    element.classList.add("dragged-over");
-    evt.dataTransfer.dropEffect = "move";
+    element.classList.add('dragged-over');
+    evt.dataTransfer.dropEffect = 'move';
   };
 
   const onDragLeave = (evt) => {
     let currentTarget = evt.currentTarget;
     let newTarget = evt.relatedTarget;
-    if (newTarget.parentNode === currentTarget || newTarget === currentTarget)
-      return;
+    if (newTarget.parentNode === currentTarget || newTarget === currentTarget) return;
     evt.preventDefault();
     let element = evt.currentTarget;
-    element.classList.remove("dragged-over");
+    element.classList.remove('dragged-over');
   };
 
   const onDragOver = (evt) => {
     evt.preventDefault();
-    evt.dataTransfer.dropEffect = "move";
+    evt.dataTransfer.dropEffect = 'move';
   };
 
   const onDrop = (evt, value, status) => {
     evt.preventDefault();
-    evt.currentTarget.classList.remove("dragged-over");
-    let data = evt.dataTransfer.getData("text/plain");
+    evt.currentTarget.classList.remove('dragged-over');
+    let data = evt.dataTransfer.getData('text/plain');
     let updated = stateTasks.map((task) => {
       if (task.id.toString() === data.toString()) {
         task.status = status;
@@ -55,59 +54,45 @@ const TaskView = ({ tasks }) => {
 
   const renderTasks = (taskList) => {
     return taskList.map((task) => (
-      <div
-        className="card-task"
-        key={task.name}
-        id={task.id}
-        draggable
-        onDragStart={(e) => onDragStart(e)}
-        onDragEnd={(e) => onDragEnd(e)}
-      >
+      <div className="card-task" key={task.name} id={task.id} draggable onDragStart={(e) => onDragStart(e)} onDragEnd={(e) => onDragEnd(e)}>
         {/* <div className="img-task">
           <img src={task.image} alt="box" />
         </div> */}
-        <div className="card_right" >
-          <div className="status-task" >{task.status}</div>
-          <div style={{ fontWeight: 'bolder', marginRight: '200px', marginTop:'-36px' }}>{task.title}</div>
+        <div className="card_right">
+          <div className="status-task">{task.status}</div>
+          <div style={{ fontWeight: 'bolder', marginRight: '200px', marginTop: '-36px' }}>{task.title}</div>
 
           <div style={{ marginRight: '120px' }}>{task.description}</div>
-
 
           {/* <div className="days" style={{ marginTop: '50px' }}>{task.time}</div>
           <div className="time" >{task.days}</div> */}
 
-
           <div className="img-task">
             <img src={task.image} alt="box" />
           </div>
-          <div style={{ marginRight: '200px' }}  >{task.icon}</div>
-
-
+          <div style={{ marginRight: '200px' }}>{task.icon}</div>
         </div>
       </div>
     ));
   };
 
   return (
-    <div className="container-task">
+    <div className="wrapper-task">
       {/* New Orders */}
       <div
         className="order small-box"
-
         onDragLeave={(e) => onDragLeave(e)}
         onDragEnter={(e) => onDragEnter(e)}
         onDragEnd={(e) => onDragEnd(e)}
         onDragOver={(e) => onDragOver(e)}
-        onDrop={(e) => onDrop(e, false, "New Order")}
+        onDrop={(e) => onDrop(e, false, 'In Backlog')}
       >
-        <section className="drag_container"  >
-          <div className="container-task" style={{ backgroundColor: '#e1f0fc' }}>
+        <section>
+          <div className="container-task">
             <div className="drag_column">
               <div className="drag_row">
-                <h4 >TO DO</h4>
-                {renderTasks(
-                  stateTasks.filter((data) => data.status === "New Order")
-                )}
+                <h4 className="h4-task">TO DO</h4>
+                {renderTasks(stateTasks.filter((data) => data.status === 'In Backlog'))}
               </div>
             </div>
           </div>
@@ -121,16 +106,14 @@ const TaskView = ({ tasks }) => {
         onDragEnter={(e) => onDragEnter(e)}
         onDragEnd={(e) => onDragEnd(e)}
         onDragOver={(e) => onDragOver(e)}
-        onDrop={(e) => onDrop(e, false, "In Progress")}
+        onDrop={(e) => onDrop(e, false, 'In Progress')}
       >
-        <section className="drag_container">
-          <div className="container-task" style={{ backgroundColor: '#e1f0fc' }}>
+        <section>
+          <div className="container-task">
             <div className="drag_column">
               <div className="drag_row">
-                <h4>IN PROGRESS</h4>
-                {renderTasks(
-                  stateTasks.filter((data) => data.status === "In Progress")
-                )}
+                <h4 className="h4-task">IN PROGRESS</h4>
+                {renderTasks(stateTasks.filter((data) => data.status === 'In Progress'))}
               </div>
             </div>
           </div>
@@ -144,16 +127,14 @@ const TaskView = ({ tasks }) => {
         onDragEnter={(e) => onDragEnter(e)}
         onDragEnd={(e) => onDragEnd(e)}
         onDragOver={(e) => onDragOver(e)}
-        onDrop={(e) => onDrop(e, true, "Delivered")}
+        onDrop={(e) => onDrop(e, true, 'In Review')}
       >
-        <section className="drag_container">
-          <div className="container-task" style={{ backgroundColor: '#e1f0fc' }}>
+        <section>
+          <div className="container-task">
             <div className="drag_column">
               <div className="drag_row">
-                <h4>IN REVIEW</h4>
-                {renderTasks(
-                  stateTasks.filter((data) => data.status === "Delivered")
-                )}
+                <h4 className="h4-task">IN REVIEW</h4>
+                {renderTasks(stateTasks.filter((data) => data.status === 'In Review'))}
               </div>
             </div>
           </div>
@@ -167,16 +148,14 @@ const TaskView = ({ tasks }) => {
         onDragEnter={(e) => onDragEnter(e)}
         onDragEnd={(e) => onDragEnd(e)}
         onDragOver={(e) => onDragOver(e)}
-        onDrop={(e) => onDrop(e, true, "Completed")}
+        onDrop={(e) => onDrop(e, true, 'Completed')}
       >
-        <section className="drag_container">
-          <div className="container-task" style={{ backgroundColor: '#e1f0fc' }}>
+        <section>
+          <div className="container-task">
             <div className="drag_column">
               <div className="drag_row">
-                <h4>DONE</h4>
-                {renderTasks(
-                  stateTasks.filter((data) => data.status === "Completed")
-                )}
+                <h4 className="h4-task">DONE</h4>
+                {renderTasks(stateTasks.filter((data) => data.status === 'Completed'))}
               </div>
             </div>
           </div>
