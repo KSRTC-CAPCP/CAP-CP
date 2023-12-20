@@ -2,6 +2,7 @@ import { useSelector } from 'react-redux';
 import './assets/css/globalStyles.css'
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline, StyledEngineProvider } from '@mui/material';
+import 'suneditor/dist/css/suneditor.min.css';
 
 // routing
 import Routes from 'routes';
