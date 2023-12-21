@@ -11,6 +11,8 @@ import Employee from 'views/Employee/Employee';
 
 import TaskPanel from 'views/task';
 import Attendance from 'views/Attendance/Attendance';
+// import Manager from 'Manager/Manager';
+import UserDetails from 'views/Employee/userDetails';
 import Manager from 'Manager/Manager';
 
 // import BusinessLeads from 'views/logics';
@@ -49,33 +51,7 @@ const MainRoutes = {
         }
       ]
     },
-    // {
-    //   path: 'utils',
-    //   children: [
-    //     {
-    //       path: 'util-typography',
-    //       element: <UtilsTypography />
-    //     }
-    //   ]
-    // },
-    // {
-    //   path: 'utils',
-    //   children: [
-    //     {
-    //       path: 'util-color',
-    //       element: <UtilsColor />
-    //     }
-    //   ]
-    // },
-    // {
-    //   path: 'utils',
-    //   children: [
-    //     {
-    //       path: 'util-shadow',
-    //       element: <UtilsShadow />
-    //     }
-    //   ]
-    // },
+    
     {
       path: 'logics',
       children: [
@@ -129,16 +105,31 @@ const MainRoutes = {
       element: <TaskPanel/>,
     },
     {
-      path: '/Employee-Panel',
-      element: <Employee />,
+      path: 'user',
+      children: [
+        {
+          path: 'user-detail',
+          element: <UserDetails />
+        }
+      ]
+    },
+    {
+      path: 'user',
+      children: [
+        {
+          path: 'task-detail',
+          element: <Employee />
+        }
+      ]
+    },
+   
+    {
+      path: '/attendance-Panel',
+      element: <Attendance />,
     },
     {
       path: '/Manager-Panel',
       element: <Manager />,
-    },
-    {
-      path: '/attendance-Panel',
-      element: <Attendance />,
     }
   ]
 };
