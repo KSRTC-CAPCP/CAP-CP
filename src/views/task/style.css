@@ -1,9 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito&display=swap');
 .card-task {
+  font-family: 'Nunito', sans-serif;
   width: 100%;
-  float: left;
+  /* float: left;
   display: flex;
   align-items: center;
-  justify-content: space-evenly;
+  justify-content: space-evenly; */
   padding: 15px;
   background: #fff;
   box-shadow: 3px 1px 12px #0000001a;
@@ -11,13 +13,12 @@
   margin-top: 15px;
   cursor: move;
 }
-.card-task:last-child{
+.card-task:last-child {
   margin-bottom: 25px;
 }
 .img-task img {
-  width: 40px;
-  height: 40px;
-  margin-top: 37px;
+  width: 25px;
+  height: 30px;
 }
 .status-task,
 .days,
@@ -60,11 +61,11 @@
 }
 
 .h4-task {
+  color: #416183;
   font-family: Monospace;
   /* font-size: 10px; */
   text-transform: uppercase;
-  margin-top: 0px;
-  color: #416183;
+  margin-top: 18px;
 }
 .wrapper-task {
   height: 100%;

@@ -38,7 +38,17 @@ import {
 import React, { forwardRef } from 'react';
 import MainCard from 'ui-component/cards/MainCard';
 import { useTheme } from '@mui/material/styles';
-import { IconDownload, IconEdit, IconEye, IconHistoryToggle, IconPlus, IconTrash, IconUpload } from '@tabler/icons';
+import {
+  IconAccessible,
+  IconAccessibleOff,
+  IconDownload,
+  IconEdit,
+  IconEye,
+  IconHistoryToggle,
+  IconPlus,
+  IconTrash,
+  IconUpload
+} from '@tabler/icons';
 import { MaterialReactTable, createMRTColumnHelper, useMaterialReactTable } from 'material-react-table';
 import { mkConfig, generateCsv, download } from 'export-to-csv';
 import * as XLSX from 'xlsx';
@@ -81,6 +91,7 @@ import {
   PROFILES_CREATE,
   PROFILES_DELETE,
   PROFILES_GET,
+  PROFILES_GETBY_STATUS,
   PROFILES_GETBY_CAC,
   PROFILES_GETBY_CAE,
   PROFILES_GET_ID,
@@ -359,12 +370,15 @@ const Profiles = () => {
     console.log(event.target.value, 'event');
     setSelectedOptionCategory(event.target.value);
   };
-  const [hired, setHired] = useState(false);
-  const handleTableToggle = () => {
-    setHired(!hired);
-  };
 
-  console.log(hired, 'hired');
+  const [hired, setHired] = useState(false);
+  const [isFilter, setIsFilter] = useState('getbycae');
+
+  const handleFilter = (e) => {
+    setIsFilter(e.target.value);
+  };
+  console.log(isFilter, 'isFilter');
+
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -499,9 +513,9 @@ const Profiles = () => {
     positionActionsColumn: 'last',
     renderRowActions: ({ row }) => (
       <div style={{ display: 'flex' }}>
-        <IconButton onClick={() => handleDelete(row)}>
+        {/* <IconButton onClick={() => handleDelete(row)}>
           <DeleteRounded style={{ color: '#2196f3' }} />
-        </IconButton>
+        </IconButton> */}
         <IconButton onClick={() => handleView(row)}>
           <VisibilityRounded style={{ color: '#2196f3' }} />
         </IconButton>
@@ -650,12 +664,34 @@ const Profiles = () => {
   });
   const fetchAllData = async () => {
     try {
-      if (hired) {
-        const fetchProfiles = await fetchData(PROFILES_GETBY_CAC, localData?.accessToken);
+      let profilesApiEndpoint;
+
+      switch (isFilter) {
+        case 'getbycae':
+          profilesApiEndpoint = PROFILES_GETBY_CAE;
+          break;
+        case 'getbycac':
+          profilesApiEndpoint = PROFILES_GETBY_CAC;
+          break;
+        case 'getbyactive':
+          profilesApiEndpoint = PROFILES_GETBY_STATUS('active');
+          break;
+        case 'getbyinactive':
+          profilesApiEndpoint = PROFILES_GETBY_STATUS('inactive');
+          break;
+        default:
+          // Handle default case
+          break;
+      }
+
+      if (isFilter === 'getbyactive' || isFilter === 'getbyinactive') {
+        // Handle post method for active and inactive
+        const fetchProfiles = await fetchData(profilesApiEndpoint, localData?.accessToken);
         // Set employee data in the state
         setEmployeeData(fetchProfiles?.data);
       } else {
-        const fetchProfiles = await fetchData(PROFILES_GETBY_CAE, localData?.accessToken);
+        // Handle get method for others
+        const fetchProfiles = await fetchData(profilesApiEndpoint, localData?.accessToken);
         // Set employee data in the state
         setEmployeeData(fetchProfiles?.data);
       }
@@ -663,6 +699,7 @@ const Profiles = () => {
       console.log('error :', error);
     }
   };
+
   useEffect(() => {
     // Define an async function to fetch data
     const fetchDataAsync = async () => {
@@ -680,16 +717,42 @@ const Profiles = () => {
           const categoryData = await fetchData(LOCATION_GET);
           setLocationData(categoryData);
           console.log(categoryData, 'fetched using categoryData db');
-          // Fetch profiles data using the access token
-          if (hired) {
-            const fetchProfiles = await fetchData(PROFILES_GETBY_CAC, localData?.accessToken);
+        }
+        try {
+          let profilesApiEndpoint;
+
+          switch (isFilter) {
+            case 'getbycae':
+              profilesApiEndpoint = PROFILES_GETBY_CAE;
+              break;
+            case 'getbycac':
+              profilesApiEndpoint = PROFILES_GETBY_CAC;
+              break;
+            case 'getbyactive':
+              profilesApiEndpoint = PROFILES_GETBY_STATUS('active');
+              break;
+            case 'getbyinactive':
+              profilesApiEndpoint = PROFILES_GETBY_STATUS('inactive');
+              break;
+            default:
+              // Handle default case
+              break;
+          }
+
+          if (isFilter === 'getbyactive' || isFilter === 'getbyinactive') {
+            // Handle post method for active and inactive
+            // const endPoint = isFilter === 'getbyactive' ? PROFILES_GETBY_STATUS('active') : PROFILES_GETBY_STATUS('inactive');
+            const fetchProfiles = await fetchData(profilesApiEndpoint, localData?.accessToken);
             // Set employee data in the state
             setEmployeeData(fetchProfiles?.data);
           } else {
-            const fetchProfiles = await fetchData(PROFILES_GETBY_CAE, localData?.accessToken);
+            // Handle get method for others
+            const fetchProfiles = await fetchData(profilesApiEndpoint, localData?.accessToken);
             // Set employee data in the state
             setEmployeeData(fetchProfiles?.data);
           }
+        } catch (error) {
+          console.log('error :', error);
         }
       } catch (error) {
         // Handle errors during data fetching
@@ -699,7 +762,7 @@ const Profiles = () => {
     };
     // Call the async function to fetch data when the component mounts
     fetchDataAsync();
-  }, [hired]); // Empty dependency array to mimic componentDidMount behavior
+  }, [isFilter]); // Empty dependency array to mimic componentDidMount behavior
 
   console.log(employeeData, 'fetchTeams');
 
@@ -942,36 +1005,37 @@ const Profiles = () => {
                 }
               }}
             >
-              {!hired ? (
-                <Button variant="outlined" style={{ marginRight: '1rem' }} color="primary" onClick={handleTableToggle}>
-                  Consultant Employees
-                </Button>
-              ) : (
-                <Button variant="outlined" style={{ marginRight: '1rem' }} color="primary" onClick={handleTableToggle}>
-                  Direct Employees
-                </Button>
-              )}
-              <ButtonBase sx={{ borderRadius: '12px' }}>
-                <Avatar
-                  variant="rounded"
-                  sx={{
-                    ...theme.typography.commonAvatar,
-                    ...theme.typography.mediumAvatar,
-                    transition: 'all .2s ease-in-out',
-                    background: theme.palette.secondary.light,
-                    color: theme.palette.secondary.dark,
-                    '&[aria-controls="menu-list-grow"],&:hover': {
-                      background: theme.palette.secondary.dark,
-                      color: theme.palette.secondary.light
-                    }
-                  }}
-                  aria-haspopup="true"
-                  onClick={handleToggle}
-                  color="inherit"
-                >
-                  <IconPlus stroke={2} size="1.3rem" />
-                </Avatar>
-              </ButtonBase>
+              <div className="d-flex w-100">
+                <div class="select-dropdown me-1">
+                  <select onChange={handleFilter}>
+                    <option value="getbycae">Direct Employees</option>
+                    <option value="getbycac">Consultant Employees</option>
+                    <option value="getbyactive">Active Employees</option>
+                    <option value="getbyinactive">In Active Employees</option>
+                  </select>
+                </div>
+                <ButtonBase sx={{ borderRadius: '12px' }}>
+                  <Avatar
+                    variant="rounded"
+                    sx={{
+                      ...theme.typography.commonAvatar,
+                      ...theme.typography.mediumAvatar,
+                      transition: 'all .2s ease-in-out',
+                      background: theme.palette.secondary.light,
+                      color: theme.palette.secondary.dark,
+                      '&[aria-controls="menu-list-grow"],&:hover': {
+                        background: theme.palette.secondary.dark,
+                        color: theme.palette.secondary.light
+                      }
+                    }}
+                    aria-haspopup="true"
+                    onClick={handleToggle}
+                    color="inherit"
+                  >
+                    <IconPlus stroke={2} size="1.3rem" />
+                  </Avatar>
+                </ButtonBase>
+              </div>
             </Box>
           }
         >

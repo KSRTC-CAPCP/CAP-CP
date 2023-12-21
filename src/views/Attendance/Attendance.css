@@ -8,14 +8,14 @@
 
 
 /* Apply styles to the container */
-section > div {
+/* section > div {
     width: 350px;
     height: fit-content;
     border-radius: 20px;
     text-align: center;
     margin-top: 10px;
     padding-bottom: 15px;
-}
+} */
 
 /* Apply styles to the image */
 section img {

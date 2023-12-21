@@ -35,6 +35,7 @@ export const PROFILES_DELETE = (id) => `${BASE_URL}/employee/delete/${id}`;
 export const PROFILES_BULK_DELETE = `${BASE_URL}/employee/bulk/delete`;
 export const PROFILES_GETBY_CAE = `${BASE_URL}/employee/getbydirecthire`;
 export const PROFILES_GETBY_CAC = `${BASE_URL}/employee/getbyconsultanthire`;
+export const PROFILES_GETBY_STATUS = (id) => `${BASE_URL}/employee/status/${id}`;
 
 //FOR PROJECT
 export const PROJECT_GET = `${BASE_URL}/project/get-all`;

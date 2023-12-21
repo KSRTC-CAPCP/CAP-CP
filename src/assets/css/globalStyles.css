@@ -50,7 +50,9 @@ video {
 .css-1vkmmdj-MuiPaper-root-MuiCard-root {
   border-color: transparent !important;
 }
-
+.border-top {
+  border-top: 1px solid gray;
+}
 .css-d0lab9-MuiPaper-root,
 .css-1kcnu38-MuiTableRow-root {
   box-shadow: none !important;
@@ -249,7 +251,7 @@ main {
 }
 
 .mt-1 {
-  margin-top: 1rem;
+  margin-top: 1rem !important;
 }
 
 .mt-2 {
@@ -276,7 +278,21 @@ main {
 p {
   padding: 10px;
 }
-
+.p-3 {
+  padding: 0px 10px;
+}
+.ps-1 {
+  padding-left: 10px;
+}
+.ellipse-co {
+  display: -webkit-box;
+  max-width: 284px;
+  -webkit-line-clamp: 2;
+  text-align: justify;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: #416183;
+}
 .text-danger {
   color: red;
 }
@@ -296,7 +312,39 @@ hr {
 .css-1w9i8cz-MuiTypography-root {
   padding-top: 12px;
 }
-
+.select-dropdown {
+  position: relative;
+  background-color: #ede7f6;
+  border-radius: 4px;
+}
+.select-dropdown select {
+  font-size: 1rem;
+  font-weight: normal;
+  max-width: 100%;
+  padding: 8px 24px 8px 10px;
+  border: none;
+  background-color: transparent;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+.select-dropdown select:active,
+.select-dropdown select:focus {
+  outline: none;
+  box-shadow: none;
+}
+.select-dropdown:after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  width: 0;
+  height: 0;
+  margin-top: -2px;
+  border-top: 5px solid #aaa;
+  border-right: 5px solid transparent;
+  border-left: 5px solid transparent;
+}
 .css-14c97s3-MuiPaper-root-MuiCard-root {
   height: 35rem;
 }
