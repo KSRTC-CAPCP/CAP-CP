@@ -35,6 +35,7 @@ export const PROFILES_DELETE = (id) => `${BASE_URL}/employee/delete/${id}`;
 export const PROFILES_BULK_DELETE = `${BASE_URL}/employee/bulk/delete`;
 export const PROFILES_GETBY_CAE = `${BASE_URL}/employee/getbydirecthire`;
 export const PROFILES_GETBY_CAC = `${BASE_URL}/employee/getbyconsultanthire`;
+export const PROFILES_GETBY_STATUS = (id) => `${BASE_URL}/employee/status/${id}`;
 
 //FOR PROJECT
 export const PROJECT_GET = `${BASE_URL}/project/get-all`;
@@ -45,5 +46,11 @@ export const PROJECT_UPDATE = (id) => `${BASE_URL}/project/update/${id}`;
 //FOR CATEGORY
 export const CATEGORY_CREATE = `${BASE_URL}/categories`;
 export const CATEGORY_GET = `${BASE_URL}/categories`;
+
+//FOR MILESTONE
 export const MILESTONE_GET = `${BASE_URL}/milestones`;
 export const MILESTONE_CREATE = `${BASE_URL}/milestone`;
+
+//FOR LOCATION
+export const LOCATION_GET = `${BASE_URL}/locations`;
+export const LOCATION_CREATE = `${BASE_URL}/location`;

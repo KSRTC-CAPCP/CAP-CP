@@ -522,7 +522,28 @@ const BusinessRFQ = () => {
   };
   const theme = useTheme();
   const handleExportData = () => {
-    const csv = generateCsv(csvConfig)(data);
+    // Process the lead data
+    const processedLeadData = rfqData.map((lead) => {
+      const { _id, __v, rfqDescription, tasks, ...rest } = lead;
+
+      // Extract the first object from rfqDescription
+      const firstRfqDescription = rfqDescription.length > 0 ? rfqDescription[0] : {};
+
+      // Find the last "Approval" status in rfqDescription
+      const lastApprovalStatus = rfqDescription.filter((item) => item.status === 'Approval').pop();
+
+      // Add separate columns for description, lastApprovalStatusRequest, and lastApprovalStatus
+      const processedLead = {
+        ...rest,
+        RFQDescription: firstRfqDescription.description || '',
+        lastApprovalStatus: lastApprovalStatus ? lastApprovalStatus.statusRequest + lastApprovalStatus?.status : ''
+      };
+
+      return processedLead;
+    });
+
+    // Use the processed data to generate and download the CSV
+    const csv = generateCsv(csvConfig)(processedLeadData);
     download(csvConfig)(csv);
   };
 
@@ -626,7 +647,7 @@ const BusinessRFQ = () => {
       // Reset the form and fetch updated data
       fetchFun();
       formik.resetForm();
-      setlNumber('')
+      setlNumber('');
       // Optionally, set the view mode to 'Initial' or perform other actions
       setView({
         visible: true,
@@ -837,7 +858,7 @@ const BusinessRFQ = () => {
     onCreatingRowSave: handleCreateRowHistory,
     onCreatingRowCancel: handleCancelCreateHistory,
     renderRowActions: ({ row, table }) => (
-      <Box sx={{ display: 'flex', gap: '1rem' }}>
+      <Box sx={{ display: 'none', gap: '1rem' }}>
         <Tooltip title="Edit">
           <IconButton
             onClick={() => {
@@ -914,7 +935,7 @@ const BusinessRFQ = () => {
     onCreatingRowSave: handleCreateRowTask,
     onCreatingRowCancel: handleCancelCreateTask,
     renderRowActions: ({ row, table }) => (
-      <Box sx={{ display: 'flex', gap: '1rem' }}>
+      <Box sx={{ display: 'none', gap: '1rem' }}>
         <Tooltip title="Edit">
           <IconButton
             onClick={() => {
@@ -1916,7 +1937,8 @@ const BusinessRFQ = () => {
                             </Typography>
                             <br />
                             <Typography variant="h6" component="span" className="strong">
-                              {item.statusRequest}
+                              {item.statusRequest === 'newlead' ? 'New Lead' : item.statusRequest} &nbsp; - &nbsp;
+                              {item.status === '' ? 'Pending' : item.status}
                             </Typography>
                             <li> {item.description}</li>
                           </TimelineContent>
