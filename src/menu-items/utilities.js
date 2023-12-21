@@ -11,7 +11,8 @@ const icons = {
   IconUser,
   IconLockAccess,
   IconUsers,
-  IconUserX 
+  IconUserX ,
+  
   
 };
 
@@ -80,14 +81,6 @@ const utilities = {
         }
       ]
     },
-    // {
-    //   id: 'util-shadow',
-    //   title: 'Shadow',
-    //   type: 'item',
-    //   url: '/utils/util-shadow',
-    //   icon: icons.IconShadow,
-    //   breadcrumbs: false
-    // },
     {
       id: 'profiles',
       title: 'Profiles',
@@ -105,12 +98,30 @@ const utilities = {
       breadcrumbs: false
     },
     {
-      id: 'EmployeePanel',
-      title: 'Employee Panel',
-      type: 'item',
-      url: '/Employee-Panel',
+      id: 'icons',
+      title: 'User',
+      type: 'collapse',
       icon: icons.IconUsers,
-      breadcrumbs: false
+      children: [
+        {
+          id: 'task-detail',
+          title: 'Task Detail',
+          type: 'item',
+          // external: true,
+          // target: '_blank',
+          url: 'user/task-detail',
+          breadcrumbs: false
+        },
+        {
+          id: 'user-detail',
+          title: 'User Detail',
+          type: 'item',
+          // external: true,
+          // target: '_blank',
+          url: 'user/user-detail',
+          breadcrumbs: false
+        }
+      ]
     },
     {
       id: 'ManagerPanel',
