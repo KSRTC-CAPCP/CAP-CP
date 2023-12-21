@@ -80,16 +80,14 @@ const TaskView = ({ tasks }) => {
           <div>
             <div className="d-flex justify-content-between align-items-center m-0">
               <div>
-                <p className="text-muted">Name </p>
-                <p className="m-0 p-3">HR / Ambatore</p>
+                <p className="text-muted line-ellipse">{task.title}</p>
               </div>
               <div>
                 <p className="mute m-0 bold-text">{task.days}</p>
                 <p className="m-0 p-3 status-task ">{task.status}</p>
               </div>
             </div>
-            <p className="text-muted mt-1">{task.title}</p>
-            <p className="p-3 ellipse-co">
+            <p className="p-3 ellipse-co mt-1">
               Whilst I don't care too much for older browsers and I'll probably just use this answer, its criminal that no-one has mentioned
               the top npm module for line clamping - npmjs.com/package/shave - I've never used it so can't comment on how well it works (or
               not) - but if docs are anything to go on it looks good - also ... worth adding a CSS max-height in case the browser does not
@@ -192,7 +190,7 @@ const TaskView = ({ tasks }) => {
           </div>
         </section>
       </div>
-      <Dialog open={taskOpen} fullWidth TransitionComponent={Transition}>
+      {/* <Dialog open={taskOpen} fullWidth TransitionComponent={Transition}>
         <DialogTitle className="d-flex justify-content-between">
           <Typography variant="h3">Approval</Typography>
           <Typography variant="h3" onClick={handleTaskClose}>
@@ -202,7 +200,7 @@ const TaskView = ({ tasks }) => {
         <Divider />
         <DialogContent>red</DialogContent>
         <Divider />
-      </Dialog>
+      </Dialog> */}
     </div>
   );
 };
