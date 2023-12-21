@@ -38,7 +38,17 @@ import {
 import React, { forwardRef } from 'react';
 import MainCard from 'ui-component/cards/MainCard';
 import { useTheme } from '@mui/material/styles';
-import { IconDownload, IconEdit, IconEye, IconHistoryToggle, IconPlus, IconTrash, IconUpload } from '@tabler/icons';
+import {
+  IconAccessible,
+  IconAccessibleOff,
+  IconDownload,
+  IconEdit,
+  IconEye,
+  IconHistoryToggle,
+  IconPlus,
+  IconTrash,
+  IconUpload
+} from '@tabler/icons';
 import { MaterialReactTable, createMRTColumnHelper, useMaterialReactTable } from 'material-react-table';
 import { mkConfig, generateCsv, download } from 'export-to-csv';
 import * as XLSX from 'xlsx';
@@ -76,9 +86,12 @@ import { deleteData, fetchData, postData, updateData } from 'utils/apiUtils';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import {
+  LOCATION_CREATE,
+  LOCATION_GET,
   PROFILES_CREATE,
   PROFILES_DELETE,
   PROFILES_GET,
+  PROFILES_GETBY_STATUS,
   PROFILES_GETBY_CAC,
   PROFILES_GETBY_CAE,
   PROFILES_GET_ID,
@@ -229,6 +242,10 @@ const Profiles = () => {
   const [employeeData, setEmployeeData] = useState([]);
   const [employeeViewData, setEmployeeViewData] = useState([]);
   const [editId, setEditId] = useState('');
+  const [showSelect, setShowSelect] = useState(true);
+  const [selectedOption4Locat, setSelectedOption4Locat] = React.useState('');
+  const [locationData, setLocationData] = useState([]);
+  const [customOption, setCustomOption] = useState('');
   const [viewId, setViewId] = useState('');
   const teamsOption = teamsData.map((data) => ({
     label: data.Team,
@@ -238,6 +255,44 @@ const Profiles = () => {
   const handleDOBChange = (event) => {
     setDOB(event.target.value);
   };
+  const handleSelectOnChange = (event) => {
+    const value = event.target.value;
+    formik.handleChange(event);
+    formik.setFieldTouched('Location', true, false); // Manually mark the field as touched
+    // If "Add More Option" is selected, hide the select input and show the text input
+    if (value === 'addMore') {
+      setShowSelect(false);
+    } else {
+      setSelectedOption4Locat(value);
+      setShowSelect(true);
+    }
+  };
+  const handleSelectInputChange = (event) => {
+    setCustomOption(event.target.value);
+  };
+  const handleSaveCustomOption = async () => {
+    if (customOption.trim() !== '') {
+      if (selectedOption4Locat === 'addMore') {
+        // If "Add More Option" is selected, set selectedOption to the customOption value
+        setSelectedOption4Locat(customOption);
+      }
+      // Save the custom option to the backend
+      await postData(LOCATION_CREATE, { name: customOption });
+      // Fetch the updated category data
+      const categoryData = await fetchData(LOCATION_GET);
+      setLocationData(categoryData);
+      // Reset the customOption state
+      setCustomOption('');
+      // Show the select input
+      setShowSelect(true);
+    }
+  };
+  const categoryOption = locationData?.map((data) => ({
+    label: data.name,
+    value: data.name
+  }));
+  const customOptions = [...categoryOption, { value: 'addMore', label: 'Add More Option' }];
+
   const data = [
     {
       NameOfCandidate: 'Thara',
@@ -267,7 +322,6 @@ const Profiles = () => {
     columnHelper.accessor('NameOfCandidate', {
       header: 'Name Of Candidate'
     }),
-
     columnHelper.accessor('PercentageOfEffort', {
       header: 'Effort',
       Cell: ({ renderedCellValue, row }) => (
@@ -281,6 +335,9 @@ const Profiles = () => {
     }),
     columnHelper.accessor('Team', {
       header: 'Team'
+    }),
+    columnHelper.accessor('Location', {
+      header: 'Location'
     }),
     columnHelper.accessor('Role', {
       header: 'Role'
@@ -313,12 +370,15 @@ const Profiles = () => {
     console.log(event.target.value, 'event');
     setSelectedOptionCategory(event.target.value);
   };
-  const [hired, setHired] = useState(false);
-  const handleTableToggle = () => {
-    setHired(!hired);
-  };
 
-  console.log(hired, 'hired');
+  const [hired, setHired] = useState(false);
+  const [isFilter, setIsFilter] = useState('getbycae');
+
+  const handleFilter = (e) => {
+    setIsFilter(e.target.value);
+  };
+  console.log(isFilter, 'isFilter');
+
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -453,9 +513,9 @@ const Profiles = () => {
     positionActionsColumn: 'last',
     renderRowActions: ({ row }) => (
       <div style={{ display: 'flex' }}>
-        <IconButton onClick={() => handleDelete(row)}>
+        {/* <IconButton onClick={() => handleDelete(row)}>
           <DeleteRounded style={{ color: '#2196f3' }} />
-        </IconButton>
+        </IconButton> */}
         <IconButton onClick={() => handleView(row)}>
           <VisibilityRounded style={{ color: '#2196f3' }} />
         </IconButton>
@@ -535,6 +595,7 @@ const Profiles = () => {
       Designation: '',
       Team: '',
       ContactNumber: '',
+      Location: '',
       Role: '',
       status: '',
       Category: ''
@@ -603,12 +664,34 @@ const Profiles = () => {
   });
   const fetchAllData = async () => {
     try {
-      if (hired) {
-        const fetchProfiles = await fetchData(PROFILES_GETBY_CAC, localData?.accessToken);
+      let profilesApiEndpoint;
+
+      switch (isFilter) {
+        case 'getbycae':
+          profilesApiEndpoint = PROFILES_GETBY_CAE;
+          break;
+        case 'getbycac':
+          profilesApiEndpoint = PROFILES_GETBY_CAC;
+          break;
+        case 'getbyactive':
+          profilesApiEndpoint = PROFILES_GETBY_STATUS('active');
+          break;
+        case 'getbyinactive':
+          profilesApiEndpoint = PROFILES_GETBY_STATUS('inactive');
+          break;
+        default:
+          // Handle default case
+          break;
+      }
+
+      if (isFilter === 'getbyactive' || isFilter === 'getbyinactive') {
+        // Handle post method for active and inactive
+        const fetchProfiles = await fetchData(profilesApiEndpoint, localData?.accessToken);
         // Set employee data in the state
         setEmployeeData(fetchProfiles?.data);
       } else {
-        const fetchProfiles = await fetchData(PROFILES_GETBY_CAE, localData?.accessToken);
+        // Handle get method for others
+        const fetchProfiles = await fetchData(profilesApiEndpoint, localData?.accessToken);
         // Set employee data in the state
         setEmployeeData(fetchProfiles?.data);
       }
@@ -616,6 +699,7 @@ const Profiles = () => {
       console.log('error :', error);
     }
   };
+
   useEffect(() => {
     // Define an async function to fetch data
     const fetchDataAsync = async () => {
@@ -630,16 +714,45 @@ const Profiles = () => {
           // Set local data and teams data in the state
           setLocalData(parsedData);
           setTeamsData(fetchTeams);
-          // Fetch profiles data using the access token
-          if (hired) {
-            const fetchProfiles = await fetchData(PROFILES_GETBY_CAC, localData?.accessToken);
+          const categoryData = await fetchData(LOCATION_GET);
+          setLocationData(categoryData);
+          console.log(categoryData, 'fetched using categoryData db');
+        }
+        try {
+          let profilesApiEndpoint;
+
+          switch (isFilter) {
+            case 'getbycae':
+              profilesApiEndpoint = PROFILES_GETBY_CAE;
+              break;
+            case 'getbycac':
+              profilesApiEndpoint = PROFILES_GETBY_CAC;
+              break;
+            case 'getbyactive':
+              profilesApiEndpoint = PROFILES_GETBY_STATUS('active');
+              break;
+            case 'getbyinactive':
+              profilesApiEndpoint = PROFILES_GETBY_STATUS('inactive');
+              break;
+            default:
+              // Handle default case
+              break;
+          }
+
+          if (isFilter === 'getbyactive' || isFilter === 'getbyinactive') {
+            // Handle post method for active and inactive
+            // const endPoint = isFilter === 'getbyactive' ? PROFILES_GETBY_STATUS('active') : PROFILES_GETBY_STATUS('inactive');
+            const fetchProfiles = await fetchData(profilesApiEndpoint, localData?.accessToken);
             // Set employee data in the state
             setEmployeeData(fetchProfiles?.data);
           } else {
-            const fetchProfiles = await fetchData(PROFILES_GETBY_CAE, localData?.accessToken);
+            // Handle get method for others
+            const fetchProfiles = await fetchData(profilesApiEndpoint, localData?.accessToken);
             // Set employee data in the state
             setEmployeeData(fetchProfiles?.data);
           }
+        } catch (error) {
+          console.log('error :', error);
         }
       } catch (error) {
         // Handle errors during data fetching
@@ -649,7 +762,7 @@ const Profiles = () => {
     };
     // Call the async function to fetch data when the component mounts
     fetchDataAsync();
-  }, [hired]); // Empty dependency array to mimic componentDidMount behavior
+  }, [isFilter]); // Empty dependency array to mimic componentDidMount behavior
 
   console.log(employeeData, 'fetchTeams');
 
@@ -816,6 +929,48 @@ const Profiles = () => {
                   </FormHelperText>
                 )}
               </Grid>
+              <Grid xs={4} p={2}>
+                {showSelect ? (
+                  <FormControl fullWidth>
+                    <InputLabel id="demo-simple-select-label">Location</InputLabel>
+                    <Select
+                      error={Boolean(formik.touched.Location && formik.errors.Location)}
+                      value={selectedOption4Locat}
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      fullWidth
+                      name="Location"
+                      onChange={handleSelectOnChange}
+                      label="Select"
+                      placeholder="Select"
+                    >
+                      {customOptions.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {formik.touched.Location && formik.errors.Location && (
+                      <FormHelperText error id="standard-weight-helper-text-Password-login">
+                        {formik.errors.Location}
+                      </FormHelperText>
+                    )}
+                  </FormControl>
+                ) : (
+                  <>
+                    <div style={{ display: 'flex' }}>
+                      <TextField
+                        type="text"
+                        fullWidth
+                        value={customOption}
+                        onChange={handleSelectInputChange}
+                        placeholder="Enter custom option"
+                      />
+                      <Button onClick={handleSaveCustomOption}>Save</Button>
+                    </div>
+                  </>
+                )}
+              </Grid>
               <Grid item xs={4} p={2}>
                 <FormLabel id="demo-row-radio-buttons-group-label">Status</FormLabel>
                 <RadioGroup aria-label="yesno" name="status" value={selectedOption} onChange={handleOptionChange} row>
@@ -850,36 +1005,37 @@ const Profiles = () => {
                 }
               }}
             >
-              {!hired ? (
-                <Button variant="outlined" style={{ marginRight: '1rem' }} color="primary" onClick={handleTableToggle}>
-                  Consultant Employees
-                </Button>
-              ) : (
-                <Button variant="outlined" style={{ marginRight: '1rem' }} color="primary" onClick={handleTableToggle}>
-                  Direct Employees
-                </Button>
-              )}
-              <ButtonBase sx={{ borderRadius: '12px' }}>
-                <Avatar
-                  variant="rounded"
-                  sx={{
-                    ...theme.typography.commonAvatar,
-                    ...theme.typography.mediumAvatar,
-                    transition: 'all .2s ease-in-out',
-                    background: theme.palette.secondary.light,
-                    color: theme.palette.secondary.dark,
-                    '&[aria-controls="menu-list-grow"],&:hover': {
-                      background: theme.palette.secondary.dark,
-                      color: theme.palette.secondary.light
-                    }
-                  }}
-                  aria-haspopup="true"
-                  onClick={handleToggle}
-                  color="inherit"
-                >
-                  <IconPlus stroke={2} size="1.3rem" />
-                </Avatar>
-              </ButtonBase>
+              <div className="d-flex w-100">
+                <div class="select-dropdown me-1">
+                  <select onChange={handleFilter}>
+                    <option value="getbycae">Direct Employees</option>
+                    <option value="getbycac">Consultant Employees</option>
+                    <option value="getbyactive">Active Employees</option>
+                    <option value="getbyinactive">In Active Employees</option>
+                  </select>
+                </div>
+                <ButtonBase sx={{ borderRadius: '12px' }}>
+                  <Avatar
+                    variant="rounded"
+                    sx={{
+                      ...theme.typography.commonAvatar,
+                      ...theme.typography.mediumAvatar,
+                      transition: 'all .2s ease-in-out',
+                      background: theme.palette.secondary.light,
+                      color: theme.palette.secondary.dark,
+                      '&[aria-controls="menu-list-grow"],&:hover': {
+                        background: theme.palette.secondary.dark,
+                        color: theme.palette.secondary.light
+                      }
+                    }}
+                    aria-haspopup="true"
+                    onClick={handleToggle}
+                    color="inherit"
+                  >
+                    <IconPlus stroke={2} size="1.3rem" />
+                  </Avatar>
+                </ButtonBase>
+              </div>
             </Box>
           }
         >
