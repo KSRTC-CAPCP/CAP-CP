@@ -59,7 +59,14 @@
   padding: 3px 10px;
   border-radius: 18px;
 }
-
+.line-ellipse {
+  max-width: 150px;
+  width: 100%;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .h4-task {
   color: #416183;
   font-family: Monospace;

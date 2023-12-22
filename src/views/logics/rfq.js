@@ -31,7 +31,9 @@ import {
   Input,
   Card,
   Badge,
-  FormHelperText
+  FormHelperText,
+  Autocomplete,
+  createFilterOptions
 } from '@mui/material';
 import React, { forwardRef } from 'react';
 import MainCard from 'ui-component/cards/MainCard';
@@ -85,10 +87,10 @@ const columnHelper = createMRTColumnHelper();
 const validationSchema = Yup.object({
   date: Yup.string().required('Date is required'),
   Source: Yup.string().required('Source is required'),
-  Pilot: Yup.string().required('Pilot is required'),
-  companyName: Yup.string().required('Company Name is required'),
+  // Pilot: Yup.string().required('Pilot is required'),
+  // companyName: Yup.string().required('Company Name is required'),
   category: Yup.string().required('Category is required'),
-  contactName: Yup.string().required('Contact Name is required'),
+  // contactName: Yup.string().required('Contact Name is required'),
   departmentName: Yup.string().required('Department Name is required'),
   phoneNumber: Yup.string().required('Phone Number is required'),
   email: Yup.string().required('Email is required'),
@@ -573,6 +575,9 @@ const BusinessRFQ = () => {
     // setUpdatedValue(getByIdData)
     setUpdateId(e.original._id);
     setSelectedOption(getByIdData?.data.category);
+    setValueForCompany(getByIdData?.data.companyName);
+    setValueForContact(getByIdData?.data.contactName);
+    setValueForSuggest(getByIdData?.data.Pilot);
     console.log(getByIdData?.data, 'getby');
     setlNumber(getByIdData?.data.leadNumber);
     formik.setValues({
@@ -616,6 +621,20 @@ const BusinessRFQ = () => {
     const data = await fetchData(RFQ_GET, localData?.accessToken);
     setrfqData(data.data);
   };
+
+  const pilotName = rfqData.map((data) => ({
+    title: data.Pilot
+  }));
+  const companyName = rfqData.map((data) => ({
+    title: data.companyName
+  }));
+  const contactName = rfqData.map((data) => ({
+    title: data.contactName
+  }));
+  const filter = createFilterOptions();
+  const [valueForSuggest, setValueForSuggest] = React.useState(null);
+  const [valueForCompany, setValueForCompany] = React.useState(null);
+  const [valueForContact, setValueForContact] = React.useState(null);
   const handleUpdate = async (values) => {
     console.log('values------>', values);
     try {
@@ -624,10 +643,10 @@ const BusinessRFQ = () => {
         // Update fields as needed
         date: values.date,
         Source: values.Source,
-        Pilot: values.Pilot,
-        companyName: values.companyName,
+        Pilot: valueForSuggest.title,
+        companyName: valueForCompany.title,
         category: values.category,
-        contactName: values.contactName,
+        contactName: valueForContact.title,
         leadNumber: lNumber,
         departmentName: values.departmentName,
         phoneNumber: values?.phoneNumber,
@@ -680,11 +699,39 @@ const BusinessRFQ = () => {
     },
     validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
-      console.log('worked');
+      console.log('worked', values);
       try {
         if (updateId) {
-          console.log('handle update', values);
-          handleUpdate(values);
+          const rfqDescriptionArray = values.rfqDescription
+            ? values.rfqDescription.split('\n').map((item) => ({
+                date: values.date?.slice(0, 10),
+                description: item.trim(),
+                status: 'pending', // Set your default status here
+                statusRequest: values.status // Set your default statusRequest here
+              }))
+            : [];
+
+          const formattedData = {
+            ...values,
+            Pilot: valueForSuggest?.title || values?.Pilot,
+            companyName: valueForCompany?.title || values?.companyName,
+            contactName: valueForContact?.title || values?.contactName,
+            rfqDescription: rfqDescriptionArray
+          };
+          console.log(formattedData, 'formed');
+          const endpoint = RFQ_UPDATE(updateId);
+          await updateData(endpoint, formattedData, localData?.accessToken);
+
+          // Reset the form and fetch updated data
+          fetchFun();
+          formik.resetForm();
+          setlNumber('');
+          // Optionally, set the view mode to 'Initial' or perform other actions
+          setView({
+            visible: true,
+            mode: 'Initial'
+          });
+          // handleUpdate(formattedData);
         } else {
           console.log('handle submit');
 
@@ -699,6 +746,9 @@ const BusinessRFQ = () => {
 
           const formattedData = {
             ...values,
+            Pilot: valueForSuggest?.title,
+            companyName: valueForCompany?.title,
+            contactName: valueForContact?.title,
             rfqDescription: rfqDescriptionArray
           };
           console.log(formattedData, 'formattedData');
@@ -1229,7 +1279,7 @@ const BusinessRFQ = () => {
                 </FormControl>
               </Grid>
               <Grid xs={4} p={2}>
-                <TextField
+                {/* <TextField
                   error={Boolean(formik.touched.Pilot && formik.errors.Pilot)}
                   name="Pilot"
                   value={formik.values.Pilot}
@@ -1244,10 +1294,62 @@ const BusinessRFQ = () => {
                   <FormHelperText error id="standard-weight-helper-text-Password-login">
                     {formik.errors.Pilot}
                   </FormHelperText>
-                )}
+                )} */}
+                <Autocomplete
+                  value={valueForSuggest}
+                  onChange={(event, newValue) => {
+                    if (typeof newValue === 'string') {
+                      setValueForSuggest({
+                        title: newValue
+                      });
+                    } else if (newValue && newValue.inputValue) {
+                      // Create a new value from the user input
+                      setValueForSuggest({
+                        title: newValue.inputValue
+                      });
+                    } else {
+                      setValueForSuggest(newValue);
+                    }
+                  }}
+                  filterOptions={(options, params) => {
+                    const filtered = filter(options, params);
+
+                    const { inputValue } = params;
+                    // Suggest the creation of a new value
+                    const isExisting = options.some((option) => inputValue === option.title);
+                    if (inputValue !== '' && !isExisting) {
+                      filtered.push({
+                        inputValue,
+                        title: `Add "${inputValue}"`
+                      });
+                    }
+
+                    return filtered;
+                  }}
+                  selectOnFocus
+                  clearOnBlur
+                  handleHomeEndKeys
+                  id="fxt-demo"
+                  options={pilotName}
+                  getOptionLabel={(option) => {
+                    // Value selected with enter, right from the input
+                    if (typeof option === 'string') {
+                      return option;
+                    }
+                    // Add "xxx" option created dynamically
+                    if (option.inputValue) {
+                      return option.inputValue;
+                    }
+                    // Regular option
+                    return option.title;
+                  }}
+                  renderOption={(props, option) => <li {...props}>{option.title}</li>}
+                  freeSolo
+                  renderInput={(params) => <TextField {...params} label="Pilot" />}
+                />
               </Grid>
               <Grid xs={4} p={2}>
-                <TextField
+                {/* <TextField
                   error={Boolean(formik.touched.companyName && formik.errors.companyName)}
                   name="companyName"
                   value={formik.values.companyName}
@@ -1262,7 +1364,59 @@ const BusinessRFQ = () => {
                   <FormHelperText error id="standard-weight-helper-text-Password-login">
                     {formik.errors.companyName}
                   </FormHelperText>
-                )}
+                )} */}
+                <Autocomplete
+                  value={valueForCompany}
+                  onChange={(event, newValue) => {
+                    if (typeof newValue === 'string') {
+                      setValueForCompany({
+                        title: newValue
+                      });
+                    } else if (newValue && newValue.inputValue) {
+                      // Create a new value from the user input
+                      setValueForCompany({
+                        title: newValue.inputValue
+                      });
+                    } else {
+                      setValueForCompany(newValue);
+                    }
+                  }}
+                  filterOptions={(options, params) => {
+                    const filtered = filter(options, params);
+
+                    const { inputValue } = params;
+                    // Suggest the creation of a new value
+                    const isExisting = options.some((option) => inputValue === option.title);
+                    if (inputValue !== '' && !isExisting) {
+                      filtered.push({
+                        inputValue,
+                        title: `Add "${inputValue}"`
+                      });
+                    }
+
+                    return filtered;
+                  }}
+                  selectOnFocus
+                  clearOnBlur
+                  handleHomeEndKeys
+                  id="fxt-demo"
+                  options={companyName}
+                  getOptionLabel={(option) => {
+                    // Value selected with enter, right from the input
+                    if (typeof option === 'string') {
+                      return option;
+                    }
+                    // Add "xxx" option created dynamically
+                    if (option.inputValue) {
+                      return option.inputValue;
+                    }
+                    // Regular option
+                    return option.title;
+                  }}
+                  renderOption={(props, option) => <li {...props}>{option.title}</li>}
+                  freeSolo
+                  renderInput={(params) => <TextField {...params} label="CompanyName" />}
+                />
               </Grid>{' '}
               <Grid xs={4} p={2}>
                 {showSelect ? (
@@ -1307,7 +1461,59 @@ const BusinessRFQ = () => {
                 )}
               </Grid>
               <Grid xs={4} p={2}>
-                <TextField
+                <Autocomplete
+                  value={valueForContact}
+                  onChange={(event, newValue) => {
+                    if (typeof newValue === 'string') {
+                      setValueForContact({
+                        title: newValue
+                      });
+                    } else if (newValue && newValue.inputValue) {
+                      // Create a new value from the user input
+                      setValueForContact({
+                        title: newValue.inputValue
+                      });
+                    } else {
+                      setValueForContact(newValue);
+                    }
+                  }}
+                  filterOptions={(options, params) => {
+                    const filtered = filter(options, params);
+
+                    const { inputValue } = params;
+                    // Suggest the creation of a new value
+                    const isExisting = options.some((option) => inputValue === option.title);
+                    if (inputValue !== '' && !isExisting) {
+                      filtered.push({
+                        inputValue,
+                        title: `Add "${inputValue}"`
+                      });
+                    }
+
+                    return filtered;
+                  }}
+                  selectOnFocus
+                  clearOnBlur
+                  handleHomeEndKeys
+                  id="fxt-demo"
+                  options={contactName}
+                  getOptionLabel={(option) => {
+                    // Value selected with enter, right from the input
+                    if (typeof option === 'string') {
+                      return option;
+                    }
+                    // Add "xxx" option created dynamically
+                    if (option.inputValue) {
+                      return option.inputValue;
+                    }
+                    // Regular option
+                    return option.title;
+                  }}
+                  renderOption={(props, option) => <li {...props}>{option.title}</li>}
+                  freeSolo
+                  renderInput={(params) => <TextField {...params} label="Contact Name" />}
+                />
+                {/* <TextField
                   error={Boolean(formik.touched.contactName && formik.errors.contactName)}
                   name="contactName"
                   value={formik.values.contactName}
@@ -1322,7 +1528,7 @@ const BusinessRFQ = () => {
                   <FormHelperText error id="standard-weight-helper-text-Password-login">
                     {formik.errors.contactName}
                   </FormHelperText>
-                )}
+                )} */}
               </Grid>
               <Grid xs={4} p={2}>
                 <TextField
@@ -1392,15 +1598,14 @@ const BusinessRFQ = () => {
                     label="Select"
                     placeholder="Select"
                   >
-                    <MenuItem value={'teardown'}>Tear Down</MenuItem>
-                    <MenuItem value={'operations'}>Operations</MenuItem>
-                    <MenuItem value={'concerns'}>Concerns</MenuItem>
+                    <MenuItem value={'teardown'}>TDBM - Tear Down</MenuItem>
+                    <MenuItem value={'Testing'}>Testing</MenuItem>
                     <MenuItem value={'software'}>Software</MenuItem>
-                    <MenuItem value={'hr'}>HR</MenuItem>
-                    <MenuItem value={'finance'}>Finance</MenuItem>
-                    <MenuItem value={'scanning'}>Scanning</MenuItem>
-                    <MenuItem value={'Modeling'}>Modeling</MenuItem>
-                    <MenuItem value={'drivingunit'}>Driving Unit</MenuItem>
+                    <MenuItem value={'import'}>Import</MenuItem>
+                    <MenuItem value={'vehicleRental'}>Vehicle Rental</MenuItem>
+                    <MenuItem value={'procurement'}>Procurement</MenuItem>
+                    <MenuItem value={'scanning&modeling'}>Scanning / Modeling</MenuItem>
+                    <MenuItem value={'hr'}>Human Resource</MenuItem>
                   </Select>
                 </FormControl>
                 {formik.touched.businessVertical && formik.errors.businessVertical && (
@@ -1541,7 +1746,7 @@ const BusinessRFQ = () => {
                 </FormControl>
               </Grid>
               <Grid xs={4} p={2}>
-                <TextField
+                {/* <TextField
                   error={Boolean(formik.touched.Pilot && formik.errors.Pilot)}
                   name="Pilot"
                   value={formik.values.Pilot}
@@ -1556,10 +1761,62 @@ const BusinessRFQ = () => {
                   <FormHelperText error id="standard-weight-helper-text-Password-login">
                     {formik.errors.Pilot}
                   </FormHelperText>
-                )}
+                )} */}
+                <Autocomplete
+                  value={valueForSuggest}
+                  onChange={(event, newValue) => {
+                    if (typeof newValue === 'string') {
+                      setValueForSuggest({
+                        title: newValue
+                      });
+                    } else if (newValue && newValue.inputValue) {
+                      // Create a new value from the user input
+                      setValueForSuggest({
+                        title: newValue.inputValue
+                      });
+                    } else {
+                      setValueForSuggest(newValue);
+                    }
+                  }}
+                  filterOptions={(options, params) => {
+                    const filtered = filter(options, params);
+
+                    const { inputValue } = params;
+                    // Suggest the creation of a new value
+                    const isExisting = options.some((option) => inputValue === option.title);
+                    if (inputValue !== '' && !isExisting) {
+                      filtered.push({
+                        inputValue,
+                        title: `Add "${inputValue}"`
+                      });
+                    }
+
+                    return filtered;
+                  }}
+                  selectOnFocus
+                  clearOnBlur
+                  handleHomeEndKeys
+                  id="fxt-demo"
+                  options={pilotName}
+                  getOptionLabel={(option) => {
+                    // Value selected with enter, right from the input
+                    if (typeof option === 'string') {
+                      return option;
+                    }
+                    // Add "xxx" option created dynamically
+                    if (option.inputValue) {
+                      return option.inputValue;
+                    }
+                    // Regular option
+                    return option.title;
+                  }}
+                  renderOption={(props, option) => <li {...props}>{option.title}</li>}
+                  freeSolo
+                  renderInput={(params) => <TextField {...params} label="Pilot" />}
+                />
               </Grid>
               <Grid xs={4} p={2}>
-                <TextField
+                {/* <TextField
                   error={Boolean(formik.touched.companyName && formik.errors.companyName)}
                   name="companyName"
                   value={formik.values.companyName}
@@ -1574,7 +1831,59 @@ const BusinessRFQ = () => {
                   <FormHelperText error id="standard-weight-helper-text-Password-login">
                     {formik.errors.companyName}
                   </FormHelperText>
-                )}
+                )} */}
+                <Autocomplete
+                  value={valueForCompany}
+                  onChange={(event, newValue) => {
+                    if (typeof newValue === 'string') {
+                      setValueForCompany({
+                        title: newValue
+                      });
+                    } else if (newValue && newValue.inputValue) {
+                      // Create a new value from the user input
+                      setValueForCompany({
+                        title: newValue.inputValue
+                      });
+                    } else {
+                      setValueForCompany(newValue);
+                    }
+                  }}
+                  filterOptions={(options, params) => {
+                    const filtered = filter(options, params);
+
+                    const { inputValue } = params;
+                    // Suggest the creation of a new value
+                    const isExisting = options.some((option) => inputValue === option.title);
+                    if (inputValue !== '' && !isExisting) {
+                      filtered.push({
+                        inputValue,
+                        title: `Add "${inputValue}"`
+                      });
+                    }
+
+                    return filtered;
+                  }}
+                  selectOnFocus
+                  clearOnBlur
+                  handleHomeEndKeys
+                  id="fxt-demo"
+                  options={companyName}
+                  getOptionLabel={(option) => {
+                    // Value selected with enter, right from the input
+                    if (typeof option === 'string') {
+                      return option;
+                    }
+                    // Add "xxx" option created dynamically
+                    if (option.inputValue) {
+                      return option.inputValue;
+                    }
+                    // Regular option
+                    return option.title;
+                  }}
+                  renderOption={(props, option) => <li {...props}>{option.title}</li>}
+                  freeSolo
+                  renderInput={(params) => <TextField {...params} label="CompanyName" />}
+                />
               </Grid>{' '}
               <Grid xs={4} p={2}>
                 {/* <FormControl fullWidth>
@@ -1629,7 +1938,59 @@ const BusinessRFQ = () => {
                 )}
               </Grid>
               <Grid xs={4} p={2}>
-                <TextField
+                <Autocomplete
+                  value={valueForContact}
+                  onChange={(event, newValue) => {
+                    if (typeof newValue === 'string') {
+                      setValueForContact({
+                        title: newValue
+                      });
+                    } else if (newValue && newValue.inputValue) {
+                      // Create a new value from the user input
+                      setValueForContact({
+                        title: newValue.inputValue
+                      });
+                    } else {
+                      setValueForContact(newValue);
+                    }
+                  }}
+                  filterOptions={(options, params) => {
+                    const filtered = filter(options, params);
+
+                    const { inputValue } = params;
+                    // Suggest the creation of a new value
+                    const isExisting = options.some((option) => inputValue === option.title);
+                    if (inputValue !== '' && !isExisting) {
+                      filtered.push({
+                        inputValue,
+                        title: `Add "${inputValue}"`
+                      });
+                    }
+
+                    return filtered;
+                  }}
+                  selectOnFocus
+                  clearOnBlur
+                  handleHomeEndKeys
+                  id="fxt-demo"
+                  options={contactName}
+                  getOptionLabel={(option) => {
+                    // Value selected with enter, right from the input
+                    if (typeof option === 'string') {
+                      return option;
+                    }
+                    // Add "xxx" option created dynamically
+                    if (option.inputValue) {
+                      return option.inputValue;
+                    }
+                    // Regular option
+                    return option.title;
+                  }}
+                  renderOption={(props, option) => <li {...props}>{option.title}</li>}
+                  freeSolo
+                  renderInput={(params) => <TextField {...params} label="Contact Name" />}
+                />
+                {/* <TextField
                   error={Boolean(formik.touched.contactName && formik.errors.contactName)}
                   name="contactName"
                   value={formik.values.contactName}
@@ -1644,7 +2005,7 @@ const BusinessRFQ = () => {
                   <FormHelperText error id="standard-weight-helper-text-Password-login">
                     {formik.errors.contactName}
                   </FormHelperText>
-                )}
+                )} */}
               </Grid>
               <Grid xs={4} p={2}>
                 <TextField
@@ -1714,15 +2075,14 @@ const BusinessRFQ = () => {
                     label="Select"
                     placeholder="Select"
                   >
-                    <MenuItem value={'teardown'}>Tear Down</MenuItem>
-                    <MenuItem value={'operations'}>Operations</MenuItem>
-                    <MenuItem value={'concerns'}>Concerns</MenuItem>
+                    <MenuItem value={'teardown'}>TDBM - Tear Down</MenuItem>
+                    <MenuItem value={'Testing'}>Testing</MenuItem>
                     <MenuItem value={'software'}>Software</MenuItem>
-                    <MenuItem value={'hr'}>HR</MenuItem>
-                    <MenuItem value={'finance'}>Finance</MenuItem>
-                    <MenuItem value={'scanning'}>Scanning</MenuItem>
-                    <MenuItem value={'Modeling'}>Modeling</MenuItem>
-                    <MenuItem value={'drivingunit'}>Driving Unit</MenuItem>
+                    <MenuItem value={'import'}>Import</MenuItem>
+                    <MenuItem value={'vehicleRental'}>Vehicle Rental</MenuItem>
+                    <MenuItem value={'procurement'}>Procurement</MenuItem>
+                    <MenuItem value={'scanning&modeling'}>Scanning / Modeling</MenuItem>
+                    <MenuItem value={'hr'}>Human Resource</MenuItem>
                   </Select>
                 </FormControl>
                 {formik.touched.businessVertical && formik.errors.businessVertical && (
