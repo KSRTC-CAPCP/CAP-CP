@@ -710,15 +710,33 @@ const BusinessRFQ = () => {
                 statusRequest: values.status // Set your default statusRequest here
               }))
             : [];
-
+          const history = historyTableData.map((item) => ({
+            date: item.date,
+            description: item.description,
+            statusRequest: item.statusRequest,
+            status: item.status
+          }));
+          const task = taskTableData.map((item) => ({
+            title: item.title,
+            description: item.description,
+            responsible: item.responsible.slice(0, 10),
+            remark: item.remark,
+            assignedDate: item.assignedDate,
+            targetDate: item.targetDate,
+            status: item.status
+          }));
+          console.log(historyTableData, taskTableData, 'tables');
           const formattedData = {
             ...values,
             Pilot: valueForSuggest?.title || values?.Pilot,
             companyName: valueForCompany?.title || values?.companyName,
             contactName: valueForContact?.title || values?.contactName,
-            rfqDescription: rfqDescriptionArray
+            rfqDescription: history,
+            tasks: task
           };
+          console.log(values, 'values formed');
           console.log(formattedData, 'formed');
+          console.log(rfqDescriptionArray, 'rfqDescriptionArray formed');
           const endpoint = RFQ_UPDATE(updateId);
           await updateData(endpoint, formattedData, localData?.accessToken);
 
