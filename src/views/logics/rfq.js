@@ -61,7 +61,8 @@ import {
   ThumbUpSharp,
   CurrencyExchange,
   VisibilityRounded,
-  VisibilityTwoTone
+  VisibilityTwoTone,
+  SaveTwoTone
 } from '@mui/icons-material';
 import { useState } from 'react';
 import styled from '@emotion/styled';
@@ -454,7 +455,7 @@ const BusinessRFQ = () => {
 
       // Reset the customOption state
       setCustomOption('');
-
+      setSelectedOption('')
       // Show the select input
       setShowSelect(true);
     }
@@ -569,12 +570,12 @@ const BusinessRFQ = () => {
   };
 
   const handleEdit = async (e) => {
-    console.log('worked', e.original._id);
+    console.log('worked', e.original);
     const endpoint = RFQ_GET_ID(e.original._id);
     const getByIdData = await fetchData(endpoint, localData?.accessToken);
     // setUpdatedValue(getByIdData)
     setUpdateId(e.original._id);
-    setSelectedOption(getByIdData?.data.category);
+    setSelectedOption(e.original?.category);
     setValueForCompany(getByIdData?.data.companyName);
     setValueForContact(getByIdData?.data.contactName);
     setValueForSuggest(getByIdData?.data.Pilot);
@@ -1089,6 +1090,11 @@ const BusinessRFQ = () => {
     });
     formik.resetForm();
     setUpdateId('');
+    setShowSelect(true)
+    setValueForCompany('');
+    
+    setValueForContact('');
+    setValueForSuggest('')
     setSelectedOption('');
   };
   const handleClose = () => {
@@ -1473,7 +1479,12 @@ const BusinessRFQ = () => {
                         onChange={handleSelectInputChange}
                         placeholder="Enter custom option"
                       />
-                      <Button onClick={handleSaveCustomOption}>Save</Button>
+                      <Button onClick={handleSaveCustomOption}>
+                        <SaveTwoTone />
+                      </Button>
+                      <Button onClick={() => setShowSelect(true)}>
+                        <DeleteTwoTone />
+                      </Button>
                     </div>
                   </>
                 )}
@@ -1950,7 +1961,12 @@ const BusinessRFQ = () => {
                         onChange={handleSelectInputChange}
                         placeholder="Enter custom option"
                       />
-                      <Button onClick={handleSaveCustomOption}>Save</Button>
+                      <Button onClick={handleSaveCustomOption}>
+                        <SaveTwoTone />
+                      </Button>
+                      <Button onClick={() => setShowSelect(true)}>
+                        <DeleteTwoTone />
+                      </Button>{' '}
                     </div>
                   </>
                 )}

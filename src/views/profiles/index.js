@@ -57,6 +57,7 @@ import {
   ConnectWithoutContact,
   Delete,
   DeleteRounded,
+  DeleteTwoTone,
   Group,
   History,
   KeyboardBackspaceRounded,
@@ -64,6 +65,7 @@ import {
   ModeEditRounded,
   NotStarted,
   PersonAdd,
+  SaveTwoTone,
   TaskAlt,
   ThumbDown,
   ThumbDownAltSharp,
@@ -285,6 +287,7 @@ const Profiles = () => {
       setLocationData(categoryData);
       // Reset the customOption state
       setCustomOption('');
+      setSelectedOption4Locat('')
       // Show the select input
       setShowSelect(true);
     }
@@ -412,25 +415,23 @@ const Profiles = () => {
         console.log(excelDate, 'xl');
         // Convert Excel date to JavaScript Date object
         const jsDate = excelDateToJSDate(excelDate);
-
         // Format the JavaScript Date to DD-MM-YYYY
-        const formattedDateOfBirth = jsDate.toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        }).replace(/\//g, '-');
-        console.log(formattedDateOfBirth, "formed");
+        const formattedDateOfBirth = jsDate
+          .toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          })
+          .replace(/\//g, '-');
+        console.log(formattedDateOfBirth, 'formed');
         // Update the values with the formatted date and adjusted status
         const formattedValues = {
           ...item,
           DateOfBirth: formattedDateOfBirth
         };
-
         return formattedValues;
       });
-
       console.log(parsedData, 'parse');
-
       // Now, parsedData has the desired format, send it to the server
       await postData(PROFILES_UPLOAD, { employees: parsedData }, localData?.accessToken);
       fetchAllData();
@@ -491,14 +492,14 @@ const Profiles = () => {
 
     formik.setValues({
       NameOfCandidate: getByIdData?.NameOfCandidate,
-      DateOfBirth: getByIdData?.DateOfBirth,
+      DateOfBirth: id.original?.DateOfBirth,
       Designation: getByIdData?.Designation,
       ContactNumber: getByIdData?.ContactNumber,
       Team: getByIdData?.Team,
       Role: getByIdData?.Role
     });
     setSelectedOption(getByIdData?.status ? 'active' : 'inActive');
-
+    setSelectedOption4Locat(getByIdData?.Location);
     setView({
       visible: true,
       mode: 'Edit'
@@ -608,6 +609,8 @@ const Profiles = () => {
       mode: 'Add'
     });
     formik.resetForm();
+    setEditId('');
+    setSelectedOption4Locat('');
   };
   const handleClose = () => {
     setView({
@@ -633,17 +636,18 @@ const Profiles = () => {
       console.log(editId, 'worked id');
       try {
         if (editId) {
+          console.log(values, "values here in edit");
           // Convert the date format to dd-mm-yyyy
-          const formattedDateOfBirth = new Date(values.DateOfBirth).toLocaleDateString('en-GB', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-          });
-          const formattedDate = formattedDateOfBirth.replace(/\//g, '-');
+          // const formattedDateOfBirth = new Date(values.DateOfBirth).toLocaleDateString('en-GB', {
+          //   day: '2-digit',
+          //   month: '2-digit',
+          //   year: 'numeric'
+          // });
+          // const formattedDate = formattedDateOfBirth.replace(/\//g, '-');
           // Update the values with the formatted date
           const formattedValues = {
             ...values,
-            DateOfBirth: formattedDate,
+            // DateOfBirth: formattedDate,
             status: selectedOption === 'active' ? true : false,
             Category: selectedOptionCategory === 'Consultant Hiring' ? 'Consultant Hiring' : 'Direct Hiring'
           };
@@ -1017,7 +1021,13 @@ const Profiles = () => {
                         onChange={handleSelectInputChange}
                         placeholder="Enter custom option"
                       />
-                      <Button onClick={handleSaveCustomOption}>Save</Button>
+                      <Button onClick={handleSaveCustomOption}>
+                        <SaveTwoTone />
+                      </Button>
+
+                      <Button onClick={() => setShowSelect(true)}>
+                        <DeleteTwoTone />
+                      </Button>
                     </div>
                   </>
                 )}
@@ -1183,6 +1193,7 @@ const Profiles = () => {
                   name="DateOfBirth"
                   placeholder="Date"
                   className="w-100"
+                  disabled
                   value={formik.values.DateOfBirth}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -1275,6 +1286,54 @@ const Profiles = () => {
                   <FormHelperText error id="standard-weight-helper-text-Password-login">
                     {formik.errors.Role}
                   </FormHelperText>
+                )}
+              </Grid>
+              <Grid xs={4} p={2}>
+                {showSelect ? (
+                  <FormControl fullWidth>
+                    <InputLabel id="demo-simple-select-label">Location</InputLabel>
+                    <Select
+                      error={Boolean(formik.touched.Location && formik.errors.Location)}
+                      value={selectedOption4Locat}
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      fullWidth
+                      name="Location"
+                      onChange={handleSelectOnChange}
+                      label="Select"
+                      placeholder="Select"
+                    >
+                      {customOptions.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {formik.touched.Location && formik.errors.Location && (
+                      <FormHelperText error id="standard-weight-helper-text-Password-login">
+                        {formik.errors.Location}
+                      </FormHelperText>
+                    )}
+                  </FormControl>
+                ) : (
+                  <>
+                    <div style={{ display: 'flex' }}>
+                      <TextField
+                        type="text"
+                        fullWidth
+                        value={customOption}
+                        onChange={handleSelectInputChange}
+                        placeholder="Enter custom option"
+                      />
+                      <Button onClick={handleSaveCustomOption}>
+                        <SaveTwoTone />
+                      </Button>
+
+                      <Button onClick={() => setShowSelect(true)}>
+                        <DeleteTwoTone />
+                      </Button>
+                    </div>
+                  </>
                 )}
               </Grid>
               <Grid item xs={4} p={2}>
