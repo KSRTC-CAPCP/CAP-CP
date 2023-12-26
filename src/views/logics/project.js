@@ -94,7 +94,8 @@ import {
   PROJECT_GET,
   PROJECT_UPDATE,
   RFQ_GET,
-  RFQ_GET_ID
+  RFQ_GET_ID,
+  RFQ_GET_STATUS
 } from 'api/apiEndPoint';
 import { useEffect } from 'react';
 import { deleteData, fetchData, postData, updateData } from 'utils/apiUtils';
@@ -1431,8 +1432,8 @@ const Projects = ({ _history, tasks }) => {
           const parsedData = JSON.parse(localStore);
           console.log(parsedData, 'parsed');
           const data = await fetchData(PROJECT_GET, parsedData?.accessToken);
-          const data4Rfq = await fetchData(RFQ_GET, parsedData?.accessToken);
-          const data4Employee = await fetchData(PROFILES_GET_ROLE('Employee'), parsedData?.accessToken);
+          const data4Rfq = await fetchData(RFQ_GET_STATUS, parsedData?.accessToken);
+          const data4Employee = await fetchData(PROFILES_GET, parsedData?.accessToken);
           const EmployeeRole = await fetchData(PROFILES_GET_ROLE('Manager'), parsedData?.accessToken);
           const categoryData = await fetchData(MILESTONE_GET);
           setMilestoneOptions(categoryData);

@@ -97,7 +97,9 @@ import {
   PROFILES_GET_ID,
   PROFILES_UPDATE,
   PROFILES_UPLOAD,
-  TEAMS_GET
+  TEAMS_GET,
+  TEAM_GET_ALL,
+  PROFILES_BULK_DELETE
 } from 'api/apiEndPoint';
 import { useEffect } from 'react';
 
@@ -333,6 +335,9 @@ const Profiles = () => {
     columnHelper.accessor('Designation', {
       header: 'Designation'
     }),
+    columnHelper.accessor('DateOfBirth', {
+      header: 'Date Of Birth'
+    }),
     columnHelper.accessor('Team', {
       header: 'Team'
     }),
@@ -373,6 +378,7 @@ const Profiles = () => {
 
   const [hired, setHired] = useState(false);
   const [isFilter, setIsFilter] = useState('getbycae');
+  const [isBulkDelete, setIsBulkDelete] = useState([]);
 
   const handleFilter = (e) => {
     setIsFilter(e.target.value);
@@ -401,19 +407,25 @@ const Profiles = () => {
     try {
       // Convert numeric dates to DD-MM-YYYY format and adjust status
       const parsedData = data.map((item) => {
-        const formattedDateOfBirth = new Date(item.DateOfBirth).toLocaleDateString('en-GB', {
+        // Ensure DateOfBirth is a number
+        const excelDate = typeof item.DateOfBirth === 'number' ? item.DateOfBirth : parseFloat(item.DateOfBirth);
+        console.log(excelDate, 'xl');
+        // Convert Excel date to JavaScript Date object
+        const jsDate = excelDateToJSDate(excelDate);
+
+        // Format the JavaScript Date to DD-MM-YYYY
+        const formattedDateOfBirth = jsDate.toLocaleDateString('en-GB', {
           day: '2-digit',
           month: '2-digit',
           year: 'numeric'
-        });
-        const formattedDate = formattedDateOfBirth.replace(/\//g, '-');
-
+        }).replace(/\//g, '-');
+        console.log(formattedDateOfBirth, "formed");
         // Update the values with the formatted date and adjusted status
         const formattedValues = {
           ...item,
-          DateOfBirth: formattedDate,
-          status: true
+          DateOfBirth: formattedDateOfBirth
         };
+
         return formattedValues;
       });
 
@@ -426,6 +438,12 @@ const Profiles = () => {
       console.error('Error uploading file:', error);
     }
   };
+  // Function to convert Excel date to JavaScript Date object
+  function excelDateToJSDate(excelDate) {
+    const baseDate = new Date(1899, 11, 30);
+    const milliseconds = excelDate * 24 * 60 * 60 * 1000;
+    return new Date(baseDate.getTime() + milliseconds);
+  }
 
   const [inputValue, setInputValue] = useState('');
   const [options, setOptions] = useState([]);
@@ -453,8 +471,8 @@ const Profiles = () => {
   const [open, setOpen] = useState(false);
   const handleDelete = (id) => {
     setOpen(true);
-    setDeleteId(id.original._id);
-    console.log('open', id.original._id);
+    // setDeleteId(id.original._id);
+    // console.log('open', id.original._id);
   };
   const theme = useTheme();
   const handleExportData = () => {
@@ -506,6 +524,9 @@ const Profiles = () => {
       console.log(error, 'error');
     }
   };
+  const [rowSelection, setRowSelection] = useState({});
+  const [isAnyRowSelected, setIsAnyRowSelected] = useState(false);
+
   const table = useMaterialReactTable({
     columns,
     data: employeeData,
@@ -525,6 +546,13 @@ const Profiles = () => {
       </div>
     ),
     enableRowSelection: true,
+    positionToolbarAlertBanner: 'head-overlay', //show alert banner over table head, top toolbar, or bottom toolbar
+    getRowId: (row) => row._id, //give each row a more useful id
+    onRowSelectionChange: (newRowSelection, allRows) => {
+      setRowSelection(newRowSelection);
+    },
+
+    state: { rowSelection }, //pass our managed row selection state to the table to use
     columnFilterDisplayMode: 'popover',
     paginationDisplayMode: 'pages',
     positionToolbarAlertBanner: 'bottom',
@@ -710,7 +738,7 @@ const Profiles = () => {
         // If user data exists, proceed to fetch teams and profiles
         if (parsedData) {
           // Fetch teams data using the access token
-          const fetchTeams = await fetchData(TEAMS_GET, parsedData?.accessToken);
+          const fetchTeams = await fetchData(TEAM_GET_ALL, parsedData?.accessToken);
           // Set local data and teams data in the state
           setLocalData(parsedData);
           setTeamsData(fetchTeams);
@@ -763,9 +791,32 @@ const Profiles = () => {
     // Call the async function to fetch data when the component mounts
     fetchDataAsync();
   }, [isFilter]); // Empty dependency array to mimic componentDidMount behavior
-
-  console.log(employeeData, 'fetchTeams');
-
+  //do something when the row selection changes...
+  useEffect(() => {
+    const numberOfProperties = Object.keys(rowSelection).length;
+    console.info('numberOfProperties', numberOfProperties); //read your managed row selection state
+    if (numberOfProperties !== 0) {
+      setIsAnyRowSelected(true);
+    } else {
+      setIsAnyRowSelected(false);
+    }
+    const convertedData = {
+      employeeIds: Object.keys(rowSelection)
+    };
+    setIsBulkDelete(convertedData);
+    console.log(JSON.stringify(convertedData, null, 2));
+    // console.info(table.getState().rowSelection); //alternate way to get the row selection state
+  }, [rowSelection, isAnyRowSelected]);
+  console.info('isbulk', isBulkDelete); //read your managed row selection state
+  const bulkDataDelete = async () => {
+    try {
+      if (isBulkDelete) await postData(PROFILES_BULK_DELETE, isBulkDelete, localData?.accessToken);
+      setOpen(false);
+      fetchAllData();
+    } catch (error) {
+      console.log(error, 'error');
+    }
+  };
   return (
     <div className="max">
       {view.mode === 'Add' && (
@@ -1035,6 +1086,29 @@ const Profiles = () => {
                     <IconPlus stroke={2} size="1.3rem" />
                   </Avatar>
                 </ButtonBase>
+                {isAnyRowSelected && (
+                  <ButtonBase sx={{ borderRadius: '12px', marginLeft: '1rem' }}>
+                    <Avatar
+                      variant="rounded"
+                      sx={{
+                        ...theme.typography.commonAvatar,
+                        ...theme.typography.mediumAvatar,
+                        transition: 'all .2s ease-in-out',
+                        background: theme.palette.secondary.light,
+                        color: theme.palette.secondary.dark,
+                        '&[aria-controls="menu-list-grow"],&:hover': {
+                          background: theme.palette.secondary.dark,
+                          color: theme.palette.secondary.light
+                        }
+                      }}
+                      aria-haspopup="true"
+                      onClick={handleDelete}
+                      color="inherit"
+                    >
+                      <IconTrash stroke={2} size="1.3rem" />
+                    </Avatar>
+                  </ButtonBase>
+                )}
               </div>
             </Box>
           }
@@ -1322,7 +1396,7 @@ const Profiles = () => {
           <Button variant="outlined" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button variant="contained" onClick={confirmDelete}>
+          <Button variant="contained" onClick={bulkDataDelete}>
             Delete
           </Button>
         </DialogActions>
