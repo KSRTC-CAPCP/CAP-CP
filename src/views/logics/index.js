@@ -58,6 +58,7 @@ import {
   PersonAdd,
   SaveAltTwoTone,
   SaveAsTwoTone,
+  SaveTwoTone,
   TaskAlt,
   ThumbDown,
   ThumbDownAltSharp,
@@ -464,7 +465,7 @@ const BusinessLeads = () => {
 
       // Reset the customOption state
       setCustomOption('');
-
+      setSelectedOption('')
       // Show the select input
       setShowSelect(true);
     }
@@ -760,6 +761,7 @@ const BusinessLeads = () => {
     const getByIdData = await fetchData(endpoint, localData?.accessToken);
     // setUpdatedValue(getByIdData)
     setUpdateId(e.original._id);
+    setCustomOption(getByIdData?.category)
     // console.log(getByIdData?.data, 'getby');
     const value = getByIdData?.data;
     setleadNumber(value?.serialNumber);
@@ -1460,7 +1462,7 @@ const BusinessLeads = () => {
                         placeholder="Enter custom option"
                       />
                       <Button onClick={handleSaveCustomOption} className="MuiOutlinedInput-root">
-                        <SaveAsTwoTone />
+                        <SaveTwoTone />
                       </Button>
                       <Button onClick={handleRemoveCustomOption}>
                         <DeleteTwoTone />
@@ -1961,7 +1963,7 @@ const BusinessLeads = () => {
                         placeholder="Enter custom option"
                       />
                       <Button onClick={handleSaveCustomOption} className="MuiOutlinedInput-root">
-                        <SaveAsTwoTone />
+                        <SaveTwoTone />
                       </Button>
                       <Button onClick={handleRemoveCustomOption}>
                         <DeleteTwoTone />
