@@ -1,59 +1,101 @@
+.profile-container {
+  display: flex;
+  align-items: center;
+  margin-left: 30px;
+  margin-top: 35px;
+}
+
+.avatar {
+  margin-right: 10px;
+}
+
+.text-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.text-container h5,
+.text-container span {
+  margin: 0;
+}
+
+.card-style {
+  width: 457px;
+}
+
+.align-items-center {
+  margin-block-end: 22px;
+}
+
+.p-2 {
+  padding: 1rem;
+}
 
 
-  .profile-container {
-    display: flex;
-    align-items: center;
-    margin-left: 30px;
-    margin-top: 35px;
-  }
-  
-  .avatar {
-    margin-right: 10px; 
-  }
-  
-  .text-container {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .text-container h5,
-  .text-container span {
-    margin: 0;
-  }
-
-  .card-style{
-    width: 457px;
-  }
-  .align-items-center{
-    margin-block-end: 22px;
-  }
-  
-  .p-2{
-    padding: 1rem;
-  }
-
- 
 
 .contact-section:hover {
-    background-color: #e2f1fc;
-    cursor: pointer;
-    
-  }
+  background-color: #e2f1fc;
+  cursor: pointer;
 
-  .contact-section:hover svg {
-    fill: #3f51b5; 
-  }  
-  
-  .rs-divider-horizontal{
-    margin: 0;
-  }
-  
- .mar-top{
-    margin-left: 71px;
- }
+}
 
- 
+.contact-section:hover svg {
+  fill: #3f51b5;
+}
+
+.rs-divider-horizontal {
+  margin: 0;
+}
+
+.mar-top {
+  margin-left: 71px;
+}
+
+
 .centered {
-    text-align: center;
-  }
-  
+  text-align: center;
+}
+
+.css-xof2nj-MuiPaper-root-MuiCard-root {
+  margin-left: 20px;
+}
+
+.h5margin {
+  margin-top: 25px;
+  margin-left: 30px;
+
+}
+
+.ptag {
+  margin-left: 15px;
+  font-weight: 600;
+  /* font-family: 'Roboto, sans-serif'; */
+  font-size: 0.900rem;
+  line-height: 1.6;
+  color: rgb(101, 101, 102);
+  max-width: 800px;
+  margin: '0 auto';
+
+}
+
+.name-list {
+  margin: 20px; /* Adjust margin as needed */
+  padding: 10px; /* Adjust padding as needed */
+ 
+}
+
+.name-list p {
+  margin: 5px 0; /* Adjust margin between each line */
+  font-family: 'Arial', sans-serif; /* Specify the desired font */
+  font-size: 14px; /* Specify the desired font size */
+  /* Add more styling as needed */
+}
+.d-flex {
+  display: flex;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+
