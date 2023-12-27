@@ -160,7 +160,15 @@ section .button-popup > div > button:nth-child(1) {
     border-color: #333 transparent transparent transparent;
     transform: translateX(-60%);
   }
-  
+  .image-container
+  {
+    display: flex;
+    justify-content: center;
+  }
+  .image-container div
+  {
+    border: 2px solid #1e8eea;
+  }
   .icon-container:hover .tooltip-text {
     visibility: visible;
     opacity: 1;
