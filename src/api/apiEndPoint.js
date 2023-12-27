@@ -4,7 +4,6 @@ export const BASE_URL = 'http://localhost:5000/capcp';
 //FOR LOGIN API HERE
 export const LOGIN = `${BASE_URL}/login`;
 
-
 //FOR LEADS API HERE
 export const LEAD_CREATION = `${BASE_URL}/lead/create`;
 export const LEAD_GET = `${BASE_URL}/lead/get`;
@@ -51,9 +50,12 @@ export const MILESTONE_CREATE = `${BASE_URL}/milestone`;
 export const LOCATION_GET = `${BASE_URL}/locations`;
 export const LOCATION_CREATE = `${BASE_URL}/location`;
 
-//FOR TEAM 
+//FOR TEAM
 export const TEAM_CREATION = `${BASE_URL}/roleaccess/add`;
 export const TEAM_GET_ALL = `${BASE_URL}/roleaccess/getall`;
 export const TEAM_DELETE = (id) => `${BASE_URL}/roleaccess/delete/${id}`;
 export const TEAM_UPDATE = (id) => `${BASE_URL}/roleaccess/update/${id}`;
 export const TEAM_GET_BY_ID = (id) => `${BASE_URL}/roleaccess/getbyid/${id}`;
+
+//FOR MANAGER PROJECT
+export const MANAGERS_PROJECT = (id) => `${BASE_URL}/project/managers-projects/${id}`;

@@ -39,7 +39,7 @@ import {
   Card
 } from '@mui/material';
 import React, { forwardRef } from 'react';
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
 import MainCard from 'ui-component/cards/MainCard';
 import { useTheme } from '@mui/material/styles';
 import { IconDownload, IconEdit, IconEye, IconHistoryToggle, IconPlus, IconTrash, IconUpload } from '@tabler/icons';
@@ -81,10 +81,12 @@ import {
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { DatePicker } from 'rsuite';
 import {
+  MANAGERS_PROJECT,
   MILESTONE_CREATE,
   MILESTONE_GET,
   PROFILES_CREATE,
   PROFILES_GET,
+  PROFILES_GET_ID,
   PROFILES_GET_ROLE,
   PROJECT_CREATE,
   PROJECT_DELETE,
@@ -223,6 +225,7 @@ const Manager = ({ _history, tasks }) => {
   };
   const [profilesData, setProfilesData] = useState([]);
   const [managerData, setManagerData] = useState([]);
+  const [employeeDetail, setEmployeeDetail] = useState();
   const [managerId, setManagerId] = useState('');
   const handleEmployee = (e) => {
     console.log(e.target.value.slice(0, 7), 'its worked');
@@ -566,42 +569,42 @@ const Manager = ({ _history, tasks }) => {
         if (editId) {
           const teamsValue = teamData
             ? teamData.map((item) => ({
-              fromDate: item.fromDate,
-              employeeCode: item.employeeCode?.slice(0, 7),
-              employeeId: managerId?._id,
-              toDate: item.toDate,
-              location: item.location,
-              percentage: Number(item.percentage),
-              team: item.team
-            }))
+                fromDate: item.fromDate,
+                employeeCode: item.employeeCode?.slice(0, 7),
+                employeeId: managerId?._id,
+                toDate: item.toDate,
+                location: item.location,
+                percentage: Number(item.percentage),
+                team: item.team
+              }))
             : [];
           const historyValue = historyTableData
             ? historyTableData.map((data) => ({
-              date: data.date,
-              projectDescription: data.projectDescription,
-              requestStatus: data.requestStatus,
-              approvalStatus: data.approvalStatus
-            }))
+                date: data.date,
+                projectDescription: data.projectDescription,
+                requestStatus: data.requestStatus,
+                approvalStatus: data.approvalStatus
+              }))
             : [];
           const taskValue = taskTableData
             ? taskTableData.map((data) => ({
-              title: data.title,
-              description: data.description,
-              responsible: data.responsible,
-              remarks: data.remarks,
-              assignedDate: data.assignedDate,
-              targetDate: data.targetDate,
-              status: data.status
-            }))
+                title: data.title,
+                description: data.description,
+                responsible: data.responsible,
+                remarks: data.remarks,
+                assignedDate: data.assignedDate,
+                targetDate: data.targetDate,
+                status: data.status
+              }))
             : [];
           const financeValue = financeData
             ? financeData.map((data) => ({
-              date: data.date,
-              refNumber: data.refNumber,
-              amount: data.amount,
-              tax: data.tax,
-              status: data.status
-            }))
+                date: data.date,
+                refNumber: data.refNumber,
+                amount: data.amount,
+                tax: data.tax,
+                status: data.status
+              }))
             : [];
           console.log(values, 'upd');
           const formattedData = {
@@ -627,42 +630,42 @@ const Manager = ({ _history, tasks }) => {
           console.log('handle submit', values, startDate, endDate);
           const teamsValue = teamData
             ? teamData.map((item) => ({
-              fromDate: item.fromDate,
-              employeeCode: item.employeeCode?.slice(0, 7),
-              employeeId: managerId?._id,
-              toDate: item.toDate,
-              location: item.location,
-              percentage: Number(item.percentage),
-              team: item.team
-            }))
+                fromDate: item.fromDate,
+                employeeCode: item.employeeCode?.slice(0, 7),
+                employeeId: managerId?._id,
+                toDate: item.toDate,
+                location: item.location,
+                percentage: Number(item.percentage),
+                team: item.team
+              }))
             : [];
           const historyValue = historyTableData
             ? historyTableData.map((data) => ({
-              date: data.date,
-              projectDescription: data.description,
-              requestStatus: data.requeststatus,
-              approvalStatus: data.approvalstatus
-            }))
+                date: data.date,
+                projectDescription: data.description,
+                requestStatus: data.requeststatus,
+                approvalStatus: data.approvalstatus
+              }))
             : [];
           const taskValue = taskTableData
             ? taskTableData.map((data) => ({
-              title: data.title,
-              description: data.description,
-              responsible: data.responsible,
-              remarks: data.remarks,
-              assignedDate: data.assigneddate,
-              targetDate: data.targetdate,
-              status: data.status
-            }))
+                title: data.title,
+                description: data.description,
+                responsible: data.responsible,
+                remarks: data.remarks,
+                assignedDate: data.assigneddate,
+                targetDate: data.targetdate,
+                status: data.status
+              }))
             : [];
           const financeValue = financeData
             ? financeData.map((data) => ({
-              date: data.date,
-              refNumber: data.refNumber,
-              amount: data.amount,
-              tax: data.tax,
-              status: data.status
-            }))
+                date: data.date,
+                refNumber: data.refNumber,
+                amount: data.amount,
+                tax: data.tax,
+                status: data.status
+              }))
             : [];
           const formattedData = {
             ...values,
@@ -695,7 +698,9 @@ const Manager = ({ _history, tasks }) => {
   const [editId, setEditId] = useState('');
   const [open, setOpen] = useState(false);
   const fetchFun = async () => {
-    const data = await fetchData(PROJECT_GET, localData?.accessToken);
+    const data = await fetchData(MANAGERS_PROJECT(employeeDetail?.EmployeeCode), localData?.accessToken);
+    console.log(data, 'datadatadata');
+    // const data = await fetchData(PROJECT_GET, localData?.accessToken);
     setProjectData(data.data);
   };
   const handleDelete = (e) => {
@@ -773,10 +778,11 @@ const Manager = ({ _history, tasks }) => {
         <IconButton onClick={() => handleView(row)}>
           <VisibilityRounded style={{ color: '#2196f3' }} />
         </IconButton>
-        <Link to='/task-panel' >
-        <IconButton >
-        <IconPlus style={{ color: '#2196f3' }}/>
-        </IconButton></Link>
+        <Link to="/task-panel">
+          <IconButton>
+            <IconPlus style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Link>
       </div>
     ),
     enableRowSelection: true,
@@ -1379,14 +1385,18 @@ const Manager = ({ _history, tasks }) => {
         if (localStore) {
           const parsedData = JSON.parse(localStore);
           console.log(parsedData, 'parsed');
-          const data = await fetchData(PROJECT_GET, parsedData?.accessToken);
+          const EmployeeCode = await fetchData(PROFILES_GET_ID(parsedData?.employeeId), parsedData?.accessToken);
+          const data = await fetchData(MANAGERS_PROJECT(EmployeeCode?.EmployeeCode), parsedData?.accessToken);
+          console.log(data, 'datadatadata');
           const data4Rfq = await fetchData(RFQ_GET, parsedData?.accessToken);
           const data4Employee = await fetchData(PROFILES_GET_ROLE('Employee'), parsedData?.accessToken);
           const EmployeeRole = await fetchData(PROFILES_GET_ROLE('Manager'), parsedData?.accessToken);
           const categoryData = await fetchData(MILESTONE_GET);
           setMilestoneOptions(categoryData);
           setManagerData(EmployeeRole?.data);
+          setEmployeeDetail(EmployeeCode);
           console.log(EmployeeRole, 'EmployeeRole');
+          console.log(EmployeeCode, 'EmployeeCode');
           setProfilesData(data4Employee?.data);
           setRFQData(data4Rfq?.data);
           console.log(data, 'parsedddd');
@@ -1405,7 +1415,6 @@ const Manager = ({ _history, tasks }) => {
   console.log(endDate, '2 date');
   return (
     <div className="max">
-
       {view.mode === 'Initial' && (
         <MainCard
           title="Manager Panel"
@@ -1419,7 +1428,7 @@ const Manager = ({ _history, tasks }) => {
                 }
               }}
             >
-               <ButtonBase sx={{ borderRadius: '12px' }}>
+              <ButtonBase sx={{ borderRadius: '12px' }}>
                 {/* <Avatar
                   variant="rounded"
                   sx={{
@@ -1446,7 +1455,7 @@ const Manager = ({ _history, tasks }) => {
           <MaterialReactTable table={table} />
         </MainCard>
       )}
-     
+
       {view.mode === 'View' && (
         <>
           <MainCard
@@ -1616,8 +1625,9 @@ const Manager = ({ _history, tasks }) => {
                             <p className="text-muted-light m-0 text-end">Target Date : &nbsp; {data?.toDate}</p>
                             <div className="d-flex justify-content-end">
                               <p
-                                className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${data?.status === 'completed' ? 'badge-success max-width' : ''
-                                  }${data?.status === 'not-started' ? 'badge-danger max-width' : ''}`}
+                                className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${
+                                  data?.status === 'completed' ? 'badge-success max-width' : ''
+                                }${data?.status === 'not-started' ? 'badge-danger max-width' : ''}`}
                               >
                                 {data?.statusRequest} {data?.status}
                               </p>
