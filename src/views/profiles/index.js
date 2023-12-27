@@ -380,9 +380,9 @@ const Profiles = () => {
   };
 
   const [hired, setHired] = useState(false);
-  const [isFilter, setIsFilter] = useState('getbycae');
   const [isBulkDelete, setIsBulkDelete] = useState([]);
-
+  
+  const [isFilter, setIsFilter] = useState('getbycae');
   const handleFilter = (e) => {
     setIsFilter(e.target.value);
   };

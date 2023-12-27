@@ -324,6 +324,9 @@ p {
 .ps-1 {
   padding-left: 10px;
 }
+.pe-1 {
+  padding-right: 1rem;
+}
 .ellipse-co {
   display: -webkit-box;
   max-width: 284px;
