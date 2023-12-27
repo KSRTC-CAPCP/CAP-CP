@@ -465,7 +465,7 @@ const BusinessLeads = () => {
 
       // Reset the customOption state
       setCustomOption('');
-      setSelectedOption('')
+      setSelectedOption('');
       // Show the select input
       setShowSelect(true);
     }
@@ -673,7 +673,7 @@ const BusinessLeads = () => {
             serialNumber: leadNumber,
             Pilot: valueForSuggest?.title || values?.Pilot,
             companyName: valueForCompany?.title || values?.companyName,
-            contactName: valueForContact?.title || values?.contactName,
+            contactName: valueForContact?.title || values?.contactName
           };
 
           handleUpdate(formattedData);
@@ -689,7 +689,7 @@ const BusinessLeads = () => {
                 statusRequest: values.status // Set your default statusRequest here
               }))
             : [];
-            
+
           const formattedData = {
             ...values,
             Pilot: valueForSuggest?.title,
@@ -761,7 +761,7 @@ const BusinessLeads = () => {
     const getByIdData = await fetchData(endpoint, localData?.accessToken);
     // setUpdatedValue(getByIdData)
     setUpdateId(e.original._id);
-    setCustomOption(getByIdData?.category)
+    setCustomOption(getByIdData?.category);
     // console.log(getByIdData?.data, 'getby');
     const value = getByIdData?.data;
     setleadNumber(value?.serialNumber);

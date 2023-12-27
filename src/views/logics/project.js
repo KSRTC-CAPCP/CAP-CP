@@ -88,6 +88,7 @@ import {
   MILESTONE_GET,
   PROFILES_CREATE,
   PROFILES_GET,
+  PROFILES_GETBY_STATUS,
   PROFILES_GET_ROLE,
   PROJECT_CREATE,
   PROJECT_DELETE,
@@ -1433,7 +1434,7 @@ const Projects = ({ _history, tasks }) => {
           console.log(parsedData, 'parsed');
           const data = await fetchData(PROJECT_GET, parsedData?.accessToken);
           const data4Rfq = await fetchData(RFQ_GET_STATUS, parsedData?.accessToken);
-          const data4Employee = await fetchData(PROFILES_GET, parsedData?.accessToken);
+          const data4Employee = await fetchData(PROFILES_GETBY_STATUS('active'), parsedData?.accessToken);
           const EmployeeRole = await fetchData(PROFILES_GET_ROLE('Manager'), parsedData?.accessToken);
           const categoryData = await fetchData(MILESTONE_GET);
           setMilestoneOptions(categoryData);

@@ -455,7 +455,7 @@ const BusinessRFQ = () => {
 
       // Reset the customOption state
       setCustomOption('');
-      setSelectedOption('')
+      setSelectedOption('');
       // Show the select input
       setShowSelect(true);
     }
@@ -1090,11 +1090,11 @@ const BusinessRFQ = () => {
     });
     formik.resetForm();
     setUpdateId('');
-    setShowSelect(true)
+    setShowSelect(true);
     setValueForCompany('');
-    
+
     setValueForContact('');
-    setValueForSuggest('')
+    setValueForSuggest('');
     setSelectedOption('');
   };
   const handleClose = () => {
@@ -1631,6 +1631,8 @@ const BusinessRFQ = () => {
                     <MenuItem value={'Testing'}>Testing</MenuItem>
                     <MenuItem value={'software'}>Software</MenuItem>
                     <MenuItem value={'import'}>Import</MenuItem>
+                    <MenuItem value={'export'}>Export</MenuItem>
+                    <MenuItem value={'simulation'}>Simulation</MenuItem>
                     <MenuItem value={'vehicleRental'}>Vehicle Rental</MenuItem>
                     <MenuItem value={'procurement'}>Procurement</MenuItem>
                     <MenuItem value={'scanning&modeling'}>Scanning / Modeling</MenuItem>
@@ -2113,6 +2115,8 @@ const BusinessRFQ = () => {
                     <MenuItem value={'Testing'}>Testing</MenuItem>
                     <MenuItem value={'software'}>Software</MenuItem>
                     <MenuItem value={'import'}>Import</MenuItem>
+                    <MenuItem value={'export'}>Export</MenuItem>
+                    <MenuItem value={'simulation'}>Simulation</MenuItem>
                     <MenuItem value={'vehicleRental'}>Vehicle Rental</MenuItem>
                     <MenuItem value={'procurement'}>Procurement</MenuItem>
                     <MenuItem value={'scanning&modeling'}>Scanning / Modeling</MenuItem>
