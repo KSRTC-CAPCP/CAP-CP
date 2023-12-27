@@ -1,9 +1,10 @@
 import React from 'react'
+import TaskPanel from 'views/task'
 
 const Employee = () => {
   return (
     <div>
-      <h1>Hello</h1>
+      <TaskPanel/>
     </div>
   )
 }
