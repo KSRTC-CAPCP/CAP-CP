@@ -28,13 +28,13 @@ const PersonalDetails = () => {
         <div >
             <Grid container >
                 <Grid item xs={3} p={2}>
-                    <TextField label=" Name " placeholder="Name" fullWidth />
+                    <TextField label=" Name " placeholder="Name" fullWidth required />
                 </Grid>
                 <Grid item xs={3} p={2}>
-                    <TextField label="Surname " placeholder="Surname" fullWidth />
+                    <TextField label="Surname " placeholder="Surname" fullWidth required/>
                 </Grid>
                 <Grid xs={3} p={2}>
-                    <TextField label="Mother Tongue" placeholder="Mother Tongue" fullWidth />
+                    <TextField label="Mother Tongue" placeholder="Mother Tongue" fullWidth required/>
                 </Grid>
                 <Grid xs={3} p={2}>
                     <TextField label="Blood Group" placeholder="Blood Group" fullWidth />
@@ -63,13 +63,14 @@ const PersonalDetails = () => {
                 </Grid>
                 <Grid xs={3} p={2}>
                     <FormControl fullWidth>
-                        <InputLabel id="demo-simple-select-label">Gender</InputLabel>
+                        <InputLabel id="demo-simple-select-label"  required>Gender</InputLabel>
                         <Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
                             value={gender}
                             label="Gender"
                             onChange={handleChange}
+                           
                         >
                             <MenuItem value={10}>Male</MenuItem>
                             <MenuItem value={20}>Female</MenuItem>
@@ -78,28 +79,28 @@ const PersonalDetails = () => {
                     </FormControl>
                 </Grid>
                 <Grid item xs={3} p={2} >
-                    <TextField label="Contact Number" placeholder="Contact Number" fullWidth />
+                    <TextField label="Contact Number" placeholder="Contact Number" fullWidth  required/>
                 </Grid>
                 <Grid item xs={3} p={2}>
                     <TextField label="Emergency Contact Number" placeholder="Emergency Contact Number" fullWidth />
                 </Grid>
                 <Grid item xs={3} p={2}>
-                    <TextField label=" Personal Email ID" placeholder="Personal Email ID" fullWidth />
+                    <TextField label=" Personal Email ID" placeholder="Personal Email ID" fullWidth  required/>
                 </Grid>
                 <Grid item xs={3} p={2}>
-                    <TextField label=" Current Address " placeholder=" Current Address" fullWidth />
+                    <TextField label=" Current Address " placeholder=" Current Address" fullWidth  required/>
                 </Grid>
                 <Grid item xs={3} p={2}>
                     <TextField label=" Permanent Address " placeholder=" Permanent Address" fullWidth />
                 </Grid>
                 <Grid item xs={3} p={2}>
-                    <TextField label=" Aadhaar Number " placeholder=" Aadhaar Number" fullWidth />
+                    <TextField label=" Aadhaar Number " placeholder=" Aadhaar Number" fullWidth  required/>
                 </Grid>
                 <Grid item xs={3} p={2}>
-                    <TextField label=" Pan Number " placeholder=" Pan Number" fullWidth />
+                    <TextField label=" Pan Number " placeholder=" Pan Number" fullWidth  required/>
                 </Grid>
                 <Grid item xs={3} p={2}>
-                    <TextField label=" Driving License Number " placeholder="Driving License Number" fullWidth />
+                    <TextField label=" Driving License Number " placeholder="Driving License Number" fullWidth  required/>
                 </Grid>
                 <Grid xs={3} p={2}>
                     <TextField
