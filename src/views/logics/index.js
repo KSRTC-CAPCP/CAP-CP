@@ -510,15 +510,30 @@ const BusinessLeads = () => {
     }
   };
   const theme = useTheme();
-  const pilotName = leadData.map((data) => ({
-    title: data.Pilot
-  }));
-  const companyName = leadData.map((data) => ({
-    title: data.companyName
-  }));
-  const contactName = leadData.map((data) => ({
-    title: data.contactName
-  }));
+  function getUniqueTitles(dataArray, propertyName) {
+    const uniqueTitlesSet = new Set();
+  
+    const uniqueTitles = dataArray.map((data) => {
+      const title = data[propertyName];
+  
+      // Check if the title is already in the set
+      if (!uniqueTitlesSet.has(title)) {
+        // If not, add it to the set and return the object
+        uniqueTitlesSet.add(title);
+        return { title };
+      }
+  
+      // If the title is already in the set, return null or undefined (skip duplicates)
+      return null;
+    }).filter(Boolean); // Filter out null or undefined values
+  
+    return uniqueTitles;
+  }
+  
+  const pilotName = getUniqueTitles(leadData, 'Pilot');
+  const companyName = getUniqueTitles(leadData, 'companyName');
+  const contactName = getUniqueTitles(leadData, 'contactName');
+  
   const handleExportData = () => {
     // Process the lead data
     const processedLeadData = leadData.map((lead) => {

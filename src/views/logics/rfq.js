@@ -623,15 +623,32 @@ const BusinessRFQ = () => {
     setrfqData(data.data);
   };
 
-  const pilotName = rfqData.map((data) => ({
-    title: data.Pilot
-  }));
-  const companyName = rfqData.map((data) => ({
-    title: data.companyName
-  }));
-  const contactName = rfqData.map((data) => ({
-    title: data.contactName
-  }));
+  function getUniqueTitles(dataArray, propertyName) {
+    const uniqueTitlesSet = new Set();
+
+    const uniqueTitles = dataArray
+      .map((data) => {
+        const title = data[propertyName];
+
+        // Check if the title is already in the set
+        if (!uniqueTitlesSet.has(title)) {
+          // If not, add it to the set and return the object
+          uniqueTitlesSet.add(title);
+          return { title };
+        }
+
+        // If the title is already in the set, return null or undefined (skip duplicates)
+        return null;
+      })
+      .filter(Boolean); // Filter out null or undefined values
+
+    return uniqueTitles;
+  }
+
+  const pilotName = getUniqueTitles(rfqData, 'Pilot');
+  const companyName = getUniqueTitles(rfqData, 'companyName');
+  const contactName = getUniqueTitles(rfqData, 'contactName');
+
   const filter = createFilterOptions();
   const [valueForSuggest, setValueForSuggest] = React.useState(null);
   const [valueForCompany, setValueForCompany] = React.useState(null);
@@ -1336,19 +1353,24 @@ const BusinessRFQ = () => {
                     }
                   }}
                   filterOptions={(options, params) => {
-                    const filtered = filter(options, params);
-
                     const { inputValue } = params;
-                    // Suggest the creation of a new value
+
+                    // Check if the input value is an exact match for any existing option
                     const isExisting = options.some((option) => inputValue === option.title);
+
                     if (inputValue !== '' && !isExisting) {
-                      filtered.push({
-                        inputValue,
-                        title: `Add "${inputValue}"`
-                      });
+                      // If the input value is not an exact match, create a new option
+                      return [
+                        ...options,
+                        {
+                          inputValue,
+                          title: `Add "${inputValue}"`
+                        }
+                      ];
                     }
 
-                    return filtered;
+                    // If the input value is an exact match, just return the existing options
+                    return options;
                   }}
                   selectOnFocus
                   clearOnBlur
@@ -1627,16 +1649,16 @@ const BusinessRFQ = () => {
                     label="Select"
                     placeholder="Select"
                   >
-                    <MenuItem value={'teardown'}>TDBM - Tear Down</MenuItem>
+                    <MenuItem value={'TDBM'}>TDBM - Tear Down</MenuItem>
                     <MenuItem value={'Testing'}>Testing</MenuItem>
-                    <MenuItem value={'software'}>Software</MenuItem>
-                    <MenuItem value={'import'}>Import</MenuItem>
-                    <MenuItem value={'export'}>Export</MenuItem>
-                    <MenuItem value={'simulation'}>Simulation</MenuItem>
-                    <MenuItem value={'vehicleRental'}>Vehicle Rental</MenuItem>
-                    <MenuItem value={'procurement'}>Procurement</MenuItem>
-                    <MenuItem value={'scanning&modeling'}>Scanning / Modeling</MenuItem>
-                    <MenuItem value={'hr'}>Human Resource</MenuItem>
+                    <MenuItem value={'Software'}>Software</MenuItem>
+                    <MenuItem value={'Import'}>Import</MenuItem>
+                    <MenuItem value={'Export'}>Export</MenuItem>
+                    <MenuItem value={'Simulation'}>Simulation</MenuItem>
+                    <MenuItem value={'Vehicle Rental'}>Vehicle Rental</MenuItem>
+                    <MenuItem value={'Procurement'}>Procurement</MenuItem>
+                    <MenuItem value={'Scanning & Modeling'}>Scanning / Modeling</MenuItem>
+                    <MenuItem value={'HR'}>Human Resource</MenuItem>
                   </Select>
                 </FormControl>
                 {formik.touched.businessVertical && formik.errors.businessVertical && (
@@ -1810,19 +1832,24 @@ const BusinessRFQ = () => {
                     }
                   }}
                   filterOptions={(options, params) => {
-                    const filtered = filter(options, params);
-
                     const { inputValue } = params;
-                    // Suggest the creation of a new value
+
+                    // Check if the input value is an exact match for any existing option
                     const isExisting = options.some((option) => inputValue === option.title);
+
                     if (inputValue !== '' && !isExisting) {
-                      filtered.push({
-                        inputValue,
-                        title: `Add "${inputValue}"`
-                      });
+                      // If the input value is not an exact match, create a new option
+                      return [
+                        ...options,
+                        {
+                          inputValue,
+                          title: `Add "${inputValue}"`
+                        }
+                      ];
                     }
 
-                    return filtered;
+                    // If the input value is an exact match, just return the existing options
+                    return options;
                   }}
                   selectOnFocus
                   clearOnBlur
@@ -2111,16 +2138,16 @@ const BusinessRFQ = () => {
                     label="Select"
                     placeholder="Select"
                   >
-                    <MenuItem value={'teardown'}>TDBM - Tear Down</MenuItem>
+                    <MenuItem value={'TDBM'}>TDBM - Tear Down</MenuItem>
                     <MenuItem value={'Testing'}>Testing</MenuItem>
-                    <MenuItem value={'software'}>Software</MenuItem>
-                    <MenuItem value={'import'}>Import</MenuItem>
-                    <MenuItem value={'export'}>Export</MenuItem>
-                    <MenuItem value={'simulation'}>Simulation</MenuItem>
-                    <MenuItem value={'vehicleRental'}>Vehicle Rental</MenuItem>
-                    <MenuItem value={'procurement'}>Procurement</MenuItem>
-                    <MenuItem value={'scanning&modeling'}>Scanning / Modeling</MenuItem>
-                    <MenuItem value={'hr'}>Human Resource</MenuItem>
+                    <MenuItem value={'Software'}>Software</MenuItem>
+                    <MenuItem value={'Import'}>Import</MenuItem>
+                    <MenuItem value={'Export'}>Export</MenuItem>
+                    <MenuItem value={'Simulation'}>Simulation</MenuItem>
+                    <MenuItem value={'Vehicle Rental'}>Vehicle Rental</MenuItem>
+                    <MenuItem value={'Procurement'}>Procurement</MenuItem>
+                    <MenuItem value={'Scanning & Modeling'}>Scanning / Modeling</MenuItem>
+                    <MenuItem value={'HR'}>Human Resource</MenuItem>
                   </Select>
                 </FormControl>
                 {formik.touched.businessVertical && formik.errors.businessVertical && (

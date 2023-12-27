@@ -36,21 +36,33 @@ import {
   FormLabel,
   LinearProgress,
   FormHelperText,
-  Card
+  Card,
+  Tab
 } from '@mui/material';
 import React, { forwardRef } from 'react';
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
 import MainCard from 'ui-component/cards/MainCard';
 import { useTheme } from '@mui/material/styles';
 import { IconDownload, IconEdit, IconEye, IconHistoryToggle, IconPlus, IconTrash, IconUpload } from '@tabler/icons';
 import { MaterialReactTable, createMRTColumnHelper, useMaterialReactTable } from 'material-react-table';
 import { mkConfig, generateCsv, download } from 'export-to-csv';
 import * as XLSX from 'xlsx';
+import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
+import EmailTwoToneIcon from '@mui/icons-material/EmailTwoTone';
+import PhonelinkRingTwoToneIcon from '@mui/icons-material/PhonelinkRingTwoTone';
+import PinDropTwoToneIcon from '@mui/icons-material/PinDropTwoTone';
+import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
+import DescriptionTwoToneIcon from '@mui/icons-material/DescriptionTwoTone';
+import Diversity2TwoToneIcon from '@mui/icons-material/Diversity2TwoTone';
+import EngineeringTwoToneIcon from '@mui/icons-material/EngineeringTwoTone';
+import AccountBalanceTwoToneIcon from '@mui/icons-material/AccountBalanceTwoTone';
+import ArticleTwoToneIcon from '@mui/icons-material/ArticleTwoTone';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
 import {
   ConnectWithoutContact,
+  CurrencyRupee,
   Delete,
   DeleteRounded,
   Group,
@@ -70,6 +82,9 @@ import {
 import { useState } from 'react';
 import styled from '@emotion/styled';
 import {
+  TabContext,
+  TabList,
+  TabPanel,
   Timeline,
   TimelineConnector,
   TimelineContent,
@@ -81,10 +96,12 @@ import {
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { DatePicker } from 'rsuite';
 import {
+  MANAGERS_PROJECT,
   MILESTONE_CREATE,
   MILESTONE_GET,
   PROFILES_CREATE,
   PROFILES_GET,
+  PROFILES_GET_ID,
   PROFILES_GET_ROLE,
   PROJECT_CREATE,
   PROJECT_DELETE,
@@ -119,13 +136,13 @@ const data = [
   }
 ];
 const columns = [
-  columnHelper.accessor('projectname', {
-    header: 'Project Name'
+  columnHelper.accessor('projectName', {
+    header: 'Title'
   }),
   columnHelper.accessor('projectNumber', {
-    header: 'Project Number'
+    header: 'Ref Number'
   }),
-  columnHelper.accessor('companyname', {
+  columnHelper.accessor('companyName', {
     header: 'Company Name'
   }),
   columnHelper.accessor('assignedDate', {
@@ -150,7 +167,7 @@ const columns = [
   columnHelper.accessor('description', {
     header: 'Description'
   }),
-  columnHelper.accessor('milestone', {
+  columnHelper.accessor('milestone1', {
     header: 'MileStone'
   })
 ];
@@ -223,6 +240,7 @@ const Manager = ({ _history, tasks }) => {
   };
   const [profilesData, setProfilesData] = useState([]);
   const [managerData, setManagerData] = useState([]);
+  const [employeeDetail, setEmployeeDetail] = useState();
   const [managerId, setManagerId] = useState('');
   const handleEmployee = (e) => {
     console.log(e.target.value.slice(0, 7), 'its worked');
@@ -420,7 +438,11 @@ const Manager = ({ _history, tasks }) => {
       enableEditing: true
     }
   ];
+  const [value, setValue] = React.useState('1');
 
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
   const [selectedDate, setSelectedDate] = useState('');
   const parseDate = (dateString) => {
     // Check if dateString is provided and is a non-empty string
@@ -566,42 +588,42 @@ const Manager = ({ _history, tasks }) => {
         if (editId) {
           const teamsValue = teamData
             ? teamData.map((item) => ({
-              fromDate: item.fromDate,
-              employeeCode: item.employeeCode?.slice(0, 7),
-              employeeId: managerId?._id,
-              toDate: item.toDate,
-              location: item.location,
-              percentage: Number(item.percentage),
-              team: item.team
-            }))
+                fromDate: item.fromDate,
+                employeeCode: item.employeeCode?.slice(0, 7),
+                employeeId: managerId?._id,
+                toDate: item.toDate,
+                location: item.location,
+                percentage: Number(item.percentage),
+                team: item.team
+              }))
             : [];
           const historyValue = historyTableData
             ? historyTableData.map((data) => ({
-              date: data.date,
-              projectDescription: data.projectDescription,
-              requestStatus: data.requestStatus,
-              approvalStatus: data.approvalStatus
-            }))
+                date: data.date,
+                projectDescription: data.projectDescription,
+                requestStatus: data.requestStatus,
+                approvalStatus: data.approvalStatus
+              }))
             : [];
           const taskValue = taskTableData
             ? taskTableData.map((data) => ({
-              title: data.title,
-              description: data.description,
-              responsible: data.responsible,
-              remarks: data.remarks,
-              assignedDate: data.assignedDate,
-              targetDate: data.targetDate,
-              status: data.status
-            }))
+                title: data.title,
+                description: data.description,
+                responsible: data.responsible,
+                remarks: data.remarks,
+                assignedDate: data.assignedDate,
+                targetDate: data.targetDate,
+                status: data.status
+              }))
             : [];
           const financeValue = financeData
             ? financeData.map((data) => ({
-              date: data.date,
-              refNumber: data.refNumber,
-              amount: data.amount,
-              tax: data.tax,
-              status: data.status
-            }))
+                date: data.date,
+                refNumber: data.refNumber,
+                amount: data.amount,
+                tax: data.tax,
+                status: data.status
+              }))
             : [];
           console.log(values, 'upd');
           const formattedData = {
@@ -627,42 +649,42 @@ const Manager = ({ _history, tasks }) => {
           console.log('handle submit', values, startDate, endDate);
           const teamsValue = teamData
             ? teamData.map((item) => ({
-              fromDate: item.fromDate,
-              employeeCode: item.employeeCode?.slice(0, 7),
-              employeeId: managerId?._id,
-              toDate: item.toDate,
-              location: item.location,
-              percentage: Number(item.percentage),
-              team: item.team
-            }))
+                fromDate: item.fromDate,
+                employeeCode: item.employeeCode?.slice(0, 7),
+                employeeId: managerId?._id,
+                toDate: item.toDate,
+                location: item.location,
+                percentage: Number(item.percentage),
+                team: item.team
+              }))
             : [];
           const historyValue = historyTableData
             ? historyTableData.map((data) => ({
-              date: data.date,
-              projectDescription: data.description,
-              requestStatus: data.requeststatus,
-              approvalStatus: data.approvalstatus
-            }))
+                date: data.date,
+                projectDescription: data.description,
+                requestStatus: data.requeststatus,
+                approvalStatus: data.approvalstatus
+              }))
             : [];
           const taskValue = taskTableData
             ? taskTableData.map((data) => ({
-              title: data.title,
-              description: data.description,
-              responsible: data.responsible,
-              remarks: data.remarks,
-              assignedDate: data.assigneddate,
-              targetDate: data.targetdate,
-              status: data.status
-            }))
+                title: data.title,
+                description: data.description,
+                responsible: data.responsible,
+                remarks: data.remarks,
+                assignedDate: data.assigneddate,
+                targetDate: data.targetdate,
+                status: data.status
+              }))
             : [];
           const financeValue = financeData
             ? financeData.map((data) => ({
-              date: data.date,
-              refNumber: data.refNumber,
-              amount: data.amount,
-              tax: data.tax,
-              status: data.status
-            }))
+                date: data.date,
+                refNumber: data.refNumber,
+                amount: data.amount,
+                tax: data.tax,
+                status: data.status
+              }))
             : [];
           const formattedData = {
             ...values,
@@ -695,7 +717,9 @@ const Manager = ({ _history, tasks }) => {
   const [editId, setEditId] = useState('');
   const [open, setOpen] = useState(false);
   const fetchFun = async () => {
-    const data = await fetchData(PROJECT_GET, localData?.accessToken);
+    const data = await fetchData(MANAGERS_PROJECT(employeeDetail?.EmployeeCode), localData?.accessToken);
+    console.log(data, 'datadatadata');
+    // const data = await fetchData(PROJECT_GET, localData?.accessToken);
     setProjectData(data.data);
   };
   const handleDelete = (e) => {
@@ -773,10 +797,11 @@ const Manager = ({ _history, tasks }) => {
         <IconButton onClick={() => handleView(row)}>
           <VisibilityRounded style={{ color: '#2196f3' }} />
         </IconButton>
-        <Link to='/task-panel' >
-        <IconButton >
-        <IconPlus style={{ color: '#2196f3' }}/>
-        </IconButton></Link>
+        <Link to="/task-panel">
+          <IconButton>
+            <IconPlus style={{ color: '#2196f3' }} />
+          </IconButton>
+        </Link>
       </div>
     ),
     enableRowSelection: true,
@@ -803,7 +828,10 @@ const Manager = ({ _history, tasks }) => {
       </>
     )
   });
-
+  const [isFilter, setIsFilter] = useState('getProject');
+  const handleFilter = (e) => {
+    setIsFilter(e.target.value);
+  };
   //Project
   const handleSaveRowProject = (newData, oldData) => {
     console.log('handleSaveRowProject - newData:', newData);
@@ -1368,7 +1396,6 @@ const Manager = ({ _history, tasks }) => {
   console.log(startDate, '11111111111111');
   useEffect(() => {
     const fetchDataAndUpdate = async () => {
-      console.log('inside useeffect');
       try {
         const localStore = localStorage.getItem('userData');
         console.log(localStore, 'inside localStore');
@@ -1379,14 +1406,18 @@ const Manager = ({ _history, tasks }) => {
         if (localStore) {
           const parsedData = JSON.parse(localStore);
           console.log(parsedData, 'parsed');
-          const data = await fetchData(PROJECT_GET, parsedData?.accessToken);
+          const EmployeeCode = await fetchData(PROFILES_GET_ID(parsedData?.employeeId), parsedData?.accessToken);
+          const data = await fetchData(MANAGERS_PROJECT(EmployeeCode?.EmployeeCode), parsedData?.accessToken);
+          console.log(data, 'datadatadata');
           const data4Rfq = await fetchData(RFQ_GET, parsedData?.accessToken);
           const data4Employee = await fetchData(PROFILES_GET_ROLE('Employee'), parsedData?.accessToken);
           const EmployeeRole = await fetchData(PROFILES_GET_ROLE('Manager'), parsedData?.accessToken);
           const categoryData = await fetchData(MILESTONE_GET);
           setMilestoneOptions(categoryData);
           setManagerData(EmployeeRole?.data);
+          setEmployeeDetail(EmployeeCode);
           console.log(EmployeeRole, 'EmployeeRole');
+          console.log(EmployeeCode, 'EmployeeCode');
           setProfilesData(data4Employee?.data);
           setRFQData(data4Rfq?.data);
           console.log(data, 'parsedddd');
@@ -1405,48 +1436,184 @@ const Manager = ({ _history, tasks }) => {
   console.log(endDate, '2 date');
   return (
     <div className="max">
-
       {view.mode === 'Initial' && (
-        <MainCard
-          title="Manager Panel"
-          secondary={
-            <Box
-              sx={{
-                ml: 2,
-                // mr: 3,
-                [theme.breakpoints.down('md')]: {
-                  mr: 2
-                }
-              }}
-            >
-               <ButtonBase sx={{ borderRadius: '12px' }}>
-                {/* <Avatar
-                  variant="rounded"
+        <MainCard>
+          <Box sx={{ width: '100%', typography: 'body1' }}>
+            <TabContext value={value}>
+              <Box className="pe-1" sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems:'center' }}>
+                <TabList onChange={handleChange} aria-label="lab API tabs example">
+                  <Tab
+                    label={<div style={{ display: 'flex', alignItems: 'center' }}>Project Logs</div>}
+                    value="1"
+                    style={{ fontSize: '15px' }}
+                  />
+                  <Tab
+                    label={<div style={{ display: 'flex', alignItems: 'center' }}>Attendance Logs</div>}
+                    value="2"
+                    style={{ fontSize: '15px' }}
+                  />
+                  <Tab
+                    label={<div style={{ display: 'flex', alignItems: 'center' }}>Leave Logs</div>}
+                    value="3"
+                    style={{ fontSize: '15px' }}
+                  />
+                </TabList>
+                <Button
+                  // onClick={() => handleView(row)}
                   sx={{
-                    ...theme.typography.commonAvatar,
-                    ...theme.typography.mediumAvatar,
-                    transition: 'all .2s ease-in-out',
-                    background: theme.palette.secondary.light,
-                    color: theme.palette.secondary.dark,
-                    '&[aria-controls="menu-list-grow"],&:hover': {
-                      background: theme.palette.secondary.dark,
-                      color: theme.palette.secondary.light
+                    backgroundColor: '#ede7f6',
+                    color: '#5e35b1',
+                    transition: 'background-color 0.3s',
+                    padding: "5px 15px",
+                    '&:hover': {
+                      backgroundColor: '#5e35b1',
+                      color: '#ede7f6'
                     }
                   }}
-                  aria-haspopup="true"
-                  onClick={handleToggle}
-                  color="inherit"
                 >
-                 
-                </Avatar> */}
-              </ButtonBase>
-            </Box>
-          }
-        >
-          <MaterialReactTable table={table} />
+                  Overall Tasks
+                </Button>
+              </Box>
+              <TabPanel value="1">
+                <MaterialReactTable table={table} />
+              </TabPanel>
+              <TabPanel value="2">
+                <div className="d-flex align-iteam-center">
+                  <Card className="card-style">
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div className="profile-container">
+                        <Avatar
+                          alt="Remy Sharp"
+                          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDkx7MKWlJ53IVpHCSTOf4UixgZ16UXWQDqQ&usqp=CAU"
+                          className="avatar"
+                        />
+                        <div className="text-container">
+                          <h5>Darla Josh</h5>
+                          <span>Developer</span>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: '30px' }} className="text-muted">
+                        <p>Logged In : 12.00PM</p>
+                      </div>
+                    </div>
+                    <Divider />
+                    <div className="p-2">
+                      <div className="d-flex justify-content-between align-items-center contact-section p-2">
+                        <div style={{ display: 'flex', alignItems: 'center', marginLeft: '35px' }}>
+                          <EmailTwoToneIcon />
+                          <h6 style={{ margin: '0 0 0 5px' }}>Email</h6>
+                        </div>
+
+                        <div className="text-muted">
+                          <span>Tharavasu@gmail.com</span>
+                        </div>
+                      </div>
+                      <Divider />
+                      <div className="d-flex justify-content-between align-items-center contact-section p-2">
+                        <div style={{ display: 'flex', alignItems: 'center', marginLeft: '35px' }}>
+                          <PhonelinkRingTwoToneIcon />
+                          <h6 style={{ margin: '0 0 0 5px' }}>Phone</h6>
+                        </div>
+
+                        <div className="text-muted">
+                          <span>(+91) 2345678945</span>
+                        </div>
+                      </div>
+                      <Divider />
+                      <div className="d-flex justify-content-between align-items-center contact-section p-2 ">
+                        <div style={{ display: 'flex', alignItems: 'center', marginLeft: '35px' }}>
+                          <PinDropTwoToneIcon />
+                          <h6 style={{ margin: '0 0 0 5px' }}>Location</h6>
+                        </div>
+
+                        <div className="text-muted">
+                          <span>Poonamallee</span>
+                        </div>
+                      </div>
+                      <div className="d-flex justify-content-between align-iteam-center mar-top ">
+                        <div>
+                          <h6 className="centered">5</h6>
+                          <span className="text-muted">PROJECT</span>
+                        </div>
+                        <div>
+                          <h6 className="centered">10</h6>
+                          <span className="text-muted">TASK</span>
+                        </div>
+                        <div>
+                          <h6 className="centered">7/10</h6>
+                          <span className="text-muted"> PERFORMANCE</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                  <Card>
+                    <div className="d-flex justify-content-between align-iteam-center">
+                      <h6 className="h5margin">About Me</h6>
+                      <div
+                        style={{
+                          backgroundColor: '#ede7f6',
+                          borderRadius: '10px',
+                          padding: '6px',
+                          display: 'inline-block',
+                          marginTop: '24px'
+                        }}
+                      >
+                        <EditTwoToneIcon style={{ color: '#663fb5', marginBottom: '0.9px' }} />
+                      </div>
+                    </div>
+                    <hr />
+                    <p className="ptag text-muted">
+                      Hello,I’m Anshan Handgun Creative Graphic Designer & User Experience Designer based in Website, I create digital
+                      Products a more Beautiful and usable place. Morbid accusant ipsum. Nam nec tellus at.
+                    </p>
+                    <br />
+                    <h6 style={{ marginLeft: '24px' }}>Personal Details</h6>
+                    <br />
+                    <div className="name-list">
+                      <Grid className="d-flex align-items-center">
+                        <Grid style={{ fontWeight: 'bolder' }}>Full Name</Grid>
+                        <Grid>:</Grid>
+                        <Grid> JWT User</Grid>
+                      </Grid>
+                      <Grid className="d-flex align-items-center">
+                        <Grid style={{ fontWeight: 'bolder' }}>Fathers Name</Grid>
+                        <Grid>:</Grid>
+                        <Grid> Mr. Deepen Handgun</Grid>
+                      </Grid>
+                      <Grid className="d-flex align-items-center">
+                        <Grid style={{ fontWeight: 'bolder' }}>Address</Grid>
+                        <Grid>:</Grid>
+                        <Grid> Street 110-B Kalians Bag, Dewan, M.P. INDIA</Grid>
+                      </Grid>
+                      <Grid className="d-flex align-items-center">
+                        <Grid style={{ fontWeight: 'bolder' }}>Zip Code</Grid>
+                        <Grid>:</Grid>
+                        <Grid> 12345</Grid>
+                      </Grid>
+                      <Grid className="d-flex align-items-center">
+                        <Grid style={{ fontWeight: 'bolder' }}>Phone</Grid>
+                        <Grid>:</Grid>
+                        <Grid> +0 123456789 , +0 123456789</Grid>
+                      </Grid>
+                      <Grid className="d-flex align-items-center">
+                        <Grid style={{ fontWeight: 'bolder' }}> Email</Grid>
+                        <Grid>:</Grid>
+                        <Grid> support@example.com</Grid>
+                      </Grid>
+                      <Grid className="d-flex align-items-center">
+                        <Grid style={{ fontWeight: 'bolder' }}>Website</Grid>
+                        <Grid>:</Grid>
+                        <Grid> http://example.com</Grid>
+                      </Grid>
+                    </div>
+                  </Card>
+                </div>
+              </TabPanel>
+            </TabContext>
+          </Box>
         </MainCard>
       )}
-     
+
       {view.mode === 'View' && (
         <>
           <MainCard
@@ -1486,75 +1653,61 @@ const Manager = ({ _history, tasks }) => {
             }
           >
             <Grid container m={3}>
-              <Grid xs={6}>
+              <Grid xs={12}>
                 <Grid container>
-                  <Grid xs={6} p={2}>
+                  <Grid xs={3} p={2}>
                     <label className="text-muted">Project Number</label>
                     <p>{viewId?.projectNumber}</p>
                   </Grid>
-                  <Grid xs={6} p={2}>
+                  <Grid xs={3} p={2}>
                     <label className="text-muted">Project Name</label>
                     <p>{viewId?.projectName}</p>
                   </Grid>
-                  <Grid xs={6} p={2}>
+                  <Grid xs={3} p={2}>
                     <label className="text-muted">RFQ Number</label>
                     <p>{viewId?.rfqNumber}</p>
                   </Grid>
-                  <Grid xs={6} p={2}>
+                  <Grid xs={3} p={2}>
                     <label className="text-muted">Company Name</label>
                     <p>{viewId?.companyName}</p>
                   </Grid>
-                  <Grid xs={6} p={2}>
+                  <Grid xs={3} p={2}>
                     <label className="text-muted">Assigned Date</label>
                     <p>{viewId?.assignedDate?.slice(0, 10)}</p>
                   </Grid>
-                  <Grid xs={6} p={2}>
+                  <Grid xs={3} p={2}>
                     <label className="text-muted">Target Date</label>
                     <p>{viewId?.targetDate?.slice(0, 10)}</p>
                   </Grid>
-                  <Grid xs={6} p={2}>
+                  <Grid xs={3} p={2}>
                     <label className="text-muted">Description</label>
                     <p>{viewId?.description}</p>
                   </Grid>
-                  <Grid xs={6} p={2}>
+                  <Grid xs={3} p={2}>
                     <label className="text-muted">Manager</label>
                     <p>{viewId?.manager}</p>
                   </Grid>
-                  <Grid xs={6} p={2}>
-                    <label className="text-muted">MileStone</label>
-                    <p>{viewId?.milestone}</p>
+                  <Grid xs={3} p={2}>
+                    <label className="text-muted">MileStone 1</label>
+                    <p>{viewId?.milestone1 ? viewId?.milestone1 : '-'}</p>
+                  </Grid>
+                  <Grid xs={3} p={2}>
+                    <label className="text-muted">MileStone 2</label>
+                    <p>{viewId?.milestone2 ? viewId?.milestone2 : '-'}</p>
+                  </Grid>
+                  <Grid xs={3} p={2}>
+                    <label className="text-muted">MileStone 3</label>
+                    <p>{viewId?.milestone3 ? viewId?.milestone3 : '-'}</p>
+                  </Grid>
+                  <Grid xs={3} p={2}>
+                    <label className="text-muted">MileStone 4</label>
+                    <p>{viewId?.milestone4 ? viewId?.milestone4 : '-'}</p>
+                  </Grid>
+                  <Grid xs={3} p={2}>
+                    <label className="text-muted">MileStone 5</label>
+                    <p>{viewId?.milestone5 ? viewId?.milestone5 : '-'}</p>
                   </Grid>
                 </Grid>
-              </Grid>
-              <Grid xs={6}>
-                <TableContainer component={Paper}>
-                  <MainCard title="Finance History">
-                    <Table aria-label="simple table">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Date</TableCell>
-                          <TableCell align="right">Ref No/Bill</TableCell>
-                          <TableCell align="right">Amount</TableCell>
-                          <TableCell align="right">Tax</TableCell>
-                          <TableCell align="right">Status</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {Financeviewrows.map((row) => (
-                          <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                            <TableCell component="th" scope="row">
-                              {row.Date}
-                            </TableCell>
-                            <TableCell align="right">{row.Ref}</TableCell>
-                            <TableCell align="right">{row.Amount}</TableCell>
-                            <TableCell align="right">{row.Tax}</TableCell>
-                            <TableCell align="right">{row.Status}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </MainCard>
-                </TableContainer>
               </Grid>
             </Grid>
             <Grid container p={3}>
@@ -1566,7 +1719,6 @@ const Manager = ({ _history, tasks }) => {
                       <Box
                         sx={{
                           ml: 2,
-
                           [theme.breakpoints.down('md')]: {
                             mr: 2
                           }
@@ -1595,37 +1747,50 @@ const Manager = ({ _history, tasks }) => {
                       </Box>
                     }
                   >
-                    {viewId?.projectAllocation.map((data) => (
-                      <Card sx={{ margin: '1rem', padding: '1rem' }} className="card-hovered">
-                        <div className="d-flex justify-content-between">
-                          <div className="d-flex">
-                            {/* <Avatar sx={{ bgcolor: '#ede7f6', color: '#5e35b1' }}>{data?.employeeName[0]}</Avatar> */}
-                            <div className="ms-1">
-                              <p className="avatar-name">{data?.employeeCode}</p>
-                              <div className="d-flex align-items-center">
-                                <p className="text-muted-light m-0">{data?.team}</p> &nbsp; /
-                                <div>
-                                  <PeopleAltTwoTone style={{ fontSize: 'medium' }} />
-                                  <span className="ms-01">{data.location}</span>
+                    <Grid container p={2}>
+                      {viewId?.projectAllocation?.map((data) => (
+                        <Grid xs={3} p={2}>
+                          <Card sx={{ margin: '1rem', padding: '1rem' }} className="card-hovered">
+                            <div className="">
+                              <div className="">
+                                <div className="d-flex align-items-center w-100" style={{ justifyContent: 'space-between' }}>
+                                  <div>
+                                    <p className="avatar-name">{data?.employeeName}</p>
+                                    <p className="avatar-name">{data?.employeeCode}</p>
+                                  </div>
+                                  <div>
+                                    <Avatar sx={{ bgcolor: '#ede7f6', color: '#5e35b1', width: '60px', height: '60px' }}>
+                                      {data?.employeeName ? data?.employeeName[0] : ''}
+                                    </Avatar>
+                                  </div>
+                                </div>
+                                <div className="d-flex align-items-center">
+                                  <p className="text-muted-light m-0">{data?.team}</p> / &nbsp;
+                                  <div className="d-flex align-items-center">
+                                    <LocationOnTwoTone style={{ fontSize: 'medium' }} />
+                                    <span className="">{data.location}</span>
+                                  </div>
                                 </div>
                               </div>
+                              <div className="">
+                                <p className="text-muted-light m-0">Assigned Date : &nbsp; {data?.fromDate}</p>
+                                <p className="text-muted-light m-0">Target Date : &nbsp; {data?.toDate}</p>
+                                <div className="d-flex justify-content-end">
+                                  <p
+                                    className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${
+                                      data?.status === 'completed' ? 'badge-success max-width' : ''
+                                    }${data?.status === 'not-started' ? 'badge-danger max-width' : ''}`}
+                                  >
+                                    {data?.statusRequest} {data?.status}
+                                  </p>
+                                </div>
+                              </div>
+                              {/* <Progress value={'12'} /> */}
                             </div>
-                          </div>
-                          <div className="float-end">
-                            <p className="text-muted-light m-0 text-end">Assigned Date : &nbsp; {data?.fromDate}</p>
-                            <p className="text-muted-light m-0 text-end">Target Date : &nbsp; {data?.toDate}</p>
-                            <div className="d-flex justify-content-end">
-                              <p
-                                className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${data?.status === 'completed' ? 'badge-success max-width' : ''
-                                  }${data?.status === 'not-started' ? 'badge-danger max-width' : ''}`}
-                              >
-                                {data?.statusRequest} {data?.status}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
+                          </Card>
+                        </Grid>
+                      ))}
+                    </Grid>
                   </MainCard>
                 </div>
               </Grid>
@@ -1665,53 +1830,109 @@ const Manager = ({ _history, tasks }) => {
                         </ButtonBase>
                       </Box>
                     }
-                  ></MainCard>
-                </div>
-              </Grid>
-              <Grid xs={8} p={2}>
-                <div className="task-container">
-                  <MainCard
-                    title="Task"
-                    secondary={
-                      <Box
-                        sx={{
-                          ml: 2,
-                          [theme.breakpoints.down('md')]: {
-                            mr: 2
-                          }
-                        }}
-                      >
-                        <ButtonBase sx={{ borderRadius: '12px' }}>
-                          <Avatar
-                            variant="rounded"
-                            sx={
-                              {
-                                // Avatar styles
-                              }
-                            }
-                            aria-haspopup="true"
-                            color="inherit"
-                          >
-                            <TaskAlt stroke={2} size="1.3rem" />
-                          </Avatar>
-                        </ButtonBase>
-                      </Box>
-                    }
                   >
-                    {tasks &&
-                      Array.isArray(tasks) &&
-                      tasks.map((data, index) => (
-                        <Card key={index} sx={{ margin: '1rem', padding: '1rem' }} className="card-hover">
-                          <Typography variant="h6" component="span">
-                            {data?.title}
-                          </Typography>
-                          <Typography variant="body1">{data?.description}</Typography>
-                        </Card>
+                    <Timeline>
+                      {viewId?.history?.map((item) => (
+                        <TimelineItem>
+                          <TimelineOppositeContent style={{ display: 'none' }}></TimelineOppositeContent>
+                          <TimelineSeparator>
+                            <TimelineDot color="secondary">
+                              {/* {item.statusRequest === 'newlead' && <PersonAdd />}
+                              {item.statusRequest === 'Contact Establish' && <ConnectWithoutContact />}
+                              {item.statusRequest === 'Technicle Meeting' && <Group />}
+                              {item.statusRequest === 'Hold' && <NotStarted />}
+                              {item.statusRequest === 'Reject' && <ThumbDown />}
+                              {item.statusRequest === 'Move to RFQ' && <ThumbUpSharp />} */}
+                            </TimelineDot>
+                            <TimelineConnector />
+                          </TimelineSeparator>
+                          <TimelineContent>
+                            <Typography variant="h6" component="span" className="text-muted">
+                              {item.date?.slice(0, 10)}
+                            </Typography>
+                            <br />
+                            <Typography variant="h6" component="span" className="strong">
+                              {item.requestStatus} &nbsp; - &nbsp;
+                              {item.approvalStatus === '' ? 'Pending' : item.approvalStatus}
+                            </Typography>
+                            <li> {item.projectDescription}</li>
+                          </TimelineContent>
+                        </TimelineItem>
                       ))}
+                    </Timeline>
                   </MainCard>
                 </div>
               </Grid>
-              <Grid></Grid>
+              <Grid xs={8} p={3}>
+                <Grid xs={12}>
+                  <div className="task-container">
+                    <MainCard
+                      title="Task"
+                      secondary={
+                        <Box
+                          sx={{
+                            ml: 2,
+                            [theme.breakpoints.down('md')]: {
+                              mr: 2
+                            }
+                          }}
+                        >
+                          <ButtonBase sx={{ borderRadius: '12px' }}>
+                            <Avatar
+                              variant="rounded"
+                              sx={{
+                                ...theme.typography.commonAvatar,
+                                ...theme.typography.mediumAvatar,
+                                transition: 'all .2s ease-in-out',
+                                background: theme.palette.secondary.light,
+                                color: theme.palette.secondary.dark,
+                                '&[aria-controls="menu-list-grow"],&:hover': {
+                                  background: theme.palette.secondary.dark,
+                                  color: theme.palette.secondary.light
+                                }
+                              }}
+                              aria-haspopup="true"
+                              color="inherit"
+                            >
+                              <TaskAlt stroke={2} size="1.3rem" />
+                            </Avatar>
+                          </ButtonBase>
+                        </Box>
+                      }
+                    >
+                      {viewId?.task?.map((data) => (
+                        <div>
+                          <Grid container>
+                            <Grid xs={4} className="d-flex border-left ">
+                              <Avatar sx={{ bgcolor: '#ede7f6', color: '#5e35b1', marginTop: '15px' }}>
+                                {data?.responsible ? data?.responsible[0] : ''}
+                              </Avatar>
+                              <div className="ms-1">
+                                <p className="avatar-name">{data?.responsible}</p>
+                                <p className="text-muted-light m-0">Assigned Date : &nbsp; {data?.assignedDate?.slice(0, 10)}</p>
+                                <p className="text-muted-light m-0">Target Date : &nbsp; {data?.targetDate?.slice(0, 10)}</p>
+                              </div>
+                            </Grid>
+                            <Grid xs={8}>
+                              <div className="ms-1">
+                                <p className="text-muted m-0">{data?.title}</p>
+                                <p className="m-0">
+                                  <span>{data?.description}</span>
+                                </p>
+                                <p className="text-muted m-0">Remarks</p>
+                                <p className="m-0">
+                                  <span> {data?.remarks}</span>
+                                </p>
+                              </div>
+                              <hr />
+                            </Grid>
+                          </Grid>
+                        </div>
+                      ))}
+                    </MainCard>
+                  </div>
+                </Grid>
+              </Grid>
             </Grid>
           </MainCard>
         </>

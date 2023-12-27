@@ -3,14 +3,14 @@ import { Card, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, I
 import { Box } from '@mui/system';
 import React from 'react'
 import MainCard from 'ui-component/cards/MainCard'
-import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
 import Avatar from '@mui/material/Avatar';
 import './userDetails.css';
+import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
 import EmailTwoToneIcon from '@mui/icons-material/EmailTwoTone';
 import PhonelinkRingTwoToneIcon from '@mui/icons-material/PhonelinkRingTwoTone';
 import PinDropTwoToneIcon from '@mui/icons-material/PinDropTwoTone';
-import { Divider, Grid } from 'rsuite';
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
+import { Divider, Grid } from 'rsuite';
 import PersonalDetails from './Details/PersonalDetails';
 import Button from '@mui/material/Button';
 import { useState } from 'react';
