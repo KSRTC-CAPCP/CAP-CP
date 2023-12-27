@@ -1,128 +1,145 @@
-import { Card, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, TextField, } from '@mui/material'
+/*eslint-disable */
+
+import { FormControl, InputLabel, MenuItem, Select, TextField, } from '@mui/material'
 import React from 'react'
 import { Grid } from '@mui/material'
-import { Avatar, Button } from 'rsuite';
-import { useRef } from 'react';
+
+
 
 
 const PersonalDetails = () => {
 
+    const handleNextClick = () => {
 
-
-    const fileInputRef = useRef(null);
-
-    const handleFileUpload = () => {
-        if (fileInputRef.current) {
-            fileInputRef.current.click();
-        }
+        window.location.href = '/user-detail';
     };
 
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        // Process the file as needed (e.g., upload to server, display preview, etc.)
-        console.log('Uploaded file:', file);
+
+
+    const [gender, setGender] = React.useState('');
+
+    const handleChange = (event) => {
+        setGender(event.target.value);
     };
+
+
     return (
-        <div>
-            <Card style={{ width: '80%', margin: 'auto', marginTop: '5px', padding: '0px' }}>
-                <h5 style={{ marginTop: '30px', marginLeft: '40px' }}>Personal Details</h5>
 
+        <div >
+            <Grid container >
+                <Grid item xs={3} p={2}>
+                    <TextField label=" Name " placeholder="Name" fullWidth />
+                </Grid>
+                <Grid item xs={3} p={2}>
+                    <TextField label="Surname " placeholder="Surname" fullWidth />
+                </Grid>
+                <Grid xs={3} p={2}>
+                    <TextField label="Mother Tongue" placeholder="Mother Tongue" fullWidth />
+                </Grid>
+                <Grid xs={3} p={2}>
+                    <TextField label="Blood Group" placeholder="Blood Group" fullWidth />
+                </Grid>
+                <Grid xs={3} p={2}>
+                    <TextField label="Education Qualification" placeholder="Education Qualification" fullWidth />
+                </Grid>
+                <Grid xs={3} p={2}>
+                    <TextField label="Year Of Graduation" placeholder="Year Of Graduation" fullWidth />
+                </Grid>
+                <Grid xs={3} p={2}>
+                    <TextField
+                        id="date-picker-birth"
+                        label="Date Of Birth"
+                        type="date"
+                        variant="outlined"
+                        fullWidth
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        InputProps={{
+                            placeholder: 'Date Of Birth',
 
-                <hr />
-                <div style={{ paddingLeft: '150px' }}>
-                    <Grid container spacing={2}>
-                        <Grid item xs={6} p={3}>
-                            <TextField label="Full Name With Initial" placeholder="Name" sx={{ width: '80%' }} />
-                        </Grid>
-                        <Grid item xs={6} p={3}>
-                            <TextField label="Employee ID" placeholder="Employee Id" sx={{ width: '80%' }} />
-                        </Grid>
-                        <Grid item xs={6} p={3}>
-                            <TextField label="Designation" placeholder="Designation" sx={{ width: '80%' }} />
-                        </Grid>
-                        <Grid xs={6} p={3}>
-                            <TextField label="Height" placeholder="Height" sx={{ width: '80%' }} />
-                        </Grid>
-                        <Grid xs={6} p={3}>
-                            <TextField label="Weight" placeholder="Weight" sx={{ width: '80%' }} />
-                        </Grid>
-                        <Grid xs={6} p={3}>
-                            <TextField label="Mother Tongue" placeholder="Mother Tongue" sx={{ width: '80%' }} />
-                        </Grid>
-                        <Grid xs={6} p={3}>
-                            <TextField label="Blood Group" placeholder="Blood Group" sx={{ width: '80%' }} />
-                        </Grid>
-                        <Grid xs={6} p={3}>
-                            <TextField label="Education Qualification" placeholder="Education Qualification" sx={{ width: '80%' }} />
-                        </Grid>
-                        <Grid xs={6} p={3}>
-                            <TextField label="Year Of Graduation" placeholder="Year Of Graduation" sx={{ width: '80%' }} />
-                        </Grid>
-                        <Grid xs={6} p={3}>
-                            <TextField
-                                id="date-picker-joining"
-                                label="Date Of Joining"
-                                type="date"
-                                variant="outlined"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                InputProps={{
-                                    placeholder: 'Date Of Joining',
-                                    style: { width: '235%' },
-                                }}
-                            />
-                        </Grid>
-                        <Grid xs={6} p={3}>
-                            <TextField
-                                id="date-picker-birth"
-                                label="Date Of Birth"
-                                type="date"
-                                variant="outlined"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                InputProps={{
-                                    placeholder: 'Date Of Birth',
-                                    style: { width: '235%' },
-                                }}
-                            />
-                        </Grid>
-                        <Grid xs={6} p={3}>
-                            <FormControl>
-                                <FormLabel id="demo-row-radio-buttons-group-label">Gender</FormLabel>
-                                <RadioGroup
-                                    row
-                                    aria-labelledby="demo-row-radio-buttons-group-label"
-                                    name="row-radio-buttons-group"
-                                >
-                                    <FormControlLabel value="female" control={<Radio />} label="Female" />
-                                    <FormControlLabel value="male" control={<Radio />} label="Male" />
-                                    <FormControlLabel value="other" control={<Radio />} label="Other" />
-                                </RadioGroup>
-                            </FormControl>
-                        </Grid>
-                        <Grid item>
-                            <Avatar alt="Passport Photo" sx={{ width: 100, height: 100 }} />
-                        </Grid>
-                        <Grid item>
-                            <input
-                                accept="image/*"
-                                id="passport-photo-upload"
-                                type="file"
-                                style={{ display: 'none' }}
-                                ref={fileInputRef}
-                                onChange={handleFileChange}
-                            />
-                            <Button variant="contained" onClick={handleFileUpload}>
-                                Upload Passport Photo
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </div>
+                        }}
+                    />
+                </Grid>
+                <Grid xs={3} p={2}>
+                    <FormControl fullWidth>
+                        <InputLabel id="demo-simple-select-label">Gender</InputLabel>
+                        <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={gender}
+                            label="Gender"
+                            onChange={handleChange}
+                        >
+                            <MenuItem value={10}>Male</MenuItem>
+                            <MenuItem value={20}>Female</MenuItem>
+                            <MenuItem value={30}>Others</MenuItem>
+                        </Select>
+                    </FormControl>
+                </Grid>
+                <Grid item xs={3} p={2} >
+                    <TextField label="Contact Number" placeholder="Contact Number" fullWidth />
+                </Grid>
+                <Grid item xs={3} p={2}>
+                    <TextField label="Emergency Contact Number" placeholder="Emergency Contact Number" fullWidth />
+                </Grid>
+                <Grid item xs={3} p={2}>
+                    <TextField label=" Personal Email ID" placeholder="Personal Email ID" fullWidth />
+                </Grid>
+                <Grid item xs={3} p={2}>
+                    <TextField label=" Current Address " placeholder=" Current Address" fullWidth />
+                </Grid>
+                <Grid item xs={3} p={2}>
+                    <TextField label=" Permanent Address " placeholder=" Permanent Address" fullWidth />
+                </Grid>
+                <Grid item xs={3} p={2}>
+                    <TextField label=" Aadhaar Number " placeholder=" Aadhaar Number" fullWidth />
+                </Grid>
+                <Grid item xs={3} p={2}>
+                    <TextField label=" Pan Number " placeholder=" Pan Number" fullWidth />
+                </Grid>
+                <Grid item xs={3} p={2}>
+                    <TextField label=" Driving License Number " placeholder="Driving License Number" fullWidth />
+                </Grid>
+                <Grid xs={3} p={2}>
+                    <TextField
+                        id="date-picker-birth"
+                        label="Driving License Expiry Date"
+                        type="date"
+                        variant="outlined"
+                        fullWidth
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        InputProps={{
+                            placeholder: 'Driving License Expiry Date',
 
-            </Card>
+                        }}
+                    />
+                </Grid>
+                <Grid item xs={3} p={2}>
+                    <TextField label=" Passport Number " placeholder="Passport Number" fullWidth />
+                </Grid>
+                <Grid xs={3} p={2}>
+                    <TextField
+                        id="date-picker-birth"
+                        label="Passport Expiry Date"
+                        type="date"
+                        variant="outlined"
+                        fullWidth
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        InputProps={{
+                            placeholder: 'Passport Expiry Date ',
+
+                        }}
+                    />
+                </Grid>
+
+            </Grid>
         </div>
+
     )
 }
 
