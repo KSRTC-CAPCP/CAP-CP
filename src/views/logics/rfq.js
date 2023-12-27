@@ -190,7 +190,7 @@ const columns = [
     header: 'RFQ Description',
     Cell: ({ renderedCellValue, row }) => (
       <Box component="span">
-        {row.original.rfqDescription.length > 0 && <p>{row.original.rfqDescription[row.original.rfqDescription.length - 1].description}</p>}
+        {row.original.rfqDescription.length > 0 && <p>{row.original.rfqDescription[0]?.description}</p>}
       </Box>
     )
   }),
@@ -568,7 +568,7 @@ const BusinessRFQ = () => {
       // ...populate other fields
     });
   };
-
+const [description, setDescription] = useState('')
   const handleEdit = async (e) => {
     console.log('worked', e.original);
     const endpoint = RFQ_GET_ID(e.original._id);
@@ -576,6 +576,7 @@ const BusinessRFQ = () => {
     // setUpdatedValue(getByIdData)
     setUpdateId(e.original._id);
     setSelectedOption(e.original?.category);
+    setDescription(e?.original?.rfqDescription[0]?.description)
     setValueForCompany(getByIdData?.data.companyName);
     setValueForContact(getByIdData?.data.contactName);
     setValueForSuggest(getByIdData?.data.Pilot);
@@ -2155,6 +2156,19 @@ const BusinessRFQ = () => {
                     {formik.errors.businessVertical}
                   </FormHelperText>
                 )}
+              </Grid>
+              <Grid xs={4} p={2}>
+                <TextField
+                  // name="departmentName"
+                  value={description}
+                  // onChange={formik.handleChange}
+                  // onBlur={formik.handleBlur}
+                  fullWidth
+                  disabled
+                  id="outlined-basic"
+                  label="Initial Description"
+                  variant="outlined"
+                />
               </Grid>
               {tcoNumberView && (
                 <Grid xs={4} p={2}>
