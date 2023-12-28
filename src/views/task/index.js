@@ -15,8 +15,11 @@ import CardMembershipIcon from '@mui/icons-material/CardMembership';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import GroupIcon from '@mui/icons-material/Group';
 import FlagIcon from '@mui/icons-material/Flag';
-import { KeyboardBackspaceRounded, PlusOne } from '@mui/icons-material';
+import { KeyboardBackspaceRounded, PlusOne, ViewAgendaTwoTone } from '@mui/icons-material';
 import { IconPlus } from '@tabler/icons';
+import TocOutlinedIcon from '@mui/icons-material/TocOutlined';
+
+
 
 const TaskPanel = () => {
   const [hovered, setHovered] = useState(false);
@@ -111,6 +114,26 @@ const TaskPanel = () => {
     fileInputRef.current.value = null;
   };
 
+
+  const [view, setView] = useState({
+    visible: false,
+    mode: 'Initial'
+  });
+
+  const handleToggle = () => {
+    setView({
+      visible: true,
+      mode: 'Add'
+    });
+  };
+  const handleBoard = () => {
+    setView({
+      visible: true,
+      mode: 'Initial'
+    });
+  };
+
+
   return (
     <>
       <MainCard
@@ -131,15 +154,8 @@ const TaskPanel = () => {
             <span className="text-muted" style={{ paddingLeft: '5px', paddingRight: '10px' }}>
               7 days remaining
             </span>
-            <Box
-              sx={{
-                ml: 2,
-                // mr: 3,
-                [theme.breakpoints.down('md')]: {
-                  mr: 2
-                }
-              }}
-            >
+
+            <Box sx={{ ml: 2 }}>
               <ButtonBase sx={{ borderRadius: '12px' }} onClick={handleOpen}>
                 <Avatar
                   variant="rounded"
@@ -151,8 +167,8 @@ const TaskPanel = () => {
                     color: theme.palette.secondary.dark,
                     '&[aria-controls="menu-list-grow"],&:hover': {
                       background: theme.palette.secondary.dark,
-                      color: theme.palette.secondary.light
-                    }
+                      color: theme.palette.secondary.light,
+                    },
                   }}
                   aria-haspopup="true"
                   onClick={handleClose}
@@ -162,86 +178,142 @@ const TaskPanel = () => {
                 </Avatar>
               </ButtonBase>
             </Box>
+            {view.mode === 'Add' ? <Box sx={{ ml: 2 }}>
+              <ButtonBase sx={{ borderRadius: '12px' }}>
+                <Avatar
+                  variant="rounded"
+                  sx={{
+                    ...theme.typography.commonAvatar,
+                    ...theme.typography.mediumAvatar,
+                    transition: 'all .2s ease-in-out',
+                    background: theme.palette.secondary.light,
+                    color: theme.palette.secondary.dark,
+                    '&[aria-controls="menu-list-grow"],&:hover': {
+                      background: theme.palette.secondary.dark,
+                      color: theme.palette.secondary.light,
+                    },
+                  }}
+                  aria-haspopup="true"
+                  onClick={handleBoard}
+                  color="inherit"
+                >
+                  <ViewAgendaTwoTone style={{ rotate: '90deg' }} />
+                </Avatar>
+              </ButtonBase>
+            </Box> : <Box sx={{ ml: 2 }}>
+              <ButtonBase sx={{ borderRadius: '12px' }}>
+                <Avatar
+                  variant="rounded"
+                  sx={{
+                    ...theme.typography.commonAvatar,
+                    ...theme.typography.mediumAvatar,
+                    transition: 'all .2s ease-in-out',
+                    background: theme.palette.secondary.light,
+                    color: theme.palette.secondary.dark,
+                    '&[aria-controls="menu-list-grow"],&:hover': {
+                      background: theme.palette.secondary.dark,
+                      color: theme.palette.secondary.light,
+                    },
+                  }}
+                  aria-haspopup="true"
+                  onClick={handleToggle}
+                  color="inherit"
+                >
+                  <ViewAgendaTwoTone />
+                </Avatar>
+              </ButtonBase>
+            </Box>}
+
           </div>
         }
+
       >
-        <TaskView tasks={TASKS} />
-        <Modal
-          open={open}
-          style={{ borderRadius: '5px' }}
-          backdrop="static"
-          aria-labelledby="modal-modal-title"
-          aria-describedby="modal-modal-description"
-        >
-          <Box>
-            <div className="d-flex justify-content-between align-item-center">
-              <Typography className="bold-text"> Create New Task </Typography>
-              <ClearIcon onClick={handleClose} />
-            </div>
-            <hr />
-            <TextField
-              variant="outlined"
-              fullWidth
-              disabled
-              InputProps={{
-                startAdornment: <CardMembershipIcon style={{ fontSize: 'larger' }} />
-              }}
-              value="Blanck issues in KSRTC-CAPCP/Main-Repo ..."
-            />
-            <Typography className="bold-text">Add Title </Typography>
-            <TextField variant="outlined" fullWidth placeholder="Title" />
-            <Typography className="bold-text">Add Description </Typography>
-            <div>
-              <SunEditor setOptions={allOptions} setAllPlugins={true} />
-            </div>
-            <br />
-            <form onSubmit={handleSubmit}>
-              <label htmlFor="file-upload" className="custom-file-upload" style={{ marginRight: '10px' }}>
-                <AttachFileIcon style={{ marginBottom: '-4px' }} /> Choose file(s)
-              </label>
+        {view.mode === 'Add' && (
+          <MainCard>
+            <h1>hello</h1>
+          </MainCard>
+        )}
+        {view.mode === 'Initial' && (
+          <div>
+            <TaskView tasks={TASKS} />
+            <Modal
+              open={open}
+              style={{ borderRadius: '5px' }}
+              backdrop="static"
+              aria-labelledby="modal-modal-title"
+              aria-describedby="modal-modal-description"
+            >
+              <Box>
+                <div className="d-flex justify-content-between align-item-center">
+                  <Typography className="bold-text"> Create New Task </Typography>
+                  <ClearIcon onClick={handleClose} />
+                </div>
+                <hr />
+                <TextField
+                  variant="outlined"
+                  fullWidth
+                  disabled
+                  InputProps={{
+                    startAdornment: <CardMembershipIcon style={{ fontSize: 'larger' }} />
+                  }}
+                  value="Blanck issues in KSRTC-CAPCP/Main-Repo ..."
+                />
+                <Typography className="bold-text">Add Title </Typography>
+                <TextField variant="outlined" fullWidth placeholder="Title" />
+                <Typography className="bold-text">Add Description </Typography>
+                <div>
+                  <SunEditor setOptions={allOptions} setAllPlugins={true} />
+                </div>
+                <br />
+                <form onSubmit={handleSubmit}>
+                  <label htmlFor="file-upload" className="custom-file-upload" style={{ marginRight: '10px' }}>
+                    <AttachFileIcon style={{ marginBottom: '-4px' }} /> Choose file(s)
+                  </label>
 
-              <input
-                id="file-upload"
-                type="file"
-                onChange={handleOnChange}
-                style={{ display: 'none' }}
-                ref={fileInputRef} // Attach the ref to the input
-                multiple
-              />
+                  <input
+                    id="file-upload"
+                    type="file"
+                    onChange={handleOnChange}
+                    style={{ display: 'none' }}
+                    ref={fileInputRef} // Attach the ref to the input
+                    multiple
+                  />
 
-              {selectedFiles.length === 1 && <span>{selectedFiles[0].name}</span>}
-              {selectedFiles.length > 1 && <span>{selectedFiles.length} files </span>}
-            </form>
-            <br />
-            <div className="d-flex">
-              <TextField
-                InputProps={{
-                  startAdornment: <GroupIcon style={{ fontSize: 'larger' }} />
-                }}
-                placeholder="Assignee"
-              />
-              <Box width="34%" mx="auto" className="App">
-                <TextField fullWidth select label="Label">
-                  <MenuItem key="part-one" value="part-one">
-                    <FlagIcon style={{ fontSize: '19px', color: '#fd5c63' }} /> - High
-                  </MenuItem>
-                  <MenuItem key="part-two" value="part-two">
-                    <FlagIcon style={{ fontSize: '19px', color: '#FF0800' }} /> - Higher
-                  </MenuItem>
-                  <MenuItem key="part-two" value="part-two">
-                    <FlagIcon style={{ fontSize: '19px', color: '#FEBE10' }} /> - Medium
-                  </MenuItem>
-                  <MenuItem key="part-two" value="part-two">
-                    <FlagIcon style={{ fontSize: '19px', color: '#17B169' }} /> - Low
-                  </MenuItem>
-                  <MenuItem key="part-two" value="part-two">
-                    <FlagIcon style={{ fontSize: '19px', color: '#00563B' }} /> - Lower
-                  </MenuItem>
-                </TextField>
+                  {selectedFiles.length === 1 && <span>{selectedFiles[0].name}</span>}
+                  {selectedFiles.length > 1 && <span>{selectedFiles.length} files </span>}
+                </form>
+                <br />
+                <div className="d-flex">
+                  <TextField
+                    InputProps={{
+                      startAdornment: <GroupIcon style={{ fontSize: 'larger' }} />
+                    }}
+                    placeholder="Assignee"
+                  />
+                  <Box width="34%" mx="auto" className="App">
+                    <TextField fullWidth select label="Label">
+                      <MenuItem key="part-one" value="part-one">
+                        <FlagIcon style={{ fontSize: '19px', color: '#fd5c63' }} /> - High
+                      </MenuItem>
+                      <MenuItem key="part-two" value="part-two">
+                        <FlagIcon style={{ fontSize: '19px', color: '#FF0800' }} /> - Higher
+                      </MenuItem>
+                      <MenuItem key="part-two" value="part-two">
+                        <FlagIcon style={{ fontSize: '19px', color: '#FEBE10' }} /> - Medium
+                      </MenuItem>
+                      <MenuItem key="part-two" value="part-two">
+                        <FlagIcon style={{ fontSize: '19px', color: '#17B169' }} /> - Low
+                      </MenuItem>
+                      <MenuItem key="part-two" value="part-two">
+                        <FlagIcon style={{ fontSize: '19px', color: '#00563B' }} /> - Lower
+                      </MenuItem>
+                    </TextField>
+                  </Box>
+                </div>
               </Box>
-            </div>
-          </Box>
-        </Modal>
+            </Modal>
+          </div>
+        )}
       </MainCard>
     </>
   );
