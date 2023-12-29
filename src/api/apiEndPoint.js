@@ -23,6 +23,7 @@ export const RFQ_DELETE = (id) => `${BASE_URL}/rfq/delete/${id}`;
 export const PROFILES_GET = `${BASE_URL}/employee/getall`;
 export const PROFILES_GET_ID = (id) => `${BASE_URL}/employee/getbyid/${id}`;
 export const PROFILES_GET_ROLE = (id) => `${BASE_URL}/employees/role/${id}`;
+export const PROFILES_GET_CODE = (id) => `${BASE_URL}/employees/code/${id}`;
 export const PROFILES_CREATE = `${BASE_URL}/employee/add`;
 export const PROFILES_UPLOAD = `${BASE_URL}/employee/bulk`;
 export const PROFILES_UPDATE = (id) => `${BASE_URL}/employee/update/${id}`;

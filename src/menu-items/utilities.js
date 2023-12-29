@@ -1,5 +1,15 @@
 // assets
-import { IconTypography, IconPalette, IconBusinessplan, IconShadow, IconWindmill, IconUser, IconLockAccess, IconUsers, IconUserX } from '@tabler/icons';
+import {
+  IconTypography,
+  IconPalette,
+  IconBusinessplan,
+  IconShadow,
+  IconWindmill,
+  IconUser,
+  IconLockAccess,
+  IconUsers,
+  IconUserX
+} from '@tabler/icons';
 
 // constant
 const icons = {
@@ -11,9 +21,7 @@ const icons = {
   IconUser,
   IconLockAccess,
   IconUsers,
-  IconUserX ,
-  
-  
+  IconUserX
 };
 
 // ==============================|| UTILITIES MENU ITEMS ||============================== //
@@ -128,7 +136,7 @@ const utilities = {
       title: 'Manager Panel',
       type: 'item',
       url: '/Manager-Panel',
-      icon: icons.IconUserX  ,
+      icon: icons.IconUserX,
       breadcrumbs: false
     },
     {
@@ -136,11 +144,10 @@ const utilities = {
       title: 'Attendance Approval',
       type: 'item',
       url: '/attendance-Panel',
-      icon: icons.IconUserX  ,
+      icon: icons.IconUserX,
       breadcrumbs: false
     }
   ]
 };
 
 export default utilities;
-

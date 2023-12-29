@@ -90,6 +90,7 @@ import {
   LEAD_GET_ID,
   LEAD_UPDATE,
   PROFILES_GET,
+  PROFILES_GETBY_STATUS,
   RFQ_CREATION
 } from 'api/apiEndPoint';
 import { useEffect } from 'react';
@@ -585,6 +586,7 @@ const BusinessLeads = () => {
 
   console.log(moveRFQ, 'moveRFQ');
   const handleUpdate = async (values) => {
+    
     try {
       // Assuming values contain the updated data
       console.log(values, 'vvvvvvvvvvv');
@@ -1123,7 +1125,7 @@ const BusinessLeads = () => {
           setCategory(categoryData);
           console.log(categoryData, 'fetched using categoryData db');
 
-          const data4Employee = await fetchData(PROFILES_GET, parsedData?.accessToken);
+          const data4Employee = await fetchData(PROFILES_GETBY_STATUS('active'), parsedData?.accessToken);
           console.log(data, 'parsedddd');
           setProfilesData(data4Employee?.data);
           // Fetch updateId data

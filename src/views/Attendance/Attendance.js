@@ -293,22 +293,22 @@ const Attendance = () => {
   return (
     <div className="max">
       {view.mode === 'Initial' && (
-        <MainCard
-          title="Attendance Approval"
-          secondary={
-            <Box
-              sx={{
-                ml: 2,
-                // mr: 3,
-                [theme.breakpoints.down('md')]: {
-                  mr: 2
-                }
-              }}
-            ></Box>
-          }
-        >
+        // <MainCard
+        //   title="Attendance Approval"
+        //   secondary={
+        //     <Box
+        //       sx={{
+        //         ml: 2,
+        //         // mr: 3,
+        //         [theme.breakpoints.down('md')]: {
+        //           mr: 2
+        //         }
+        //       }}
+        //     ></Box>
+        //   }
+        // >
           <MaterialReactTable table={table} />
-        </MainCard>
+        // </MainCard>
       )}
       <Dialog
         open={open}
