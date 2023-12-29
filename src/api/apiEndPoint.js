@@ -58,5 +58,5 @@ export const TEAM_DELETE = (id) => `${BASE_URL}/roleaccess/delete/${id}`;
 export const TEAM_UPDATE = (id) => `${BASE_URL}/roleaccess/update/${id}`;
 export const TEAM_GET_BY_ID = (id) => `${BASE_URL}/roleaccess/getbyid/${id}`;
 
-//FOR MANAGER PROJECT
-export const MANAGERS_PROJECT = (id) => `${BASE_URL}/project/managers-projects/${id}`;
+//FOR TASK
+export const TASKS_GET_ALL =  `${BASE_URL}/tasks`;

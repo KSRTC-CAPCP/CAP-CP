@@ -96,7 +96,6 @@ import {
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { DatePicker } from 'rsuite';
 import {
-  MANAGERS_PROJECT,
   MILESTONE_CREATE,
   MILESTONE_GET,
   PROFILES_CREATE,
@@ -108,7 +107,8 @@ import {
   PROJECT_GET,
   PROJECT_UPDATE,
   RFQ_GET,
-  RFQ_GET_ID
+  RFQ_GET_ID,
+  TASKS_GET_ALL
 } from 'api/apiEndPoint';
 import { useEffect } from 'react';
 import { deleteData, fetchData, postData, updateData } from 'utils/apiUtils';
@@ -1408,7 +1408,7 @@ const Manager = ({ _history, tasks }) => {
           const parsedData = JSON.parse(localStore);
           console.log(parsedData, 'parsed');
           const EmployeeCode = await fetchData(PROFILES_GET_ID(parsedData?.employeeId), parsedData?.accessToken);
-          const data = await fetchData(MANAGERS_PROJECT(EmployeeCode?.EmployeeCode), parsedData?.accessToken);
+          const data = await fetchData(TASKS_GET_ALL, parsedData?.accessToken);
           console.log(data, 'datadatadata');
           const data4Rfq = await fetchData(RFQ_GET, parsedData?.accessToken);
           const data4Employee = await fetchData(PROFILES_GET_ROLE('Employee'), parsedData?.accessToken);

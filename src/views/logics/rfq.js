@@ -210,7 +210,7 @@ const columns = [
 ];
 const optionsForHistoryApproval = ['Pending', 'Approval', 'Reject'];
 const optionsForHistoryStatus = ['New RFQ', 'Technical Meet Done', 'TCO Submitted', 'Negotiation', 'Business Award', 'Lost']; //
-const optionsForTaskStatus = ['Not Started', 'On Going', 'Completed'];
+const optionsForTaskStatus = ['In Backlog'];
 
 const csvConfig = mkConfig({
   fieldSeparator: ',',
@@ -342,21 +342,7 @@ const BusinessRFQ = () => {
         </Box>
       )
     },
-    {
-      accessorKey: 'status',
-      header: 'Status',
-      editVariant: 'select',
-      editSelectOptions: optionsForTaskStatus,
-      muiEditTextFieldProps: {
-        select: true
-      },
-      Cell: ({ renderedCellValue, row }) => (
-        <Box component="span">
-          <p className="">{row.original.status}</p>
-        </Box>
-      ),
-      enableEditing: true
-    }
+    
   ];
   const [inputValue, setInputValue] = useState('');
   const [categoryOptions, setCategoryOptions] = useState([
@@ -738,7 +724,7 @@ const [description, setDescription] = useState('')
           const task = taskTableData.map((item) => ({
             title: item.title,
             description: item.description,
-            responsible: item.responsible.slice(0, 10),
+            responsible: item.responsible,
             remark: item.remark,
             assignedDate: item.assignedDate,
             targetDate: item.targetDate,

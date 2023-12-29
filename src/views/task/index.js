@@ -3,7 +3,7 @@ import TaskView from './task-panel';
 import { TASKS } from './mockData';
 import MainCard from 'ui-component/cards/MainCard';
 import { AvatarGroup, Button, ButtonBase, InputAdornment, MenuItem, TextField, Typography } from '@mui/material';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Avatar from '@mui/material/Avatar';
 import { Modal } from 'rsuite';
@@ -17,30 +17,28 @@ import GroupIcon from '@mui/icons-material/Group';
 import FlagIcon from '@mui/icons-material/Flag';
 import { KeyboardBackspaceRounded, PlusOne, ViewAgendaTwoTone } from '@mui/icons-material';
 import { IconPlus } from '@tabler/icons';
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import { TASKS_GET_ALL } from 'api/apiEndPoint';
+import { fetchData } from 'utils/apiUtils';
 
 function createData(ReferenceID, Title, Description, Status, priority, RemainingDays, CreatedBy) {
   return { ReferenceID, Title, Description, Status, priority, RemainingDays, CreatedBy };
 }
 
 const rows = [
-  createData("CAE0001", "CAP-CP", "Do your work", "Complete", "lower", "2days", "HR"),
-  createData("CAE0002", "CAP-CP", "Do your work", "In Progress", "higher", "2days","HR"),
-  createData("CAE0003", "CAP-CP", "Do your work", "Waiting", "high", "2days", "self"),
-  createData("CAE0004", "CAP-CP", "Do your work", "In Progress", "medium", "2days", "self"),
-  createData("CAE0005", "CAP-CP", "Do your work", "Complete", "low", "2days",  "self"),
+  createData('CAE0001', 'CAP-CP', 'Do your work', 'Complete', 'lower', '2days', 'HR'),
+  createData('CAE0002', 'CAP-CP', 'Do your work', 'In Progress', 'higher', '2days', 'HR'),
+  createData('CAE0003', 'CAP-CP', 'Do your work', 'Waiting', 'high', '2days', 'self'),
+  createData('CAE0004', 'CAP-CP', 'Do your work', 'In Progress', 'medium', '2days', 'self'),
+  createData('CAE0005', 'CAP-CP', 'Do your work', 'Complete', 'low', '2days', 'self')
 ];
 const TaskPanel = () => {
-
-
-
   const [hovered, setHovered] = useState(false);
   const theme = useTheme();
 
@@ -133,7 +131,6 @@ const TaskPanel = () => {
     fileInputRef.current.value = null;
   };
 
-
   const [view, setView] = useState({
     visible: false,
     mode: 'Initial'
@@ -151,7 +148,27 @@ const TaskPanel = () => {
       mode: 'Initial'
     });
   };
+  const [localData, setLocalData] = useState();
+  const [tasksData, setTasksData] = useState([]);
 
+  useEffect(() => {
+    const fetchDataAndUpdate = async () => {
+      try {
+        const localStore = localStorage.getItem('userData');
+        if (localStore) {
+          setLocalData(JSON.parse(localStore));
+        }
+        if (localStore) {
+          const parsedData = JSON.parse(localStore);
+          const data = await fetchData(TASKS_GET_ALL, parsedData?.accessToken);
+          setTasksData(data.data);
+        }
+      } catch (error) {
+        console.error('Error in fetchDataAndUpdate:', error);
+      }
+    };
+    fetchDataAndUpdate();
+  }, []);
 
   return (
     <>
@@ -169,10 +186,10 @@ const TaskPanel = () => {
         }
         secondary={
           <div className="d-flex justify-content-center align-items-center">
-            <AccessTimeIcon sx={{ fontSize: '1.1rem' }} />
-            <span className="text-muted" style={{ paddingLeft: '5px', paddingRight: '10px' }}>
+            {/* <AccessTimeIcon sx={{ fontSize: '1.1rem' }} /> */}
+            {/* <span className="text-muted" style={{ paddingLeft: '5px', paddingRight: '10px' }}>
               7 days remaining
-            </span>
+            </span> */}
 
             <Box sx={{ ml: 2 }}>
               <ButtonBase sx={{ borderRadius: '12px' }} onClick={handleOpen}>
@@ -186,8 +203,8 @@ const TaskPanel = () => {
                     color: theme.palette.secondary.dark,
                     '&[aria-controls="menu-list-grow"],&:hover': {
                       background: theme.palette.secondary.dark,
-                      color: theme.palette.secondary.light,
-                    },
+                      color: theme.palette.secondary.light
+                    }
                   }}
                   aria-haspopup="true"
                   onClick={handleClose}
@@ -197,98 +214,94 @@ const TaskPanel = () => {
                 </Avatar>
               </ButtonBase>
             </Box>
-            {view.mode === 'Add' ? <Box sx={{ ml: 2 }}>
-              <ButtonBase sx={{ borderRadius: '12px' }}>
-                <Avatar
-                  variant="rounded"
-                  sx={{
-                    ...theme.typography.commonAvatar,
-                    ...theme.typography.mediumAvatar,
-                    transition: 'all .2s ease-in-out',
-                    background: theme.palette.secondary.light,
-                    color: theme.palette.secondary.dark,
-                    '&[aria-controls="menu-list-grow"],&:hover': {
-                      background: theme.palette.secondary.dark,
-                      color: theme.palette.secondary.light,
-                    },
-                  }}
-                  aria-haspopup="true"
-                  onClick={handleBoard}
-                  color="inherit"
-                >
-                  <ViewAgendaTwoTone style={{ rotate: '90deg' }} />
-                </Avatar>
-              </ButtonBase>
-            </Box> : <Box sx={{ ml: 2 }}>
-              <ButtonBase sx={{ borderRadius: '12px' }}>
-                <Avatar
-                  variant="rounded"
-                  sx={{
-                    ...theme.typography.commonAvatar,
-                    ...theme.typography.mediumAvatar,
-                    transition: 'all .2s ease-in-out',
-                    background: theme.palette.secondary.light,
-                    color: theme.palette.secondary.dark,
-                    '&[aria-controls="menu-list-grow"],&:hover': {
-                      background: theme.palette.secondary.dark,
-                      color: theme.palette.secondary.light,
-                    },
-                  }}
-                  aria-haspopup="true"
-                  onClick={handleToggle}
-                  color="inherit"
-                >
-                  <ViewAgendaTwoTone />
-                </Avatar>
-              </ButtonBase>
-            </Box>}
-
+            {view.mode === 'Add' ? (
+              <Box sx={{ ml: 2 }}>
+                <ButtonBase sx={{ borderRadius: '12px' }}>
+                  <Avatar
+                    variant="rounded"
+                    sx={{
+                      ...theme.typography.commonAvatar,
+                      ...theme.typography.mediumAvatar,
+                      transition: 'all .2s ease-in-out',
+                      background: theme.palette.secondary.light,
+                      color: theme.palette.secondary.dark,
+                      '&[aria-controls="menu-list-grow"],&:hover': {
+                        background: theme.palette.secondary.dark,
+                        color: theme.palette.secondary.light
+                      }
+                    }}
+                    aria-haspopup="true"
+                    onClick={handleBoard}
+                    color="inherit"
+                  >
+                    <ViewAgendaTwoTone style={{ rotate: '90deg' }} />
+                  </Avatar>
+                </ButtonBase>
+              </Box>
+            ) : (
+              <Box sx={{ ml: 2 }}>
+                <ButtonBase sx={{ borderRadius: '12px' }}>
+                  <Avatar
+                    variant="rounded"
+                    sx={{
+                      ...theme.typography.commonAvatar,
+                      ...theme.typography.mediumAvatar,
+                      transition: 'all .2s ease-in-out',
+                      background: theme.palette.secondary.light,
+                      color: theme.palette.secondary.dark,
+                      '&[aria-controls="menu-list-grow"],&:hover': {
+                        background: theme.palette.secondary.dark,
+                        color: theme.palette.secondary.light
+                      }
+                    }}
+                    aria-haspopup="true"
+                    onClick={handleToggle}
+                    color="inherit"
+                  >
+                    <ViewAgendaTwoTone />
+                  </Avatar>
+                </ButtonBase>
+              </Box>
+            )}
           </div>
         }
-
       >
         {view.mode === 'Add' && (
           <div>
-           
-              <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                {/* return { ReferenceID, Title, Description, Status, priority, RemainingDays, CreatedBy  }; */}
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Reference ID</TableCell>
-                    <TableCell align="right">Title</TableCell>
-                    <TableCell align="right">Description</TableCell>
-                    <TableCell align="right">Status</TableCell>
-                    <TableCell align="right">priority</TableCell>
-                    <TableCell align="right">RemainingDays</TableCell>
-                    <TableCell align="right">CreatedBy</TableCell>
-
+            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+              {/* return { ReferenceID, Title, Description, Status, priority, RemainingDays, CreatedBy  }; */}
+              <TableHead>
+                <TableRow>
+                  <TableCell>Reference ID</TableCell>
+                  <TableCell align="right">Title</TableCell>
+                  <TableCell align="right">Description</TableCell>
+                  <TableCell align="right">Status</TableCell>
+                  <TableCell align="right">priority</TableCell>
+                  <TableCell align="right">RemainingDays</TableCell>
+                  <TableCell align="right">CreatedBy</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {rows.map((row) => (
+                  <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                    <TableCell component="th" scope="row">
+                      {row.ReferenceID}
+                    </TableCell>
+                    <TableCell align="right">{row.Title}</TableCell>
+                    <TableCell align="right">{row.Description}</TableCell>
+                    <TableCell align="right">{row.Status}</TableCell>
+                    <TableCell align="right">{row.priority}</TableCell>
+                    <TableCell align="right">{row.RemainingDays}</TableCell>
+                    <TableCell align="right">{row.CreatedBy}</TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {rows.map((row) => (
-                    <TableRow
-                      key={row.name}
-                      sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                    >
-                      <TableCell component="th" scope="row">
-                        {row.ReferenceID}
-                      </TableCell>
-                      <TableCell align="right">{row.Title}</TableCell>
-                      <TableCell align="right">{row.Description}</TableCell>
-                      <TableCell align="right">{row.Status}</TableCell>
-                      <TableCell align="right">{row.priority}</TableCell>
-                      <TableCell align="right">{row.RemainingDays}</TableCell>
-                      <TableCell align="right">{row.CreatedBy}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            
+                ))}
+              </TableBody>
+            </Table>
           </div>
         )}
         {view.mode === 'Initial' && (
           <div>
-            <TaskView tasks={TASKS} />
+            <TaskView tasks={tasksData} />
             <Modal
               open={open}
               style={{ borderRadius: '5px' }}

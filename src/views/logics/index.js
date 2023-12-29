@@ -367,21 +367,6 @@ const BusinessLeads = () => {
         </Box>
       )
     },
-    {
-      accessorKey: 'status',
-      header: 'Status',
-      editVariant: 'select',
-      editSelectOptions: optionsForTaskStatus,
-      muiEditTextFieldProps: {
-        select: true
-      },
-      Cell: ({ renderedCellValue, row }) => (
-        <Box component="span">
-          <p className="">{row.original.status}</p>
-        </Box>
-      ),
-      enableEditing: true
-    }
   ];
   const [inputValue, setInputValue] = useState('');
   const [leadSummary, setLeadSummary] = useState('');
