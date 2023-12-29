@@ -236,7 +236,7 @@ const Projects = ({ _history, tasks }) => {
   const handleEmployee = (e) => {
     console.log(e.target.value.slice(0, 7), 'its worked');
     const value = e.target.value;
-    const filterEmployee = profilesData.filter((employee) => employee?.EmployeeCode === value.slice(0, 7));
+    const filterEmployee = profilesData.filter((employee) => employee?.EmployeeCode === value);
     console.log(filterEmployee[0], 'filterEmployee');
     setManagerId(filterEmployee[0]);
   };
@@ -415,6 +415,11 @@ const Projects = ({ _history, tasks }) => {
     {
       accessorKey: 'responsible',
       header: 'Responsible',
+      editVariant: 'select',
+      editSelectOptions: profilesData.map((item) => item.EmployeeCode + '-' + item.NameOfCandidate),
+      muiEditTextFieldProps: {
+        select: true
+      },
       enableEditing: true
     },
     {
@@ -438,16 +443,7 @@ const Projects = ({ _history, tasks }) => {
         required: true
       }
     },
-    {
-      accessorKey: 'status',
-      header: 'Status',
-      editVariant: 'select',
-      editSelectOptions: optionsForTaskStatus,
-      muiEditTextFieldProps: {
-        select: true
-      },
-      enableEditing: true
-    }
+   
   ];
 
   const [selectedDate, setSelectedDate] = useState('');
@@ -601,7 +597,7 @@ const Projects = ({ _history, tasks }) => {
           const teamsValue = teamData
             ? teamData.map((item) => ({
                 fromDate: item.fromDate,
-                employeeCode: item.employeeCode?.slice(0, 7),
+                employeeCode: item.employeeCode,
                 employeeId: item.employeeId,
                 employeeName: item.employeeName,
                 toDate: item.toDate,
@@ -662,7 +658,7 @@ const Projects = ({ _history, tasks }) => {
           const teamsValue = teamData
             ? teamData.map((item) => ({
                 fromDate: item.fromDate,
-                employeeCode: item.employeeCode?.slice(0, 7),
+                employeeCode: item.employeeCode,
                 employeeId: managerId?._id,
                 toDate: item.toDate,
                 location: managerId?.location,
@@ -1391,7 +1387,7 @@ const Projects = ({ _history, tasks }) => {
   }));
   const managerList = managerData.map((item) => ({
     label: item.EmployeeCode + ' - ' + item.NameOfCandidate,
-    value: item.EmployeeCode
+    value: item.EmployeeCode + '-' + item.NameOfCandidate
   }));
 
   const handleSelectChange = async (event) => {

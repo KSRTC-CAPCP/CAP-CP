@@ -37,7 +37,6 @@
 .contact-section:hover {
   background-color: #e2f1fc;
   cursor: pointer;
-
 }
 
 .contact-section:hover svg {
@@ -105,6 +104,6 @@
 } */
 
 .rs-modal-content{
-  background-color: #e3f2fd;
+  /* background-color: #e3f2fd; */
 }
 

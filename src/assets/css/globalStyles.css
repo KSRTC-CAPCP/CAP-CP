@@ -324,8 +324,15 @@ p {
 .ps-1 {
   padding-left: 10px;
 }
+.p-0 {
+  padding: 0px;
+}
 .pe-1 {
   padding-right: 1rem;
+}
+.small
+{
+  font-size: smaller !important;
 }
 .ellipse-co {
   display: -webkit-box;
