@@ -1,3 +1,6 @@
+/*eslint-disable */
+
+
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import { Card, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, MenuItem, Select, Tab, TextField, Typography } from '@mui/material';
 import { Box } from '@mui/system';
@@ -10,7 +13,7 @@ import EmailTwoToneIcon from '@mui/icons-material/EmailTwoTone';
 import PhonelinkRingTwoToneIcon from '@mui/icons-material/PhonelinkRingTwoTone';
 import PinDropTwoToneIcon from '@mui/icons-material/PinDropTwoTone';
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
-import { Divider, Grid } from 'rsuite';
+import { Divider, Grid, Modal } from 'rsuite';
 import PersonalDetails from './Details/PersonalDetails';
 import Button from '@mui/material/Button';
 import { useState } from 'react';
@@ -24,8 +27,10 @@ import Family from './Details/Family';
 import Skills from './Details/Skills';
 import Bank from './Details/Bank';
 import Documents from './Details/Documents';
-
-
+import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
+import CheckCircleOutlineTwoToneIcon from '@mui/icons-material/CheckCircleOutlineTwoTone';
+import Application1 from './Details/Application1';
+import Application2 from './Details/Application2';
 
 
 const UserDetails = () => {
@@ -60,8 +65,14 @@ const UserDetails = () => {
     const handleNext4 = () => {
         setValue('6')
     }
+    const handleNext5 = () => {
+        setValue('7')
+    }   
 
-    // const [description, setDescription] = useState('');
+    const [opens, setOpens] = React.useState(false);
+    const handleOpen = () => setOpens(true);
+    const handleClose = () => setOpens(false);
+
 
     return (
         <MainCard>
@@ -128,6 +139,26 @@ const UserDetails = () => {
                                     </div>
                                 }
                                 value="6"
+                                style={{ fontSize: '15px' }}
+                            />
+                            <Tab
+                                label={
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <CheckCircleOutlineTwoToneIcon style={{ marginRight: '15px' }} />
+                                        Application Status
+                                    </div>
+                                }
+                                value="7"
+                                style={{ fontSize: '15px' }}
+                            />
+                            <Tab
+                                label={
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <CheckCircleOutlineTwoToneIcon style={{ marginRight: '15px' }} />
+                                        Application Status
+                                    </div>
+                                }
+                                value="8"
                                 style={{ fontSize: '15px' }}
                             />
                             <div className='float-end'>
@@ -428,11 +459,40 @@ const UserDetails = () => {
                                         color: '#ede7f6',
                                     },
                                 }}
+                                onClick={handleOpen}
 
                             >
                                 Submit
                             </Button>
+                            <div className='colorbg'>
+                                <Modal
+
+                                    open={opens}
+                                    onClose={handleClose}
+                                    aria-labelledby="modal-modal-title"
+                                    aria-describedby="modal-modal-description"
+                                >
+                                    <Box >
+                                        <InfoRoundedIcon style={{ color: '#1e88e5', fontSize: '55', marginLeft: '15rem' }} />
+                                        <Typography id="modal-modal-title" variant="h6" component="h2">
+                                            Note<sup>*</sup>
+                                        </Typography>
+                                        <Typography>
+                                            Once documents are uploaded, you can&apos;t edit or update the documets. If you want to update, contact your HR. If there are any fake documents, the verification will be declined. So, you should check your documents and then submit.
+                                        </Typography>
+                                        <div className=' align-iteam-center' style={{ display: 'flex', justifyContent: 'center' }}>
+                                            <Button variant="outlined" style={{borderRadius:'10px'}}>Check</Button>
+                                            <Button variant="outlined" style={{marginLeft:'10px', borderRadius:'10px'}} onClick={handleNext5}>Confirm</Button>
+                                        </div>
+                                    </Box>
+                                </Modal></div>
                         </Box>
+                    </TabPanel>
+                    <TabPanel value='7'>
+                     <Application1/>
+                    </TabPanel>
+                    <TabPanel value='8'>
+                     <Application2/>
                     </TabPanel>
 
                 </TabContext>
