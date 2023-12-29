@@ -17,11 +17,30 @@ import GroupIcon from '@mui/icons-material/Group';
 import FlagIcon from '@mui/icons-material/Flag';
 import { KeyboardBackspaceRounded, PlusOne, ViewAgendaTwoTone } from '@mui/icons-material';
 import { IconPlus } from '@tabler/icons';
-import TocOutlinedIcon from '@mui/icons-material/TocOutlined';
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
 
 
+function createData(ReferenceID, Title, Description, Status, priority, RemainingDays, CreatedBy) {
+  return { ReferenceID, Title, Description, Status, priority, RemainingDays, CreatedBy };
+}
 
+const rows = [
+  createData("CAE0001", "CAP-CP", "Do your work", "Complete", "lower", "2days", "HR"),
+  createData("CAE0002", "CAP-CP", "Do your work", "In Progress", "higher", "2days","HR"),
+  createData("CAE0003", "CAP-CP", "Do your work", "Waiting", "high", "2days", "self"),
+  createData("CAE0004", "CAP-CP", "Do your work", "In Progress", "medium", "2days", "self"),
+  createData("CAE0005", "CAP-CP", "Do your work", "Complete", "low", "2days",  "self"),
+];
 const TaskPanel = () => {
+
+
+
   const [hovered, setHovered] = useState(false);
   const theme = useTheme();
 
@@ -229,9 +248,43 @@ const TaskPanel = () => {
 
       >
         {view.mode === 'Add' && (
-          <MainCard>
-            <h1>hello</h1>
-          </MainCard>
+          <div>
+           
+              <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                {/* return { ReferenceID, Title, Description, Status, priority, RemainingDays, CreatedBy  }; */}
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Reference ID</TableCell>
+                    <TableCell align="right">Title</TableCell>
+                    <TableCell align="right">Description</TableCell>
+                    <TableCell align="right">Status</TableCell>
+                    <TableCell align="right">priority</TableCell>
+                    <TableCell align="right">RemainingDays</TableCell>
+                    <TableCell align="right">CreatedBy</TableCell>
+
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {rows.map((row) => (
+                    <TableRow
+                      key={row.name}
+                      sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                    >
+                      <TableCell component="th" scope="row">
+                        {row.ReferenceID}
+                      </TableCell>
+                      <TableCell align="right">{row.Title}</TableCell>
+                      <TableCell align="right">{row.Description}</TableCell>
+                      <TableCell align="right">{row.Status}</TableCell>
+                      <TableCell align="right">{row.priority}</TableCell>
+                      <TableCell align="right">{row.RemainingDays}</TableCell>
+                      <TableCell align="right">{row.CreatedBy}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            
+          </div>
         )}
         {view.mode === 'Initial' && (
           <div>
