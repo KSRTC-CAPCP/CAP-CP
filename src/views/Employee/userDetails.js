@@ -162,21 +162,7 @@ const UserDetails = () => {
                                 style={{ fontSize: '15px' }}
                             />
                             <div className='float-end'>
-                                <Button
-                                    // style={{ marginLeft: '480px' }}
-                                    sx={{
-                                        backgroundColor: '#ede7f6',
-                                        color: '#5e35b1',
-                                        transition: 'background-color 0.3s, color 0.3s',
-                                        '&:hover': {
-                                            backgroundColor: '#5e35b1',
-                                            color: '#ede7f6',
-                                        },
-                                    }}
-                                    onClick={handleDelete}
-                                >
-                                    Request To Leave
-                                </Button>
+                               
 
 
                                 <Dialog
@@ -307,6 +293,22 @@ const UserDetails = () => {
                                         </div>
                                     </div>
                                 </div>
+                                <div style={{marginTop:'20px', marginLeft:'9rem'}}>
+                                <Button
+                                    // style={{ marginLeft: '480px' }}
+                                    sx={{
+                                        backgroundColor: '#ede7f6',
+                                        color: '#5e35b1',
+                                        transition: 'background-color 0.3s, color 0.3s',
+                                        '&:hover': {
+                                            backgroundColor: '#5e35b1',
+                                            color: '#ede7f6',
+                                        },
+                                    }}
+                                    onClick={handleDelete}
+                                >
+                                    Request To Leave
+                                </Button></div>
                             </Card>
                             <Card >
                                 <div className='d-flex justify-content-between align-iteam-center'>
@@ -324,39 +326,102 @@ const UserDetails = () => {
                                 <br />
                                 <div className="name-list">
                                     <Grid className='d-flex align-items-center'>
-                                        <Grid style={{ fontWeight: 'bolder' }}>Full Name</Grid>
+                                        <Grid style={{ fontWeight: 'bolder' }}> Name</Grid>
                                         <Grid>:</Grid>
-                                        <Grid> JWT User</Grid>
+                                        <Grid> Darla</Grid>
                                     </Grid>
                                     <Grid className='d-flex align-items-center'>
-                                        <Grid style={{ fontWeight: 'bolder' }}>Fathers Name</Grid>
+                                        <Grid style={{ fontWeight: 'bolder' }}>Surname</Grid>
                                         <Grid>:</Grid>
-                                        <Grid>  Mr. Deepen Handgun</Grid>
+                                        <Grid> Josh</Grid>
                                     </Grid>
                                     <Grid className='d-flex align-items-center'>
-                                        <Grid style={{ fontWeight: 'bolder' }}>Address</Grid>
+                                        <Grid style={{ fontWeight: 'bolder' }}>Mother Tongue</Grid>
                                         <Grid>:</Grid>
-                                        <Grid>  Street 110-B Kalians Bag, Dewan, M.P. INDIA</Grid>
+                                        <Grid>Tamil</Grid>
                                     </Grid>
                                     <Grid className='d-flex align-items-center'>
-                                        <Grid style={{ fontWeight: 'bolder' }}>Zip Code</Grid>
+                                        <Grid style={{ fontWeight: 'bolder' }}>Blood Group</Grid>
                                         <Grid>:</Grid>
-                                        <Grid>  12345</Grid>
+                                        <Grid>  O+</Grid>
                                     </Grid>
                                     <Grid className='d-flex align-items-center'>
-                                        <Grid style={{ fontWeight: 'bolder' }}>Phone</Grid>
+                                        <Grid style={{ fontWeight: 'bolder' }}>Education Qualification</Grid>
                                         <Grid>:</Grid>
-                                        <Grid>  +0 123456789 , +0 123456789</Grid>
+                                        <Grid>B-Tech</Grid>
                                     </Grid>
                                     <Grid className='d-flex align-items-center'>
-                                        <Grid style={{ fontWeight: 'bolder' }}> Email</Grid>
+                                        <Grid style={{ fontWeight: 'bolder' }}> Year Of Graduation</Grid>
                                         <Grid>:</Grid>
-                                        <Grid>  support@example.com</Grid>
+                                        <Grid> 2022</Grid>
                                     </Grid>
                                     <Grid className='d-flex align-items-center'>
-                                        <Grid style={{ fontWeight: 'bolder' }}>Website</Grid>
+                                        <Grid style={{ fontWeight: 'bolder' }}>Date Of Birth</Grid>
                                         <Grid>:</Grid>
-                                        <Grid>  http://example.com</Grid>
+                                        <Grid> 31-8-1997</Grid>
+                                    </Grid>
+                                    <Grid className='d-flex align-items-center'>
+                                        <Grid style={{ fontWeight: 'bolder' }}>Gender</Grid>
+                                        <Grid>:</Grid>
+                                        <Grid> Female</Grid>
+                                    </Grid>
+                                    <Grid className='d-flex align-items-center'>
+                                        <Grid style={{ fontWeight: 'bolder' }}>Contact Number</Grid>
+                                        <Grid>:</Grid>
+                                        <Grid> 1236547894</Grid>
+                                    </Grid>
+                                    <Grid className='d-flex align-items-center'>
+                                        <Grid style={{ fontWeight: 'bolder' }}>Emergency Contact Number</Grid>
+                                        <Grid>:</Grid>
+                                        <Grid> 1236547894</Grid>
+                                    </Grid>
+                                    <Grid className='d-flex align-items-center'>
+                                        <Grid style={{ fontWeight: 'bolder' }}>Personal Email ID</Grid>
+                                        <Grid>:</Grid>
+                                        <Grid> darlajosh@gmail.com</Grid>
+
+                                    </Grid>
+                                    <Grid className='d-flex align-items-center'>
+                                        <Grid style={{ fontWeight: 'bolder' }}>Current Address</Grid>
+                                        <Grid>:</Grid>
+                                        <Grid> ABC Nagar st, chennai</Grid>
+
+                                    </Grid>
+                                    <Grid className='d-flex align-items-center'>
+                                        <Grid style={{ fontWeight: 'bolder' }}>Permanent Address</Grid>
+                                        <Grid>:</Grid>
+                                        <Grid> ABC Nagar st, chennai</Grid>
+
+                                    </Grid>
+                                    <Grid className='d-flex align-items-center'>
+                                        <Grid style={{ fontWeight: 'bolder' }}>Aadhaar Number</Grid>
+                                        <Grid>:</Grid>
+                                        <Grid> 1236 5555 4587</Grid>
+                                    </Grid>
+                                    <Grid className='d-flex align-items-center'>
+                                        <Grid style={{ fontWeight: 'bolder' }}>Pan Number</Grid>
+                                        <Grid>:</Grid>
+                                        <Grid> 1236 5555 4587</Grid>
+                                    </Grid>
+                                    <Grid className='d-flex align-items-center'>
+                                        <Grid style={{ fontWeight: 'bolder' }}>Driving License Number</Grid>
+                                        <Grid>:</Grid>
+                                        <Grid> TN 060 345</Grid>
+                                    </Grid>
+                                    <Grid className='d-flex align-items-center'>
+                                        <Grid style={{ fontWeight: 'bolder' }}>Driving License Expiry Date</Grid>
+                                        <Grid>:</Grid>
+                                        <Grid> 12-12-2022</Grid>
+                                    </Grid>
+                                    <Grid className='d-flex align-items-center'>
+                                        <Grid style={{ fontWeight: 'bolder' }}>Passport Number</Grid>
+                                        <Grid>:</Grid>
+                                        <Grid> 12584</Grid>
+                                    </Grid>
+                                    <Grid className='d-flex align-items-center'>
+                                        <Grid style={{ fontWeight: 'bolder' }}>Passport Expiry Date</Grid>
+                                        <Grid>:</Grid>
+                                        <Grid> 12-12-2022</Grid>
                                     </Grid>
 
 
@@ -462,7 +527,7 @@ const UserDetails = () => {
                                 onClick={handleOpen}
 
                             >
-                                Submit
+                               Apply For Verification 
                             </Button>
                             <div className='colorbg'>
                                 <Modal

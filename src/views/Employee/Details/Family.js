@@ -1,4 +1,4 @@
-import { TextField } from '@mui/material'
+import { Card, TextField } from '@mui/material'
 import React from 'react'
 import { Grid } from '@mui/material'
 
@@ -26,6 +26,47 @@ const Family = () => {
                     <TextField label="Spouse Contact Number(If married)" placeholder="Spouse Contact Number(If married)" fullWidth />
                 </Grid>
             </Grid>
+            <br/>
+            <div >
+            <Card style={{width:'50rem', height:'25rem',marginLeft:'15rem',}} >
+                <div className='d-flex justify-content-between align-iteam-center'>
+                    <h6 className='h5margin' >View</h6> 
+                </div>
+                <hr />
+                <div className="name-list" style={{marginLeft:'6rem'}}>
+                    <Grid className='d-flex align-items-center' container>
+                        <Grid  xs={6} style={{ fontWeight: 'bolder', alignItems:'center' }}> Name</Grid>
+                        <Grid xs={4}  >:</Grid>
+                        <Grid   > Darla</Grid>
+                    </Grid>
+                    <Grid className='d-flex align-items-center' container>
+                        <Grid xs={6}  style={{ fontWeight: 'bolder', alignItems:'center' }}> Mather Name</Grid>
+                        <Grid xs={4}  >:</Grid>
+                        <Grid   > Lax</Grid>
+                    </Grid>
+                    <Grid className='d-flex align-items-center' container>
+                        <Grid xs={6}  style={{ fontWeight: 'bolder', alignItems:'center' }}> Siblings</Grid>
+                        <Grid xs={4}  >:</Grid>
+                        <Grid   > 3</Grid>
+                    </Grid>
+                    <Grid className='d-flex align-items-center' container>
+                        <Grid xs={6}  style={{ fontWeight: 'bolder', alignItems:'center' }}> Marital Status</Grid>
+                        <Grid xs={4}  >:</Grid>
+                        <Grid   > Single</Grid>
+                    </Grid>
+                    <Grid className='d-flex align-items-center' container>
+                        <Grid xs={6}  style={{ fontWeight: 'bolder', alignItems:'center' }}> Spouse Name(If married)</Grid>
+                        <Grid  xs={4} >:</Grid>
+                        <Grid   > -</Grid>
+                    </Grid>
+                    <Grid className='d-flex align-items-center' container>
+                        <Grid  xs={6} style={{ fontWeight: 'bolder', alignItems:'center' }}> Spouse Contact Number(If married)</Grid>
+                        <Grid  xs={4} >:</Grid>
+                        <Grid   > -</Grid>
+                    </Grid>
+                </div>
+
+            </Card></div>
         </div>
 
 

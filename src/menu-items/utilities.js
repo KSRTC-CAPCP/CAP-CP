@@ -139,14 +139,14 @@ const utilities = {
       icon: icons.IconUserX,
       breadcrumbs: false
     },
-    {
-      id: 'attendanceapproval',
-      title: 'Attendance Approval',
-      type: 'item',
-      url: '/attendance-Panel',
-      icon: icons.IconUserX,
-      breadcrumbs: false
-    }
+    // {
+    //   id: 'attendanceapproval',
+    //   title: 'Attendance Approval',
+    //   type: 'item',
+    //   url: '/attendance-Panel',
+    //   icon: icons.IconUserX,
+    //   breadcrumbs: false
+    // }
   ]
 };
 
