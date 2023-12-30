@@ -323,16 +323,17 @@ const Projects = ({ _history, tasks }) => {
     {
       accessorKey: 'date',
       header: 'Date',
-      muiEditTextFieldProps: {
-        type: 'date',
-        required: true
-      }
+      enableEditing: false
+      // muiEditTextFieldProps: {
+      //   type: 'date',
+      //   required: true
+      // }
     },
     {
       accessorKey: 'refNumber',
       header: 'Ref No/Bill',
       muiEditTextFieldProps: {
-        type: 'number',
+        type: 'text',
         required: true
       },
       enableEditing: true
@@ -365,16 +366,22 @@ const Projects = ({ _history, tasks }) => {
         select: true
       },
       enableEditing: true
+    },
+    {
+      accessorKey: 'createdBy',
+      header: 'Created By',
+      enableEditing: false
     }
   ];
   const columnsForHistory = [
     {
       accessorKey: 'date',
       header: 'Date',
-      muiEditTextFieldProps: {
-        type: 'date',
-        required: true
-      }
+      enableEditing: false
+      // muiEditTextFieldProps: {
+      //   type: 'date',
+      //   required: true
+      // }
     },
     {
       accessorKey: 'projectDescription',
@@ -400,6 +407,11 @@ const Projects = ({ _history, tasks }) => {
         select: true
       },
       enableEditing: true
+    },
+    {
+      accessorKey: 'createdBy',
+      header: 'Created By',
+      enableEditing: false
     }
   ];
   const columnsForTask = [
@@ -442,8 +454,7 @@ const Projects = ({ _history, tasks }) => {
         type: 'date',
         required: true
       }
-    },
-   
+    }
   ];
 
   const [selectedDate, setSelectedDate] = useState('');
@@ -566,7 +577,14 @@ const Projects = ({ _history, tasks }) => {
   const [editingRowId, setEditingRowId] = useState(null);
   const generateTempId = () => `temp_${Math.random().toString(36).substr(2, 9)}`;
   const [isCreatingRow, setIsCreatingRow] = useState(false);
+  function getCurrentDate() {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
+    const yyyy = today.getFullYear();
 
+    return `${dd}-${mm}-${yyyy}`;
+  }
   const formik = useFormik({
     initialValues: {
       rfqNumber: '',
@@ -611,7 +629,8 @@ const Projects = ({ _history, tasks }) => {
                 date: data.date,
                 projectDescription: data.projectDescription,
                 requestStatus: data.requestStatus,
-                approvalStatus: data.approvalStatus
+                approvalStatus: data.approvalStatus,
+                createdBy: data.createdBy
               }))
             : [];
           const taskValue = taskTableData
@@ -631,7 +650,8 @@ const Projects = ({ _history, tasks }) => {
                 refNumber: data.refNumber,
                 amount: data.amount,
                 tax: data.tax,
-                status: data.status
+                status: data.status,
+                createdBy: data.createdBy
               }))
             : [];
           console.log(values, 'upd');
@@ -671,7 +691,8 @@ const Projects = ({ _history, tasks }) => {
                 date: data.date,
                 projectDescription: data.description,
                 requestStatus: data.requeststatus,
-                approvalStatus: data.approvalstatus
+                approvalStatus: data.approvalstatus,
+                createdBy: data.createdBy
               }))
             : [];
           const taskValue = taskTableData
@@ -691,7 +712,8 @@ const Projects = ({ _history, tasks }) => {
                 refNumber: data.refNumber,
                 amount: data.amount,
                 tax: data.tax,
-                status: data.status
+                status: data.status,
+                createdBy: data.createdBy
               }))
             : [];
           const formattedData = {
@@ -921,7 +943,7 @@ const Projects = ({ _history, tasks }) => {
   };
   const handleCreateRowHistorys = (newData) => {
     const tempId = generateTempId(); // Generate a temporary ID
-    const newTask = { ...newData.values, _id: tempId };
+    const newTask = { ...newData.values, _id: tempId, date: getCurrentDate(), createdBy: `${localData?.code}-${localData.name}` };
     setHistoryTableData([...historyTableData, newTask]);
     setIsCreatingRow(false);
   };
@@ -993,7 +1015,7 @@ const Projects = ({ _history, tasks }) => {
   };
   const handleCreateRowFinances = (newData) => {
     const tempId = generateTempId(); // Generate a temporary ID
-    const newTask = { ...newData.values, _id: tempId };
+    const newTask = { ...newData.values, _id: tempId, date: getCurrentDate(), createdBy: `${localData?.code}-${localData.name}` };
     setFinanceData([...financeData, newTask]);
     setIsCreatingRow(false);
   };
