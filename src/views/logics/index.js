@@ -191,11 +191,7 @@ const columns = [
   columnHelper.accessor('leaddescription', {
     header: 'Lead Description',
     Cell: ({ renderedCellValue, row }) => (
-      <Box component="span">
-        {row.original.leadDescription.length > 0 && (
-          <p>{row.original.leadDescription[row.original.leadDescription.length - 1].description}</p>
-        )}
-      </Box>
+      <Box component="span">{row.original.leadDescription.length > 0 && <p>{row.original.leadDescription[0].description}</p>}</Box>
     )
   }),
   columnHelper.accessor('status', {
@@ -270,12 +266,13 @@ const BusinessLeads = () => {
     {
       accessorKey: 'date',
       header: 'Date',
-      muiEditTextFieldProps: {
-        type: 'date',
-        required: true,
-        minDate: new Date(maxDateHistory).toString()
-        // maxDate :new Date(maxDateHistory).toString()
-      },
+      enableEditing: false,
+      // muiEditTextFieldProps: {
+      //   type: 'date',
+      //   required: true,
+      //   minDate: new Date(maxDateHistory).toString()
+      //   // maxDate :new Date(maxDateHistory).toString()
+      // },
       Cell: ({ renderedCellValue, row }) => (
         <Box component="span">
           <p>{row.original.date.slice(0, 10)}</p>
@@ -285,9 +282,10 @@ const BusinessLeads = () => {
     },
     {
       accessorKey: 'description',
-      header: 'Lead Description',
+      header: 'History Content',
       enableEditing: true
     },
+
     {
       accessorKey: 'statusRequest',
       header: 'Request Status',
@@ -305,6 +303,11 @@ const BusinessLeads = () => {
         onChange: (e) => handleStsReq(e)
       },
       enableEditing: true
+    },
+    {
+      accessorKey: 'createdBy',
+      header: 'Created By',
+      enableEditing: false
     }
   ];
   const [historyTableColumns, setHistoryTableColumns] = useState(coumnsForHistory);
@@ -366,7 +369,7 @@ const BusinessLeads = () => {
           <p>{row.original.targetDate.slice(0, 10)}</p>
         </Box>
       )
-    },
+    }
   ];
   const [inputValue, setInputValue] = useState('');
   const [leadSummary, setLeadSummary] = useState('');
@@ -498,28 +501,30 @@ const BusinessLeads = () => {
   const theme = useTheme();
   function getUniqueTitles(dataArray, propertyName) {
     const uniqueTitlesSet = new Set();
-  
-    const uniqueTitles = dataArray.map((data) => {
-      const title = data[propertyName];
-  
-      // Check if the title is already in the set
-      if (!uniqueTitlesSet.has(title)) {
-        // If not, add it to the set and return the object
-        uniqueTitlesSet.add(title);
-        return { title };
-      }
-  
-      // If the title is already in the set, return null or undefined (skip duplicates)
-      return null;
-    }).filter(Boolean); // Filter out null or undefined values
-  
+
+    const uniqueTitles = dataArray
+      .map((data) => {
+        const title = data[propertyName];
+
+        // Check if the title is already in the set
+        if (!uniqueTitlesSet.has(title)) {
+          // If not, add it to the set and return the object
+          uniqueTitlesSet.add(title);
+          return { title };
+        }
+
+        // If the title is already in the set, return null or undefined (skip duplicates)
+        return null;
+      })
+      .filter(Boolean); // Filter out null or undefined values
+
     return uniqueTitles;
   }
-  
+
   const pilotName = getUniqueTitles(leadData, 'Pilot');
   const companyName = getUniqueTitles(leadData, 'companyName');
   const contactName = getUniqueTitles(leadData, 'contactName');
-  
+
   const handleExportData = () => {
     // Process the lead data
     const processedLeadData = leadData.map((lead) => {
@@ -571,7 +576,6 @@ const BusinessLeads = () => {
 
   console.log(moveRFQ, 'moveRFQ');
   const handleUpdate = async (values) => {
-    
     try {
       // Assuming values contain the updated data
       console.log(values, 'vvvvvvvvvvv');
@@ -592,47 +596,64 @@ const BusinessLeads = () => {
         tasks: taskTableData
         // ...update other fields
       };
+
       console.log(
         updatedData?.leadDescription.filter((item) => item.statusRequest === 'Move to RFQ' && item.status === 'Approval'),
         '00000'
-      ); // Make the API call to update the data
+      );
+
+      // Make the API call to update the data
       const approval = updatedData?.leadDescription.filter((item) => item.statusRequest === 'Move to RFQ' && item.status === 'Approval');
-      if (approval.length !== 0) {
-        const leadDescriptionArray = values.leadDescription
-          ? values.leadDescription.split('\n').map((item) => ({
-              description: item.trim()
-            }))
-          : [];
-        const newRfq = {
-          date: values.date,
-          Source: values.Source,
-          Pilot: values.Pilot,
-          leadNumber: values?.serialNumber,
-          companyName: values.companyName,
-          category: values.category,
-          remark: values.remark,
-          contactName: values.contactName,
-          departmentName: values.departmentName,
-          phoneNumber: values.departmentName,
-          email: values.email,
-          businessVertical: values.businessVertical,
-          leadDescription: leadDescriptionArray
-        };
 
-        const moveToRfq = await postData(RFQ_CREATION, newRfq, localData?.accessToken);
-        console.log(moveToRfq, 'movetorfq');
-      }
       const endpoint = LEAD_UPDATE(updateId);
-      await updateData(endpoint, updatedData, localData?.accessToken);
-      // Reset the form and fetch updated data
-      fetchFun();
-      formik.resetForm();
 
-      // Optionally, set the view mode to 'Initial' or perform other actions
-      setView({
-        visible: true,
-        mode: 'Initial'
-      });
+      // Update data and check for errors
+      const result = await updateData(endpoint, updatedData, localData?.accessToken);
+
+      if (result.success) {
+        // Only proceed with RFQ post if the lead update was successful
+        if (approval.length !== 0) {
+          const leadDescriptionArray = values.leadDescription
+            ? values.leadDescription.split('\n').map((item) => ({
+                description: item.trim()
+              }))
+            : [];
+
+          const newRfq = {
+            date: values.date,
+            Source: values.Source,
+            Pilot: values.Pilot,
+            leadNumber: values?.serialNumber,
+            companyName: values.companyName,
+            category: values.category,
+            remark: values.remark,
+            contactName: values.contactName,
+            departmentName: values.departmentName,
+            phoneNumber: values.phoneNumber,
+            email: values.email,
+            businessVertical: values.businessVertical,
+            leadDescription: leadDescriptionArray
+          };
+
+          // Make the RFQ post request
+          const moveToRfq = await postData(RFQ_CREATION, newRfq, localData?.accessToken);
+          console.log(moveToRfq, 'movetorfq');
+        }
+
+        // Reset the form and fetch updated data
+        fetchFun();
+        formik.resetForm();
+
+        // Optionally, set the view mode to 'Initial' or perform other actions
+        setView({
+          visible: true,
+          mode: 'Initial'
+        });
+      } else {
+        // Handle lead update error (display error message, etc.)
+        console.error('Lead update error:', result.message);
+        // Optionally, display an error message to the user
+      }
     } catch (error) {
       console.error('API error:', error);
     }
@@ -643,6 +664,7 @@ const BusinessLeads = () => {
   const [valueForSuggest, setValueForSuggest] = React.useState(null);
   const [valueForCompany, setValueForCompany] = React.useState(null);
   const [valueForContact, setValueForContact] = React.useState(null);
+  const [description, setDescription] = useState('');
 
   const formik = useFormik({
     initialValues: {
@@ -688,6 +710,7 @@ const BusinessLeads = () => {
                 date: values?.date,
                 description: item.trim(),
                 status: 'pending', // Set your default status here
+                createdBy: `${localData?.code}-${localData?.name}`,
                 statusRequest: values.status // Set your default statusRequest here
               }))
             : [];
@@ -765,9 +788,14 @@ const BusinessLeads = () => {
     setUpdateId(e.original._id);
     setCustomOption(getByIdData?.category);
     // console.log(getByIdData?.data, 'getby');
+    setValueForCompany(e.original?.companyName);
+    setValueForContact(e.original?.contactName);
+    setValueForSuggest(e.original?.Pilot);
     const value = getByIdData?.data;
     setleadNumber(value?.serialNumber);
     setSelectedOption(value?.category);
+    setDescription(e?.original?.leadDescription[0]?.description);
+
     formik.setValues({
       date: value?.date?.slice(0, 10),
       Source: value?.Source,
@@ -875,7 +903,7 @@ const BusinessLeads = () => {
         row._id === oldData._id || // For existing rows
         (row && !row._id && oldData && oldData._tempId && row._tempId === oldData._tempId) // For new rows
       ) {
-        return { ...row, ...newData };
+        return { ...row, ...newData, createdBy: `${localData?.code}-${localData?.name}` };
       } else {
         return row;
       }
@@ -888,9 +916,18 @@ const BusinessLeads = () => {
   const handleCancelEditHistory = () => {
     setEditingRowId(null);
   };
+  function getCurrentDate() {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
+    const yyyy = today.getFullYear();
+  
+    return `${dd}-${mm}-${yyyy}`;
+  }
   const handleCreateRowHistory = (newData) => {
+    console.log('handleSaveRowHistory - updatedData:', newData);
     const tempId = generateTempId(); // Generate a temporary ID
-    const newTask = { ...newData.values, _id: tempId };
+    const newTask = { ...newData.values, _id: tempId,date: getCurrentDate(), createdBy: `${localData?.code}-${localData.name}` };
     setHistoryTableData([...historyTableData, newTask]);
     setIsCreatingRow(false);
   };
@@ -2128,6 +2165,19 @@ const BusinessLeads = () => {
                   </FormHelperText>
                 )}
               </Grid>
+              <Grid xs={4} p={2}>
+                <TextField
+                  // name="departmentName"
+                  value={description}
+                  // onChange={formik.handleChange}
+                  // onBlur={formik.handleBlur}
+                  fullWidth
+                  disabled
+                  id="outlined-basic"
+                  label="Initial Description"
+                  variant="outlined"
+                />
+              </Grid>
             </Grid>
             {/* <Divider /> */}
             <Box p={2} className="edit-table-container">
@@ -2284,7 +2334,7 @@ const BusinessLeads = () => {
 
                           <TimelineContent>
                             <Typography variant="h6" component="span" className="text-muted">
-                              {item.date?.slice(0, 10)}
+                              {item.date?.slice(0, 10)} / {item.createdBy}
                             </Typography>
                             <br />
                             <Typography variant="h6" component="span" className="strong">
@@ -2350,8 +2400,8 @@ const BusinessLeads = () => {
                             </div>
                           </div>
                           <div className="float-end">
-                            <p className="text-muted-light m-0 text-end">Assigned Date : &nbsp; {data?.assignedDate.slice(0, 10)}</p>
-                            <p className="text-muted-light m-0 text-end">Target Date : &nbsp; {data?.targetDate.slice(0, 10)}</p>
+                            <p className="text-muted-light m-0 text-end">Assigned Date : &nbsp; {data?.assignedDate?.slice(0, 10)}</p>
+                            <p className="text-muted-light m-0 text-end">Target Date : &nbsp; {data?.targetDate?.slice(0, 10)}</p>
                             <div className="d-flex justify-content-end">
                               <p
                                 className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${

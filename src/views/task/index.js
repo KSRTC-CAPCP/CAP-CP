@@ -2,11 +2,29 @@
 import TaskView from './task-panel';
 import { TASKS } from './mockData';
 import MainCard from 'ui-component/cards/MainCard';
-import { AvatarGroup, Button, ButtonBase, InputAdornment, MenuItem, TextField, Typography } from '@mui/material';
+import {
+  Autocomplete,
+  AvatarGroup,
+  Button,
+  ButtonBase,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  FormControl,
+  Grid,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography
+} from '@mui/material';
 import React, { useState, useRef, useEffect } from 'react';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Avatar from '@mui/material/Avatar';
-import { Modal } from 'rsuite';
+import { DatePicker, Modal } from 'rsuite';
 import { Box } from '@mui/system';
 import ClearIcon from '@mui/icons-material/Clear';
 import SunEditor from 'suneditor-react';
@@ -15,7 +33,7 @@ import CardMembershipIcon from '@mui/icons-material/CardMembership';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import GroupIcon from '@mui/icons-material/Group';
 import FlagIcon from '@mui/icons-material/Flag';
-import { KeyboardBackspaceRounded, PlusOne, ViewAgendaTwoTone } from '@mui/icons-material';
+import { CloseTwoTone, FlagTwoTone, KeyboardBackspaceRounded, PlusOne, ViewAgendaTwoTone } from '@mui/icons-material';
 import { IconPlus } from '@tabler/icons';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -24,19 +42,86 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { TASKS_GET_ALL } from 'api/apiEndPoint';
-import { fetchData } from 'utils/apiUtils';
+import { PROFILES_GETBY_STATUS, TASKS_CREATE, TASKS_GET_ALL } from 'api/apiEndPoint';
+import { fetchData, postData } from 'utils/apiUtils';
+import { MaterialReactTable, createMRTColumnHelper, useMaterialReactTable } from 'material-react-table';
+import ModalHeader from 'rsuite/esm/Modal/ModalHeader';
+import { useFormik } from 'formik';
 
 function createData(ReferenceID, Title, Description, Status, priority, RemainingDays, CreatedBy) {
   return { ReferenceID, Title, Description, Status, priority, RemainingDays, CreatedBy };
 }
 
-const rows = [
-  createData('CAE0001', 'CAP-CP', 'Do your work', 'Complete', 'lower', '2days', 'HR'),
-  createData('CAE0002', 'CAP-CP', 'Do your work', 'In Progress', 'higher', '2days', 'HR'),
-  createData('CAE0003', 'CAP-CP', 'Do your work', 'Waiting', 'high', '2days', 'self'),
-  createData('CAE0004', 'CAP-CP', 'Do your work', 'In Progress', 'medium', '2days', 'self'),
-  createData('CAE0005', 'CAP-CP', 'Do your work', 'Complete', 'low', '2days', 'self')
+const data = [
+  {
+    date: '02-04-2001',
+    source: 'Berneice',
+    pilot: 'Feil',
+    companyname: 'Deckow, Leuschke and Jaskolski',
+    category: 'Millcreek',
+    contactname: 'Nepal',
+    department: 'Nepal',
+    phonenumber: 'Nepal',
+    email: 'Nepal',
+    businessverticle: 'Nepal',
+    leaddescription: 'Nepal',
+    status: 'Nepal'
+  },
+  {
+    date: '02-04-2001',
+    source: 'Berneice',
+    pilot: 'Feil',
+    companyname: 'Deckow, Leuschke and Jaskolski',
+    category: 'Millcreek',
+    contactname: 'Nepal',
+    department: 'Nepal',
+    phonenumber: 'Nepal',
+    email: 'Nepal',
+    businessverticle: 'Nepal',
+    leaddescription: 'Nepal',
+    status: 'Nepal'
+  }
+];
+const columnHelper = createMRTColumnHelper();
+
+const columns = [
+  columnHelper.accessor('referenceId', {
+    header: 'Ref. Id'
+  }),
+  columnHelper.accessor('title', {
+    header: 'Title'
+  }),
+  columnHelper.accessor('description', {
+    header: 'Description'
+  }),
+  columnHelper.accessor('responsible', {
+    header: 'Responsible'
+  }),
+  columnHelper.accessor('startDate', {
+    header: 'Start Date'
+  }),
+  columnHelper.accessor('endDate', {
+    header: 'End Date'
+  }),
+  columnHelper.accessor('priority', {
+    header: 'priority',
+    Cell: ({ renderedCellValue, row }) => (
+      <Box component="status-task">
+        <p>{row.original.priority}</p>
+      </Box>
+    )
+  }),
+  columnHelper.accessor('status', {
+    header: 'status',
+    Cell: ({ renderedCellValue, row }) => (
+      <Box component="status-task">
+        <p>{row.original.status}</p>
+      </Box>
+    )
+  }),
+  columnHelper.accessor('createdBy', {
+    header: 'Created By'
+  })
 ];
 const TaskPanel = () => {
   const [hovered, setHovered] = useState(false);
@@ -73,9 +158,15 @@ const TaskPanel = () => {
     borderColor: '#bbb'
   };
 
-  const [open, setOpen] = React.useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const [open, setOpen] = useState(false);
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const allOptions = {
     buttonList: [
@@ -93,13 +184,18 @@ const TaskPanel = () => {
     ]
   };
   const [fileCount, setFileCount] = useState(0);
-
+  const [profilesData, setProfilesData] = useState([]);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [files, setFiles] = useState([]);
   const fileInputRef = useRef(); // Ref to file input
-
+  const employeesOption = profilesData?.map((data) => ({
+    label: data?.EmployeeCode + '-' + data?.NameOfCandidate,
+    value: data?.EmployeeCode + '-' + data?.NameOfCandidate
+  }));
   const UPLOAD_ENDPOINT = 'http://localhost/react-php-file-upload/backend/upload.php';
-
+  console.log('employeesOption', employeesOption);
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (files.length > 0) {
@@ -112,6 +208,40 @@ const TaskPanel = () => {
     }
   };
 
+  const handleStartDateChange = (event) => {
+    const inputDate = new Date(event);
+    const formattedDate = inputDate.toLocaleDateString('en-GB');
+    const [day, month, year] = formattedDate.split('/');
+    const formattedStartDate = `${day}-${month}-${year}`;
+    setStartDate(formattedStartDate);
+    formik.setValues({
+      ...formik.values,
+      startDate: formattedStartDate
+    });
+  };
+  const handleEndDateChange = (event) => {
+    const inputDate = new Date(event);
+    const formattedDate = inputDate.toLocaleDateString('en-GB');
+    const [day, month, year] = formattedDate.split('/');
+    const formattedStartDate = `${day}-${month}-${year}`;
+    setEndDate(formattedStartDate);
+    formik.setValues({
+      ...formik.values,
+      endDate: formattedStartDate
+    });
+  };
+  const parseDate = (dateString) => {
+    // Check if dateString is provided and is a non-empty string
+    if (dateString && typeof dateString === 'string' && dateString.trim() !== '') {
+      // Assuming dateString is in the format 'dd-MM-yyyy'
+      const [day, month, year] = dateString.split('-');
+      const parsedDate = new Date(`${year}-${month}-${day}`);
+      return parsedDate;
+    } else {
+      // Return null or handle the case when dateString is not valid
+      // return null;
+    }
+  };
   const uploadFile = async (file) => {
     const formData = new FormData();
     formData.append('avatar', file);
@@ -150,7 +280,15 @@ const TaskPanel = () => {
   };
   const [localData, setLocalData] = useState();
   const [tasksData, setTasksData] = useState([]);
-
+  const [valueForSuggest, setValueForSuggest] = React.useState(null);
+  // The sunEditor parameter will be set to the core suneditor instance when this function is called
+  const getSunEditorInstance = (sunEditor) => {
+    editor.current = sunEditor;
+  };
+  const table = useMaterialReactTable({
+    columns,
+    data: tasksData
+  });
   useEffect(() => {
     const fetchDataAndUpdate = async () => {
       try {
@@ -162,6 +300,9 @@ const TaskPanel = () => {
           const parsedData = JSON.parse(localStore);
           const data = await fetchData(TASKS_GET_ALL, parsedData?.accessToken);
           setTasksData(data.data);
+          const data4Employee = await fetchData(PROFILES_GETBY_STATUS('active'), parsedData?.accessToken);
+          console.log(data, 'parsedddd');
+          setProfilesData(data4Employee?.data);
         }
       } catch (error) {
         console.error('Error in fetchDataAndUpdate:', error);
@@ -169,7 +310,41 @@ const TaskPanel = () => {
     };
     fetchDataAndUpdate();
   }, []);
-
+  const formik = useFormik({
+    initialValues: {
+      title: '',
+      description: '',
+      responsible: '',
+      assignedBy: '',
+      priority: '',
+      startDate: '',
+      endDate: '',
+      status: '',
+      createdBy: '',
+      referenceId: '', // Lead/RFQ serial number or Project number
+      createdAt: '',
+      updatedBy: '',
+      updatedAt: ''
+    },
+    // validationSchema,
+    onSubmit: async (values) => {
+      console.log('worked', values);
+      try {
+        const formattedData = {
+          ...values,
+          status: 'In Backlog',
+          responsible: valueForSuggest?.label || values?.responsible
+        };
+        const taskCreation = await postData(TASKS_CREATE, formattedData, localData?.accessToken);
+        console.log(taskCreation, 'projectAllocate');
+        setView({
+          visible: true,
+          mode: 'Initial'
+        });
+      } catch {}
+    }
+  });
+  console.log(formik.values, 'values here');
   return (
     <>
       <MainCard
@@ -268,116 +443,151 @@ const TaskPanel = () => {
       >
         {view.mode === 'Add' && (
           <div>
-            <Table sx={{ minWidth: 650 }} aria-label="simple table">
-              {/* return { ReferenceID, Title, Description, Status, priority, RemainingDays, CreatedBy  }; */}
-              <TableHead>
-                <TableRow>
-                  <TableCell>Reference ID</TableCell>
-                  <TableCell align="right">Title</TableCell>
-                  <TableCell align="right">Description</TableCell>
-                  <TableCell align="right">Status</TableCell>
-                  <TableCell align="right">priority</TableCell>
-                  <TableCell align="right">RemainingDays</TableCell>
-                  <TableCell align="right">CreatedBy</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell component="th" scope="row">
-                      {row.ReferenceID}
-                    </TableCell>
-                    <TableCell align="right">{row.Title}</TableCell>
-                    <TableCell align="right">{row.Description}</TableCell>
-                    <TableCell align="right">{row.Status}</TableCell>
-                    <TableCell align="right">{row.priority}</TableCell>
-                    <TableCell align="right">{row.RemainingDays}</TableCell>
-                    <TableCell align="right">{row.CreatedBy}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <MaterialReactTable table={table} />
           </div>
         )}
         {view.mode === 'Initial' && (
-          <div>
+          <div className="task-panel-container">
             <TaskView tasks={tasksData} />
-            <Modal
-              open={open}
-              style={{ borderRadius: '5px' }}
-              backdrop="static"
-              aria-labelledby="modal-modal-title"
-              aria-describedby="modal-modal-description"
-            >
-              <Box>
-                <div className="d-flex justify-content-between align-item-center">
-                  <Typography className="bold-text"> Create New Task </Typography>
-                  <ClearIcon onClick={handleClose} />
-                </div>
-                <hr />
-                <TextField
-                  variant="outlined"
-                  fullWidth
-                  disabled
-                  InputProps={{
-                    startAdornment: <CardMembershipIcon style={{ fontSize: 'larger' }} />
-                  }}
-                  value="Blanck issues in KSRTC-CAPCP/Main-Repo ..."
-                />
-                <Typography className="bold-text">Add Title </Typography>
-                <TextField variant="outlined" fullWidth placeholder="Title" />
-                <Typography className="bold-text">Add Description </Typography>
-                <div>
-                  <SunEditor setOptions={allOptions} setAllPlugins={true} />
-                </div>
-                <br />
-                <form onSubmit={handleSubmit}>
-                  <label htmlFor="file-upload" className="custom-file-upload" style={{ marginRight: '10px' }}>
-                    <AttachFileIcon style={{ marginBottom: '-4px' }} /> Choose file(s)
-                  </label>
-
-                  <input
-                    id="file-upload"
-                    type="file"
-                    onChange={handleOnChange}
-                    style={{ display: 'none' }}
-                    ref={fileInputRef} // Attach the ref to the input
-                    multiple
-                  />
-
-                  {selectedFiles.length === 1 && <span>{selectedFiles[0].name}</span>}
-                  {selectedFiles.length > 1 && <span>{selectedFiles.length} files </span>}
-                </form>
-                <br />
-                <div className="d-flex">
-                  <TextField
-                    InputProps={{
-                      startAdornment: <GroupIcon style={{ fontSize: 'larger' }} />
-                    }}
-                    placeholder="Assignee"
-                  />
-                  <Box width="34%" mx="auto" className="App">
-                    <TextField fullWidth select label="Label">
-                      <MenuItem key="part-one" value="part-one">
-                        <FlagIcon style={{ fontSize: '19px', color: '#fd5c63' }} /> - High
-                      </MenuItem>
-                      <MenuItem key="part-two" value="part-two">
-                        <FlagIcon style={{ fontSize: '19px', color: '#FF0800' }} /> - Higher
-                      </MenuItem>
-                      <MenuItem key="part-two" value="part-two">
-                        <FlagIcon style={{ fontSize: '19px', color: '#FEBE10' }} /> - Medium
-                      </MenuItem>
-                      <MenuItem key="part-two" value="part-two">
-                        <FlagIcon style={{ fontSize: '19px', color: '#17B169' }} /> - Low
-                      </MenuItem>
-                      <MenuItem key="part-two" value="part-two">
-                        <FlagIcon style={{ fontSize: '19px', color: '#00563B' }} /> - Lower
-                      </MenuItem>
-                    </TextField>
-                  </Box>
-                </div>
-              </Box>
-            </Modal>
+            <Dialog open={open} fullWidth maxWidth="lg">
+              <form onSubmit={formik.handleSubmit}>
+                <DialogTitle className="d-flex justify-content-between m-0">
+                  <Typography variant="h3">Create Task</Typography>
+                  <Typography variant="h4" onClick={handleClose}>
+                    <CloseTwoTone />
+                  </Typography>
+                </DialogTitle>
+                <DialogContent className="m-1">
+                  <Grid container>
+                    <Grid xs={4} p={2}>
+                      <TextField
+                        fullWidth
+                        id="outlined-basic"
+                        label="Ref.no"
+                        name="referenceId"
+                        variant="outlined"
+                        value={formik.values.referenceId}
+                        onChange={formik.handleChange}
+                      />
+                    </Grid>
+                    <Grid xs={4} p={2}>
+                      <TextField
+                        fullWidth
+                        id="outlined-basic"
+                        label="Title"
+                        name="title"
+                        variant="outlined"
+                        value={formik.values.title}
+                        onChange={formik.handleChange}
+                      />
+                    </Grid>
+                    <Grid xs={4} p={2}>
+                      <FormControl fullWidth error={Boolean(formik.touched.status && formik.errors.status)}>
+                        <InputLabel id="demo-simple-select-label">Priority</InputLabel>
+                        <Select
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          label="status"
+                          fullWidth
+                          name="priority"
+                          value={formik.values.priority}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                        >
+                          <MenuItem value={'High'}>
+                            <FlagTwoTone style={{ fontSize: '19px', color: '#c62828' }} /> - High
+                          </MenuItem>
+                          <MenuItem value="Medium">
+                            <FlagTwoTone style={{ fontSize: '19px', color: '#faaf00' }} /> - Medium
+                          </MenuItem>
+                          <MenuItem value="Low">
+                            <FlagTwoTone style={{ fontSize: '19px', color: '#00e676' }} /> - Low
+                          </MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid xs={12} p={2}>
+                      <SunEditor setOptions={allOptions} setAllPlugins={true} getSunEditorInstance={getSunEditorInstance} />
+                    </Grid>
+                    <Grid xs={4} p={2}>
+                      {/* <FormControl fullWidth>
+                        <InputLabel id="demo-simple-select-label">Responsible</InputLabel>
+                        <Select
+                          isSearchable={true}
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          label="Responsible"
+                          name="Responsible"
+                        >
+                          {employeesOption.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                              {option.label}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl> */}
+                      <Autocomplete
+                        fullWidth
+                        disablePortal
+                        id="combo-box-demo"
+                        name="responsible"
+                        options={employeesOption}
+                        value={valueForSuggest}
+                        onChange={(event, newValue) => {
+                          if (typeof newValue === 'string') {
+                            setValueForSuggest({
+                              title: newValue
+                            });
+                          } else if (newValue && newValue.inputValue) {
+                            // Create a new value from the user input
+                            setValueForSuggest({
+                              title: newValue.inputValue
+                            });
+                          } else {
+                            setValueForSuggest(newValue);
+                          }
+                        }}
+                        renderInput={(params) => <TextField {...params} label="Responsible" />}
+                      />
+                    </Grid>
+                    <Grid xs={4} p={2}>
+                      <DatePicker
+                        oneTap
+                        placeholder="Assigned Date"
+                        name="startDate"
+                        aria-autocomplete="false"
+                        className="form-control"
+                        // onClean={() => setStartDate('')}
+                        autoComplete="false"
+                        value={parseDate(formik.values.startDate)}
+                        onChange={(e) => handleStartDateChange(e)}
+                        // onChange={(e) => handleStartDateChange(e)}
+                        // value={parseDate(formik.values.assignedDate)}
+                      />
+                    </Grid>
+                    <Grid xs={4} p={2}>
+                      <DatePicker
+                        oneTap
+                        placeholder="Target Date"
+                        name="endDate"
+                        aria-autocomplete="false"
+                        className="form-control"
+                        // value={formik.values.endDate}
+                        value={parseDate(formik.values.endDate)}
+                        onChange={(e) => handleEndDateChange(e)}
+                        // onChange={(e) => handleStartDateChange(e)}
+                        // value={parseDate(formik.values.assignedDate)}
+                      />{' '}
+                    </Grid>
+                  </Grid>
+                </DialogContent>
+                <DialogActions className="d-flex justify-content-center">
+                  <Button variant="contained" type="submit">
+                    Assign
+                  </Button>
+                </DialogActions>{' '}
+              </form>
+            </Dialog>
           </div>
         )}
       </MainCard>

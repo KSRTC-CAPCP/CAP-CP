@@ -186,12 +186,13 @@ const columns = [
   columnHelper.accessor('businessVertical', {
     header: 'Business Verticle'
   }),
+  columnHelper.accessor('tcoNumber', {
+    header: 'TCO Number'
+  }),
   columnHelper.accessor('rfqdescription', {
     header: 'RFQ Description',
     Cell: ({ renderedCellValue, row }) => (
-      <Box component="span">
-        {row.original.rfqDescription.length > 0 && <p>{row.original.rfqDescription[0]?.description}</p>}
-      </Box>
+      <Box component="span">{row.original.rfqDescription.length > 0 && <p>{row.original.rfqDescription[0]?.description}</p>}</Box>
     )
   }),
   columnHelper.accessor('status', {
@@ -258,10 +259,11 @@ const BusinessRFQ = () => {
     {
       accessorKey: 'date',
       header: 'Date',
-      muiEditTextFieldProps: {
-        type: 'date',
-        required: true
-      },
+      enableEditing: false,
+      // muiEditTextFieldProps: {
+      //   type: 'date',
+      //   required: true
+      // },
       Cell: ({ renderedCellValue, row }) => (
         <Box component="span">
           <p>{row.original.date?.slice(0, 10)}</p>
@@ -270,7 +272,7 @@ const BusinessRFQ = () => {
     },
     {
       accessorKey: 'description',
-      header: 'RFQ Description',
+      header: 'History Content',
       enableEditing: true
     },
     {
@@ -283,6 +285,11 @@ const BusinessRFQ = () => {
         onChange: (e) => handleChangeStatus(e)
       },
       enableEditing: true
+    },
+    {
+      accessorKey: 'createdBy',
+      header: 'Created By',
+      enableEditing: false
     }
   ];
   const [historyTableColumns, setHistoryTableColumns] = useState(coumnsForHistory);
@@ -341,8 +348,7 @@ const BusinessRFQ = () => {
           <p>{row.original.targetDate?.slice(0, 10)}</p>
         </Box>
       )
-    },
-    
+    }
   ];
   const [inputValue, setInputValue] = useState('');
   const [categoryOptions, setCategoryOptions] = useState([
@@ -554,7 +560,7 @@ const BusinessRFQ = () => {
       // ...populate other fields
     });
   };
-const [description, setDescription] = useState('')
+  const [description, setDescription] = useState('');
   const handleEdit = async (e) => {
     console.log('worked', e.original);
     const endpoint = RFQ_GET_ID(e.original._id);
@@ -562,7 +568,7 @@ const [description, setDescription] = useState('')
     // setUpdatedValue(getByIdData)
     setUpdateId(e.original._id);
     setSelectedOption(e.original?.category);
-    setDescription(e?.original?.rfqDescription[0]?.description)
+    setDescription(e?.original?.rfqDescription[0]?.description);
     setValueForCompany(getByIdData?.data.companyName);
     setValueForContact(getByIdData?.data.contactName);
     setValueForSuggest(getByIdData?.data.Pilot);
@@ -763,6 +769,7 @@ const [description, setDescription] = useState('')
                 date: values.date?.slice(0, 10),
                 description: item.trim(),
                 status: 'pending', // Set your default status here
+                createdBy: `${localData?.code}-${localData?.name}`,
                 statusRequest: values.status // Set your default statusRequest here
               }))
             : [];
@@ -891,9 +898,16 @@ const [description, setDescription] = useState('')
   const handleCancelEditHistory = () => {
     setEditingRowId(null);
   };
+  function getCurrentDate() {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
+    const yyyy = today.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  }
   const handleCreateRowHistory = (newData) => {
     const tempId = generateTempId(); // Generate a temporary ID
-    const newTask = { ...newData.values, _id: tempId };
+    const newTask = { ...newData.values, _id: tempId,date: getCurrentDate(), createdBy: `${localData?.code}-${localData.name}` };
     setHistoryTableData([...historyTableData, newTask]);
     setIsCreatingRow(false);
   };
@@ -2173,7 +2187,7 @@ const [description, setDescription] = useState('')
               {tcoNumberView && (
                 <Grid xs={4} p={2}>
                   <TextField
-                    type="number"
+                    type="text"
                     name="approximateValue"
                     value={formik.values.approximateValue}
                     onChange={formik.handleChange}
