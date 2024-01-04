@@ -61,3 +61,6 @@ export const TEAM_GET_BY_ID = (id) => `${BASE_URL}/roleaccess/getbyid/${id}`;
 //FOR TASK
 export const TASKS_GET_ALL =  `${BASE_URL}/tasks`;
 export const TASKS_CREATE =  `${BASE_URL}/tasks/manual`;
+
+//FOR TCO NUMBER
+export const TCO_NUMBER =  `${BASE_URL}/tco`;

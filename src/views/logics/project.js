@@ -68,7 +68,10 @@ import {
   ThumbUpSharp,
   VisibilityRounded,
   Money,
-  CurrencyRupee
+  CurrencyRupee,
+  DeleteTwoTone,
+  CreateTwoTone,
+  VisibilityTwoTone
 } from '@mui/icons-material';
 import { useState } from 'react';
 import styled from '@emotion/styled';
@@ -824,16 +827,20 @@ const Projects = ({ _history, tasks }) => {
     renderRowActions: ({ row }) => (
       <div style={{ display: 'flex' }}>
         <IconButton onClick={() => handleDelete(row)}>
-          <DeleteRounded style={{ color: '#2196f3' }} />
+          <DeleteTwoTone style={{ color: '#2196f3' }} />
         </IconButton>
         <IconButton onClick={() => handleView(row)}>
-          <VisibilityRounded style={{ color: '#2196f3' }} />
+          <VisibilityTwoTone style={{ color: '#2196f3' }} />
         </IconButton>
         <IconButton onClick={() => handleEdit(row)}>
-          <ModeEditRounded style={{ color: '#2196f3' }} />
+          <CreateTwoTone style={{ color: '#2196f3' }} />
         </IconButton>
       </div>
     ),
+    enableColumnPinning: true,
+    initialState: {
+      columnPinning: { right: ['mrt-row-actions'] }
+    },
     enableRowSelection: true,
     columnFilterDisplayMode: 'popover',
     paginationDisplayMode: 'pages',
@@ -1905,6 +1912,7 @@ const Projects = ({ _history, tasks }) => {
                   <Select
                     name="rfqNumber"
                     value={formik.values.rfqNumber}
+                    disabled
                     onChange={(e) => {
                       formik.handleChange(e);
                       handleSelectChange(e);
