@@ -114,6 +114,7 @@ import { useEffect } from 'react';
 import { deleteData, fetchData, postData, updateData } from 'utils/apiUtils';
 import TaskPanel from 'views/task';
 import Attendance from 'views/Attendance/Attendance';
+import Overallattendance from './Overallattendance';
 
 const columnHelper = createMRTColumnHelper();
 const data = [
@@ -1458,7 +1459,8 @@ const Manager = ({ _history, tasks }) => {
                 <MaterialReactTable table={table} />
               </TabPanel>
               <TabPanel value="2">
-                <Attendance />
+                {/* <Attendance /> */}
+                <Overallattendance/>
               </TabPanel>
             </TabContext>
           </Box>
