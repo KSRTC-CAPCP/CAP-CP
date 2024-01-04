@@ -314,9 +314,18 @@ main {
 .css-17pmaar-MuiCardContent-root:last-child {
   /* margin-left: 13px; */
 }
-
+.css-1jypy1b-MuiTableRow-root td {
+  /* display: block; */
+  max-width: 200px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 p {
   padding: 10px;
+}
+.p-1 {
+  padding: 1rem;
 }
 .p-3 {
   padding: 0px 10px;
@@ -330,8 +339,7 @@ p {
 .pe-1 {
   padding-right: 1rem;
 }
-.small
-{
+.small {
   font-size: smaller !important;
 }
 .ellipse-co {
@@ -350,11 +358,20 @@ p {
 .justify-content-between {
   margin-right: 39px;
 }
-
-.rs-modal-content {
-  margin-top: 235px;
+header,
+.css-1rcxgiw-MuiPaper-root-MuiDrawer-paper {
+  z-index: 1049 !important;
 }
 
+.rs-modal-dialog {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.rs-picker-date-menu
+{
+  z-index: 1300;
+}
 /* hr {
   padding-left: 36rem;
 } */
