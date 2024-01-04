@@ -1337,30 +1337,6 @@ const Manager = ({ _history, tasks }) => {
   const handleSelectInputChange = (event) => {
     setCustomOption(event.target.value);
   };
-  const handleSaveCustomOption = async () => {
-    // if (customOption.trim() !== '') {
-    //   const newOption = { value: customOption, label: customOption };
-    //   setMilestoneOptions([...milestoneOptions, newOption]);
-    //   setMileSelectedOption(customOption);
-    //   setCustomOption('');
-    //   setShowSelect(true);
-    // }
-    if (customOption.trim() !== '') {
-      if (mileselectedOption === 'addMore') {
-        // If "Add More Option" is selected, set selectedOption to the customOption value
-        setMileSelectedOption(customOption);
-      }
-      // Save the custom option to the backend
-      await postData(MILESTONE_CREATE, { name: customOption });
-      // Fetch the updated category data
-      const categoryData = await fetchData(MILESTONE_GET);
-      setMilestoneOptions(categoryData);
-      // Reset the customOption state
-      setCustomOption('');
-      // Show the select input
-      setShowSelect(true);
-    }
-  };
 
   const rfqNumber = rfqData.map((item) => ({
     label: item.serialNumber + '  ' + item.companyName,

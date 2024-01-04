@@ -55,6 +55,7 @@ import * as XLSX from 'xlsx';
 
 import {
   ConnectWithoutContact,
+  CreateTwoTone,
   Delete,
   DeleteRounded,
   DeleteTwoTone,
@@ -70,7 +71,8 @@ import {
   ThumbDown,
   ThumbDownAltSharp,
   ThumbUpSharp,
-  VisibilityRounded
+  VisibilityRounded,
+  VisibilityTwoTone
 } from '@mui/icons-material';
 import { useState } from 'react';
 import styled from '@emotion/styled';
@@ -533,16 +535,20 @@ const Profiles = () => {
     data: employeeData,
     enableRowActions: true,
     positionActionsColumn: 'last',
+    enableColumnPinning: true,
+    initialState: {
+      columnPinning: { right: ['mrt-row-actions'] }
+    },
     renderRowActions: ({ row }) => (
       <div style={{ display: 'flex' }}>
         {/* <IconButton onClick={() => handleDelete(row)}>
           <DeleteRounded style={{ color: '#2196f3' }} />
         </IconButton> */}
         <IconButton onClick={() => handleView(row)}>
-          <VisibilityRounded style={{ color: '#2196f3' }} />
+          <VisibilityTwoTone style={{ color: '#2196f3' }} />
         </IconButton>
         <IconButton onClick={() => handleEdit(row)}>
-          <ModeEditRounded style={{ color: '#2196f3' }} />
+          <CreateTwoTone style={{ color: '#2196f3' }} />
         </IconButton>
       </div>
     ),

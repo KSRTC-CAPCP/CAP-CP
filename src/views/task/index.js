@@ -175,10 +175,9 @@ const TaskPanel = () => {
       ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript'],
       ['fontColor', 'hiliteColor', 'textStyle'],
       ['removeFormat'],
-
       ['outdent', 'indent'],
       ['align', 'horizontalRule', 'list', 'table'],
-      ['link', 'image', 'video'],
+      ['link'],
       ['fullScreen', 'showBlocks', 'codeView'],
       ['preview']
     ]
@@ -281,10 +280,7 @@ const TaskPanel = () => {
   const [localData, setLocalData] = useState();
   const [tasksData, setTasksData] = useState([]);
   const [valueForSuggest, setValueForSuggest] = React.useState(null);
-  // The sunEditor parameter will be set to the core suneditor instance when this function is called
-  const getSunEditorInstance = (sunEditor) => {
-    editor.current = sunEditor;
-  };
+
   const table = useMaterialReactTable({
     columns,
     data: tasksData
@@ -344,6 +340,9 @@ const TaskPanel = () => {
       } catch {}
     }
   });
+  const handleEditorChange = (content) => {
+    console.log(content, 'Editor here');
+  };
   console.log(formik.values, 'values here');
   return (
     <>
@@ -507,7 +506,7 @@ const TaskPanel = () => {
                       </FormControl>
                     </Grid>
                     <Grid xs={12} p={2}>
-                      <SunEditor setOptions={allOptions} setAllPlugins={true} getSunEditorInstance={getSunEditorInstance} />
+                      <SunEditor setOptions={allOptions} setAllPlugins={true} onChange={handleEditorChange} />
                     </Grid>
                     <Grid xs={4} p={2}>
                       {/* <FormControl fullWidth>

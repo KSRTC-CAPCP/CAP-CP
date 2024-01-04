@@ -170,9 +170,6 @@ const columns = [
   columnHelper.accessor('category', {
     header: 'Category'
   }),
-  columnHelper.accessor('remark', {
-    header: 'Remark'
-  }),
   columnHelper.accessor('contactName', {
     header: 'Contact Name'
   }),
@@ -188,24 +185,38 @@ const columns = [
   columnHelper.accessor('businessVertical', {
     header: 'Business Verticle'
   }),
-  columnHelper.accessor('leaddescription', {
+  columnHelper.accessor('leadDescription', {
     header: 'Lead Description',
-    Cell: ({ renderedCellValue, row }) => (
-      <Box component="span">{row.original.leadDescription.length > 0 && <p>{row.original.leadDescription[0].description}</p>}</Box>
-    )
+    filterFn: (row, id, filterValue) => {
+      const descriptions = row.original.leadDescription.map((desc) => desc.description.toLowerCase());
+      return descriptions.some((desc) => desc.includes(filterValue.toLowerCase()));
+    },
+    Cell: ({ renderedCellValue, row }) => (row.original.leadDescription.length > 0 ? row.original.leadDescription[0].description : '')
+  }),
+
+  columnHelper.accessor('statusRequest', {
+    header: 'Status Request',
+    filterFn: (row, id, filterValue) => {
+      const lastStatus =
+        row.original.leadDescription.length > 0
+          ? row.original.leadDescription[row.original.leadDescription.length - 1].statusRequest?.toLowerCase()
+          : '';
+      return lastStatus.startsWith(filterValue);
+    },
+    Cell: ({ renderedCellValue, row }) =>
+      row.original.leadDescription.length > 0 ? row.original.leadDescription[row.original.leadDescription.length - 1]?.statusRequest : ''
   }),
   columnHelper.accessor('status', {
-    header: 'Status',
-    Cell: ({ renderedCellValue, row }) => (
-      <Box component="span">
-        {row.original.leadDescription.length > 0 && (
-          <p>
-            {row.original.leadDescription[row.original.leadDescription.length - 1].statusRequest}&nbsp;
-            {row.original.leadDescription[row.original.leadDescription.length - 1].status}
-          </p>
-        )}
-      </Box>
-    )
+    header: 'Approval Status ',
+    filterFn: (row, id, filterValue) => {
+      const lastStatus =
+        row.original.leadDescription.length > 0
+          ? row.original.leadDescription[row.original.leadDescription.length - 1]?.status.toLowerCase()
+          : '';
+      return lastStatus.startsWith(filterValue);
+    },
+    Cell: ({ renderedCellValue, row }) =>
+      row.original.leadDescription.length > 0 ? row.original.leadDescription[row.original.leadDescription.length - 1]?.status : ''
   })
 ];
 const optionsForHistoryApproval = ['Pending', 'Approval', 'Reject'];
@@ -293,7 +304,7 @@ const BusinessLeads = () => {
       Cell: ({ renderedCellValue, row }) => (
         <Box component="span">
           <p>
-            {row.original.statusRequest}&nbsp;{row.original.status}
+            {row.original.statusRequest}
           </p>
         </Box>
       ),
@@ -579,6 +590,8 @@ const BusinessLeads = () => {
     try {
       // Assuming values contain the updated data
       console.log(values, 'vvvvvvvvvvv');
+      const approval = historyTableData.filter((item) => item.statusRequest === 'Move to RFQ' && item.status === 'Approval');
+      console.log(approval.length, 'approval');
       const updatedData = {
         // Update fields as needed
         date: values.date,
@@ -593,23 +606,17 @@ const BusinessLeads = () => {
         email: values?.email,
         businessVertical: values?.businessVertical,
         leadDescription: historyTableData,
-        tasks: taskTableData
+        tasks: taskTableData,
+        isMoved: approval?.length === 0 ? false : true // Set isMoved to true when approval.length is not 0
         // ...update other fields
       };
-
       console.log(
-        updatedData?.leadDescription.filter((item) => item.statusRequest === 'Move to RFQ' && item.status === 'Approval'),
+        updatedData?.leadDescription?.filter((item) => item.statusRequest === 'Move to RFQ' && item.status === 'Approval'),
         '00000'
       );
-
-      // Make the API call to update the data
-      const approval = updatedData?.leadDescription.filter((item) => item.statusRequest === 'Move to RFQ' && item.status === 'Approval');
-
       const endpoint = LEAD_UPDATE(updateId);
-
       // Update data and check for errors
       const result = await updateData(endpoint, updatedData, localData?.accessToken);
-
       if (result.success) {
         // Only proceed with RFQ post if the lead update was successful
         if (approval.length !== 0) {
@@ -741,6 +748,10 @@ const BusinessLeads = () => {
     data: leadData,
     enableRowActions: true,
     positionActionsColumn: 'last',
+    enableColumnPinning: true,
+    initialState: {
+      columnPinning: { right: ['mrt-row-actions'] }
+    },
     renderRowActions: ({ row }) => (
       <div style={{ display: 'flex' }}>
         <IconButton onClick={() => handleDelete(row)}>
@@ -754,7 +765,7 @@ const BusinessLeads = () => {
         </IconButton>
       </div>
     ),
-
+    enableColumnFilterModes: true,
     enableRowSelection: true,
     columnFilterDisplayMode: 'popover',
     paginationDisplayMode: 'pages',
@@ -921,13 +932,13 @@ const BusinessLeads = () => {
     const dd = String(today.getDate()).padStart(2, '0');
     const mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
     const yyyy = today.getFullYear();
-  
+
     return `${dd}-${mm}-${yyyy}`;
   }
   const handleCreateRowHistory = (newData) => {
     console.log('handleSaveRowHistory - updatedData:', newData);
     const tempId = generateTempId(); // Generate a temporary ID
-    const newTask = { ...newData.values, _id: tempId,date: getCurrentDate(), createdBy: `${localData?.code}-${localData.name}` };
+    const newTask = { ...newData.values, _id: tempId, date: getCurrentDate(), createdBy: `${localData?.code}-${localData.name}` };
     setHistoryTableData([...historyTableData, newTask]);
     setIsCreatingRow(false);
   };
@@ -1778,6 +1789,7 @@ const BusinessLeads = () => {
                   name="date"
                   className="w-100"
                   value={formik.values.date}
+                  disabled
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 />
@@ -1796,6 +1808,7 @@ const BusinessLeads = () => {
                     id="demo-simple-select"
                     label="Age"
                     name="Source"
+                    disabled
                     value={formik.values.Source}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
@@ -1881,7 +1894,7 @@ const BusinessLeads = () => {
                   }}
                   renderOption={(props, option) => <li {...props}>{option.title}</li>}
                   freeSolo
-                  renderInput={(params) => <TextField {...params} label="Pilot" fullWidth />}
+                  renderInput={(params) => <TextField {...params} label="Pilot" fullWidth disabled />}
                 />
               </Grid>
               <Grid xs={4} p={2}>

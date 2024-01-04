@@ -362,7 +362,10 @@ header,
 .css-1rcxgiw-MuiPaper-root-MuiDrawer-paper {
   z-index: 1049 !important;
 }
-
+.css-sut2xh-MuiTableCell-root, .css-1k2nulk-MuiTableCell-root
+{
+  box-shadow: none !important;
+}
 .rs-modal-dialog {
   display: flex;
   justify-content: center;
@@ -375,7 +378,10 @@ header,
 /* hr {
   padding-left: 36rem;
 } */
-
+.fs-1
+{
+  font-size: 14px !important;
+}
 .css-1w9i8cz-MuiTypography-root {
   padding-top: 12px;
 }
