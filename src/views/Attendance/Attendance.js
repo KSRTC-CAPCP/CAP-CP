@@ -27,7 +27,7 @@ import Button from '@mui/material/Button';
 const data = [
   {
     SNo: 1,
-    EmpCode: 'CACE0012',
+   
     Date: '2023-12-25',
     Name: 'Sara',
     Shift: 'General Shift',
@@ -38,7 +38,7 @@ const data = [
   },
   {
     SNo: 2,
-    EmpCode: 'CACE0013',
+   
     Date: '2023-12-25',
     Name: 'Sara',
     Shift: 'General Shift',
@@ -49,7 +49,7 @@ const data = [
   },
   {
     SNo: 3,
-    EmpCode: 'CACE0014',
+   
     Date: '2023-12-25',
     Name: 'Sara',
     Shift: 'General Shift',
@@ -60,7 +60,7 @@ const data = [
   },
   {
     SNo: 4,
-    EmpCode: 'CACE0015',
+    
     Date: '2023-12-25',
     Name: 'Sara',
     Shift: 'General Shift',
@@ -89,21 +89,21 @@ const Attendance = () => {
         header: 'S No',
         size: 100,
       },
-      {
-        accessorKey: 'EmpCode',
-        header: 'Emp Code',
-        size: 150,
-      },
+      // {
+      //   accessorKey: 'EmpCode',
+      //   header: 'Emp Code',
+      //   size: 150,
+      // },
       {
         accessorKey: 'Date',
         header: 'Date',
         size: 150,
       },
-      {
-        accessorKey: 'Name',
-        header: 'Name',
-        size: 200,
-      },
+      // {
+      //   accessorKey: 'Name',
+      //   header: 'Name',
+      //   size: 200,
+      // },
       {
         accessorKey: 'Shift',
         header: 'Shift',
