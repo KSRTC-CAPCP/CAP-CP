@@ -1423,11 +1423,11 @@ const Manager = ({ _history, tasks }) => {
                 sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
               >
                 <TabList onChange={handleChange} aria-label="lab API tabs example">
-                  <Tab
+                  {/* <Tab
                     label={<div style={{ display: 'flex', alignItems: 'center' }}>Project Logs</div>}
                     value="1"
                     style={{ fontSize: '15px' }}
-                  />
+                  /> */}
                   <Tab
                     label={<div style={{ display: 'flex', alignItems: 'center' }}>Attendance Logs</div>}
                     value="2"
@@ -1439,7 +1439,7 @@ const Manager = ({ _history, tasks }) => {
                     style={{ fontSize: '15px' }}
                   />
                 </TabList>
-                <Button
+                {/* <Button
                   // onClick={() => handleView(row)}
                   sx={{
                     backgroundColor: '#ede7f6',
@@ -1453,11 +1453,11 @@ const Manager = ({ _history, tasks }) => {
                   }}
                 >
                   Overall Tasks
-                </Button>
+                </Button> */}
               </Box>
-              <TabPanel value="1">
+              {/* <TabPanel value="1">
                 <MaterialReactTable table={table} />
-              </TabPanel>
+              </TabPanel> */}
               <TabPanel value="2">
                 {/* <Attendance /> */}
                 <Overallattendance/>
