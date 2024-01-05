@@ -37,6 +37,7 @@ import {
   Autocomplete
 } from '@mui/material';
 import React, { forwardRef } from 'react';
+import { TableLoader } from 'ui-component/tableSkeleton';
 import MainCard from 'ui-component/cards/MainCard';
 import { useTheme } from '@mui/material/styles';
 import { IconDownload, IconEdit, IconEye, IconHistoryToggle, IconPlus, IconTrash, IconUpload } from '@tabler/icons';
@@ -87,6 +88,9 @@ import {
   LEAD_CREATION,
   LEAD_DELETE,
   LEAD_GET,
+  LEAD_GET_BY_HOLD,
+  LEAD_GET_BY_PENDINGS,
+  LEAD_GET_BY_REJECT,
   LEAD_GET_ID,
   LEAD_UPDATE,
   PROFILES_GET,
@@ -95,6 +99,7 @@ import {
 } from 'api/apiEndPoint';
 import { useEffect } from 'react';
 import { Value } from 'sass';
+import { toast } from 'react-toastify';
 
 const columnHelper = createMRTColumnHelper();
 const validationSchema = Yup.object({
@@ -219,7 +224,7 @@ const columns = [
       row.original.leadDescription.length > 0 ? row.original.leadDescription[row.original.leadDescription.length - 1]?.status : ''
   })
 ];
-const optionsForHistoryApproval = ['Pending', 'Approval', 'Reject'];
+const optionsForHistoryApproval = ['pending', 'Approval', 'Reject'];
 const optionsForHistoryStatus = ['newlead', 'Contact Establish', 'Technicle Meeting', 'Hold', 'Reject', 'Move to RFQ']; //
 const optionsForTaskStatus = ['Not Started', 'On Going', 'Completed'];
 
@@ -258,6 +263,7 @@ const BusinessLeads = () => {
   const [moveRFQ, setMoveRFQ] = useState(false);
   const [stsReq, setStsReq] = useState([]);
   const [profilesData, setProfilesData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [maxDateHistory, setMaxDateHistory] = useState('');
   const [historyTableData, setHistoryTableData] = useState([]);
   const getMaxDate = () => {
@@ -303,9 +309,7 @@ const BusinessLeads = () => {
       editVariant: 'select',
       Cell: ({ renderedCellValue, row }) => (
         <Box component="span">
-          <p>
-            {row.original.statusRequest}
-          </p>
+          <p>{row.original.statusRequest}</p>
         </Box>
       ),
       editSelectOptions: optionsForHistoryStatus,
@@ -607,13 +611,13 @@ const BusinessLeads = () => {
         businessVertical: values?.businessVertical,
         leadDescription: historyTableData,
         tasks: taskTableData,
-        isMoved: approval?.length === 0 ? false : true // Set isMoved to true when approval.length is not 0
+        isMoved: approval?.length === 1 // Set isMoved to true when approval.length is not 0
         // ...update other fields
       };
-      console.log(
-        updatedData?.leadDescription?.filter((item) => item.statusRequest === 'Move to RFQ' && item.status === 'Approval'),
-        '00000'
-      );
+      if (approval?.length === 1) {
+        toast.info(`${values.serialNumber} - was moved to RFQ`);
+      }
+      console.log('updatedData----------->', updatedData);
       const endpoint = LEAD_UPDATE(updateId);
       // Update data and check for errors
       const result = await updateData(endpoint, updatedData, localData?.accessToken);
@@ -672,6 +676,7 @@ const BusinessLeads = () => {
   const [valueForCompany, setValueForCompany] = React.useState(null);
   const [valueForContact, setValueForContact] = React.useState(null);
   const [description, setDescription] = useState('');
+  const [isFilter, setIsFilter] = useState('Overall Leads');
 
   const formik = useFormik({
     initialValues: {
@@ -706,7 +711,6 @@ const BusinessLeads = () => {
             companyName: valueForCompany?.title || values?.companyName,
             contactName: valueForContact?.title || values?.contactName
           };
-
           handleUpdate(formattedData);
         } else {
           console.log('handle submit');
@@ -745,7 +749,7 @@ const BusinessLeads = () => {
   });
   const table = useMaterialReactTable({
     columns,
-    data: leadData,
+    data: loading ? <TableLoader rowsNum={10} /> : leadData,
     enableRowActions: true,
     positionActionsColumn: 'last',
     enableColumnPinning: true,
@@ -1145,107 +1149,154 @@ const BusinessLeads = () => {
       try {
         const localStore = localStorage.getItem('userData');
         setLocalData(JSON.parse(localStore));
-
         if (localStore) {
           const parsedData = JSON.parse(localStore);
-
           // Fetch leads data
-          const data = await fetchData(LEAD_GET, parsedData?.accessToken);
-          setLeadData(data.data);
-          console.log(data.data, 'fetched');
-          // Fetch leads data
-          const categoryData = await fetchData(CATEGORY_GET);
-          setCategory(categoryData);
-          console.log(categoryData, 'fetched using categoryData db');
+          try {
+            let profilesApiEndpoint;
 
-          const data4Employee = await fetchData(PROFILES_GETBY_STATUS('active'), parsedData?.accessToken);
-          console.log(data, 'parsedddd');
-          setProfilesData(data4Employee?.data);
-          // Fetch updateId data
-          if (updateId) {
-            const endPointId = LEAD_GET_ID(updateId);
-            const fetchUpdateId = await fetchData(endPointId, parsedData?.accessToken);
-            setUpdatedValue(fetchUpdateId);
-            setTaskTableData(fetchUpdateId?.data?.tasks);
-
-            // Check if the user has the "Admin" role
-            console.log(parsedData?.Roles, 'who?');
-            if (parsedData?.role === 'Admin') {
-              // Include the "Approval Status" column for Admin
-              setHistoryTableColumns([
-                ...coumnsForHistory,
-                {
-                  accessorKey: 'status',
-                  header: 'Approval Status',
-                  editVariant: 'select',
-                  editSelectOptions: optionsForHistoryApproval,
-                  muiEditTextFieldProps: {
-                    select: true,
-                    onChange: (e) => handleStatusChange(e)
-                  },
-                  enableEditing: true
-                }
-              ]);
-            } else {
-              // Exclude the "Approval Status" column for non-Admin users
-              setHistoryTableColumns([...coumnsForHistory.filter((col) => col.accessorKey !== 'status')]);
+            switch (isFilter) {
+              case 'Overall Leads':
+                profilesApiEndpoint = LEAD_GET;
+                break;
+              case 'Hold Leads':
+                profilesApiEndpoint = LEAD_GET_BY_HOLD;
+                break;
+              case 'Rejected Leads':
+                profilesApiEndpoint = LEAD_GET_BY_REJECT;
+                break;
+              case 'Waiting For Approvals':
+                profilesApiEndpoint = LEAD_GET_BY_PENDINGS;
+                break;
+              default:
+                // Handle default case
+                break;
             }
+            const data = await fetchData(profilesApiEndpoint, parsedData?.accessToken);
+            setLeadData(data.data);
+            console.log(data.data, 'fetched');
+            // Fetch leads data
+            setLoading(false); // Set loading to false when data fetching is complete
+            const categoryData = await fetchData(CATEGORY_GET);
+            setCategory(categoryData);
+            console.log(categoryData, 'fetched using categoryData db');
 
-            setHistoryTableData(fetchUpdateId?.data?.leadDescription);
-            console.log(fetchUpdateId, 'fetched updateId');
+            const data4Employee = await fetchData(PROFILES_GETBY_STATUS('active'), parsedData?.accessToken);
+            console.log(data, 'parsedddd');
+            setProfilesData(data4Employee?.data);
+            // Fetch updateId data
+            if (updateId) {
+              const endPointId = LEAD_GET_ID(updateId);
+              const fetchUpdateId = await fetchData(endPointId, parsedData?.accessToken);
+              setUpdatedValue(fetchUpdateId);
+              setTaskTableData(fetchUpdateId?.data?.tasks);
+
+              // Check if the user has the "Admin" role
+              console.log(parsedData?.Roles, 'who?');
+              if (parsedData?.role === 'Admin') {
+                // Include the "Approval Status" column for Admin
+                setHistoryTableColumns([
+                  ...coumnsForHistory,
+                  {
+                    accessorKey: 'status',
+                    header: 'Approval Status',
+                    editVariant: 'select',
+                    editSelectOptions: optionsForHistoryApproval,
+                    muiEditTextFieldProps: {
+                      select: true,
+                      onChange: (e) => handleStatusChange(e)
+                    },
+                    enableEditing: true
+                  }
+                ]);
+              } else {
+                // Exclude the "Approval Status" column for non-Admin users
+                setHistoryTableColumns([...coumnsForHistory.filter((col) => col.accessorKey !== 'status')]);
+              }
+
+              setHistoryTableData(fetchUpdateId?.data?.leadDescription);
+              console.log(fetchUpdateId, 'fetched updateId');
+            }
+          } catch (error) {
+            console.log('error :', error);
           }
         }
       } catch (error) {
         console.error('Error in fetchDataAndUpdate:', error);
+        setLoading(false); // Set loading to false when data fetching is complete
       }
     };
 
     fetchDataAndUpdate(); // Invoke the async function
-  }, [updateId]); // Add dependencies if needed
+  }, [updateId, isFilter]); // Add dependencies if needed
   // useEffect(() => {
   //   const formattedDate = getMaxDate(historyTableData);
   //   console.log('maxDate', formattedDate);
   //   setmaxDateHistory(formattedDate);
   // }, [historyTableData]); // Ensure that historyTableData is the correct dependency
-
-  console.log(maxDateHistory, 'red');
+  const handleFilter = (e) => {
+    setIsFilter(e.target.value);
+  };
+  console.log(isFilter, 'isFilter');
   return (
     <div className="max">
       {view.mode === 'Initial' && (
         <MainCard
-          title="Leads"
+          title={isFilter}
           secondary={
-            <Box
-              sx={{
-                ml: 2,
-                // mr: 3,
-                [theme.breakpoints.down('md')]: {
-                  mr: 2
-                }
-              }}
-            >
-              <ButtonBase sx={{ borderRadius: '12px' }}>
-                <Avatar
-                  variant="rounded"
-                  sx={{
-                    ...theme.typography.commonAvatar,
-                    ...theme.typography.mediumAvatar,
-                    transition: 'all .2s ease-in-out',
-                    background: theme.palette.secondary.light,
-                    color: theme.palette.secondary.dark,
-                    '&[aria-controls="menu-list-grow"],&:hover': {
-                      background: theme.palette.secondary.dark,
-                      color: theme.palette.secondary.light
-                    }
-                  }}
-                  aria-haspopup="true"
-                  onClick={handleToggle}
-                  color="inherit"
-                >
-                  <IconPlus stroke={2} size="1.3rem" />
-                </Avatar>
-              </ButtonBase>
-            </Box>
+            <div className="d-flex">
+              <Box
+                sx={{
+                  ml: 2,
+                  // mr: 3,
+                  [theme.breakpoints.down('md')]: {
+                    mr: 2
+                  }
+                }}
+              >
+                <ButtonBase>
+                  <div class="select-dropdown">
+                    <select onChange={handleFilter}>
+                      <option value="Overall Leads">Overall Leads</option>
+                      <option value="Hold Leads">Hold Leads</option>
+                      <option value="Rejected Leads">Rejected Leads</option>
+                      <option value="Waiting For Approvals">Waiting For Approvals</option>
+                    </select>
+                  </div>
+                </ButtonBase>
+              </Box>
+              <Box
+                sx={{
+                  ml: 2,
+                  // mr: 3,
+                  [theme.breakpoints.down('md')]: {
+                    mr: 2
+                  }
+                }}
+              >
+                <ButtonBase sx={{ borderRadius: '12px' }}>
+                  <Avatar
+                    variant="rounded"
+                    sx={{
+                      ...theme.typography.commonAvatar,
+                      ...theme.typography.mediumAvatar,
+                      transition: 'all .2s ease-in-out',
+                      background: theme.palette.secondary.light,
+                      color: theme.palette.secondary.dark,
+                      '&[aria-controls="menu-list-grow"],&:hover': {
+                        background: theme.palette.secondary.dark,
+                        color: theme.palette.secondary.light
+                      }
+                    }}
+                    aria-haspopup="true"
+                    onClick={handleToggle}
+                    color="inherit"
+                  >
+                    <IconPlus stroke={2} size="1.3rem" />
+                  </Avatar>
+                </ButtonBase>
+              </Box>
+            </div>
           }
         >
           <MaterialReactTable table={table} />

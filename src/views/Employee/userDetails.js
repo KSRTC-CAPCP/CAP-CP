@@ -80,7 +80,6 @@ const UserDetails = () => {
                 <TabContext value={value}>
                     <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                         <TabList onChange={handleChange} aria-label="lab API tabs example">
-
                             <Tab
                                 label={
                                     <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -562,8 +561,6 @@ const UserDetails = () => {
 
                 </TabContext>
             </Box>
-
-
         </MainCard>
     )
 }

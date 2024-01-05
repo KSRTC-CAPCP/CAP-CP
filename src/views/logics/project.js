@@ -809,7 +809,8 @@ const Projects = ({ _history, tasks }) => {
     // setSelectedOption(row?.original?.requirePO === true ? 'yes' : 'no');
   };
 
-  console.log(formik.values, 'formik');
+  console.log(rfqData, 'rfqData');
+  console.log(projectData, 'projectData');
   const handleView = (row) => {
     console.log('worked', row);
     setView({
@@ -865,7 +866,6 @@ const Projects = ({ _history, tasks }) => {
       </>
     )
   });
-
   //Project
   const handleSaveRowProject = (newData, oldData) => {
     console.log('handleSaveRowProject - newData:', newData);
@@ -1410,10 +1410,23 @@ const Projects = ({ _history, tasks }) => {
     }
   };
 
+  function findRFQDataByNumber(rfqNumber) {
+    return rfqData.find((rfq) => rfq.serialNumber === rfqNumber);
+  }
+
+  // Iterate through projectData and find corresponding RFQ data
+  const projectWithRFQData = projectData.map((project) => {
+    const rfqNumber = project.rfqNumber.split(' ')[0]; // Extract RFQ number
+    const correspondingRFQData = findRFQDataByNumber(rfqNumber);
+    return { ...project, rfqData: correspondingRFQData };
+  });
+  console.log(projectWithRFQData, 'projectWithRFQData');
+
   const rfqNumber = rfqData.map((item) => ({
     label: item.serialNumber + '  ' + item.companyName,
     value: item.serialNumber
   }));
+  // console.log(projectWithRFQData);
   const managerList = managerData.map((item) => ({
     label: item.EmployeeCode + ' - ' + item.NameOfCandidate,
     value: item.EmployeeCode + '-' + item.NameOfCandidate
@@ -1425,7 +1438,7 @@ const Projects = ({ _history, tasks }) => {
     console.log(selectedValue, 'DATA');
 
     try {
-      const fetchedRFQAll = await fetchData(RFQ_GET, localData?.accessToken);
+      const fetchedRFQAll = await fetchData(RFQ_GET_STATUS, localData?.accessToken);
       console.log(fetchedRFQAll.data, 'ffff');
       const filteredData = fetchedRFQAll.data.filter((data) => data.serialNumber === selectedValue);
       if (filteredData.length > 0) {
@@ -1534,11 +1547,17 @@ const Projects = ({ _history, tasks }) => {
                     }}
                     onBlur={formik.handleBlur}
                   >
-                    {rfqNumber.map((lead, index) => (
-                      <MenuItem key={index} value={lead.value}>
-                        {lead.label}
-                      </MenuItem>
-                    ))}
+                    {rfqNumber.map((lead, index) => {
+                      const isRFQInProject = projectWithRFQData.some(
+                        (project) => project.rfqData && project.rfqData.serialNumber === lead.value
+                      );
+
+                      return (
+                        <MenuItem key={index} value={lead.value} disabled={isRFQInProject}>
+                          {lead.label}
+                        </MenuItem>
+                      );
+                    })}
                   </Select>
                 </FormControl>
                 {formik.touched.rfqNumber && formik.errors.rfqNumber && (
@@ -1547,6 +1566,7 @@ const Projects = ({ _history, tasks }) => {
                   </FormHelperText>
                 )}
               </Grid>
+
               <Grid xs={4} p={2}>
                 <TextField
                   error={Boolean(formik.touched.companyName && formik.errors.companyName)}

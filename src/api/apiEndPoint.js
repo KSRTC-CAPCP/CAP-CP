@@ -7,6 +7,9 @@ export const LOGIN = `${BASE_URL}/login`;
 //FOR LEADS API HERE
 export const LEAD_CREATION = `${BASE_URL}/lead/create`;
 export const LEAD_GET = `${BASE_URL}/lead/get`;
+export const LEAD_GET_BY_HOLD = `${BASE_URL}/lead/getbyhold`;
+export const LEAD_GET_BY_REJECT = `${BASE_URL}/lead/getbyreject`;
+export const LEAD_GET_BY_PENDINGS = `${BASE_URL}/lead/getbypendings`;
 export const LEAD_GET_ID = (id) => `${BASE_URL}/lead/getbyid/${id}`;
 export const LEAD_UPDATE = (id) => `${BASE_URL}/lead/update/${id}`;
 export const LEAD_DELETE = (id) => `${BASE_URL}/lead/delete/${id}`;
@@ -14,6 +17,8 @@ export const LEAD_DELETE = (id) => `${BASE_URL}/lead/delete/${id}`;
 //FOR RFQ API HERE
 export const RFQ_CREATION = `${BASE_URL}/rfq/create`;
 export const RFQ_GET = `${BASE_URL}/rfq/get`;
+export const RFQ_GET_BY_LOST = `${BASE_URL}/rfq/getLosted`;
+export const RFQ_GET_BY_PENDINGS = `${BASE_URL}/rfq/getPending`;
 export const RFQ_GET_STATUS = `${BASE_URL}/rfq/status/Business%20Award`;
 export const RFQ_GET_ID = (id) => `${BASE_URL}/rfq/getbyid/${id}`;
 export const RFQ_UPDATE = (id) => `${BASE_URL}/rfq/update/${id}`;
