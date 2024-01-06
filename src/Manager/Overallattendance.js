@@ -29,6 +29,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from 'material-react-table';
+import YearlyAttendance from './YearlyAttendance';
 
 
 
@@ -36,46 +37,67 @@ const data = [
   {
     SNo: 1,
     EmpCode: 'CACE0012',
-    Date: '2023-12-25',
     Name: 'Sara',
+    Date: '2023-12-25',
     Shift: 'General Shift',
     Intime: '9:00 AM',
     Outtime: '6:00 PM',
     Status: 'Present',
-   
+    workDur: '8 Hours',
+    ot: '2 Hours',
+    totalduration: '8 Hours',
+    location: 'Ambattur',
+    project: 'CAP-CP'
+
+
   },
   {
     SNo: 2,
     EmpCode: 'CACE0013',
-    Date: '2023-12-25',
     Name: 'Sara',
+    Date: '2023-12-25',
     Shift: 'General Shift',
     Intime: '9:00 AM',
     Outtime: '6:00 PM',
     Status: 'Leave',
-   
+    workDur: '8 Hours',
+    ot: '2 Hours',
+    totalduration: '8 Hours',
+    location: 'Ambattur',
+    project: 'CAP-CP'
+
   },
   {
     SNo: 3,
     EmpCode: 'CACE0014',
-    Date: '2023-12-25',
     Name: 'Sara',
+    Date: '2023-12-25',
     Shift: 'General Shift',
     Intime: '9:00 AM',
     Outtime: '6:00 PM',
     Status: 'Present',
-   
+    workDur: '8 Hours',
+    ot: '2 Hours',
+    totalduration: '8 Hours',
+    location: 'Ambattur',
+    project: 'CAP-CP'
+
   },
   {
     SNo: 4,
     EmpCode: 'CACE0015',
-    Date: '2023-12-25',
     Name: 'Sara',
+    Date: '2023-12-25',
     Shift: 'General Shift',
     Intime: '9:00 AM',
     Outtime: '6:00 PM',
     Status: 'Leave',
-   
+    workDur: '8 Hours',
+    ot: '2 Hours',
+    totalduration: '8 Hours',
+    location: 'Ambattur',
+    project: 'CAP-CP'
+
   },
 ];
 
@@ -264,14 +286,14 @@ const Overallattendance = () => {
         size: 150,
       },
       {
-        accessorKey: 'Date',
-        header: 'Date',
-        size: 150,
-      },
-      {
         accessorKey: 'Name',
         header: 'Name',
         size: 200,
+      },
+      {
+        accessorKey: 'Date',
+        header: 'Date',
+        size: 150,
       },
       {
         accessorKey: 'Shift',
@@ -289,11 +311,36 @@ const Overallattendance = () => {
         size: 150,
       },
       {
+        accessorKey: 'workDur',
+        header: 'Work Duration',
+        size: 150,
+      },
+      {
+        accessorKey: 'ot',
+        header: 'OT',
+        size: 150,
+      },
+      {
+        accessorKey: 'totalduration',
+        header: 'Total Duration',
+        size: 150,
+      },
+      {
+        accessorKey: 'location',
+        header: 'Location',
+        size: 150,
+      },
+      {
+        accessorKey: 'project',
+        header: 'Project',
+        size: 150,
+      },
+      {
         accessorKey: 'Status',
         header: 'Status',
         size: 300,
-        Cell: ({ value,row }) => 
-          (
+        Cell: ({ value, row }) =>
+        (
           <div>
             {row?.original?.Status === 'Present' && (
               <Button
@@ -415,8 +462,7 @@ const Overallattendance = () => {
       case 'yearly':
         return (
           <div>
-            <h6>yearly Attendance</h6>
-            {/* Add yearly view components or libraries here */}
+          <YearlyAttendance/>
           </div>
         );
       default:
