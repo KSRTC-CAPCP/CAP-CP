@@ -89,6 +89,8 @@ import {
   RFQ_CREATION,
   RFQ_DELETE,
   RFQ_GET,
+  RFQ_GET_BY_LOST,
+  RFQ_GET_BY_PENDINGS,
   RFQ_GET_ID,
   RFQ_UPDATE,
   TCO_NUMBER
@@ -246,7 +248,15 @@ const columns = [
   })
 ];
 const optionsForHistoryApproval = ['Pending', 'Approval', 'Reject'];
-const optionsForHistoryStatus = ['New RFQ', 'Technical Meet Done', 'TCO Submitted', 'Negotiation', 'Business Award', 'Lost']; //
+const optionsForHistoryStatus = [
+  'New RFQ',
+  'Technical Meet Done',
+  'TCO Submitted',
+  'NDA Submitted',
+  'Negotiation',
+  'Business Award',
+  'Lost'
+]; //
 const optionsForTaskStatus = ['In Backlog'];
 
 const csvConfig = mkConfig({
@@ -398,6 +408,10 @@ const BusinessRFQ = () => {
   const [rfqSummary, setrfqSummary] = useState('');
   const [rfqData, setrfqData] = useState([]);
   const [deleteId, setDeleteId] = useState('');
+  const [isFilter, setIsFilter] = useState('Overall RFQ');
+  const handleFilter = (e) => {
+    setIsFilter(e.target.value);
+  };
   const [updateId, setUpdateId] = useState('');
   const [updatedValue, setUpdatedValue] = useState([]);
   const [selectedOption, setSelectedOption] = useState('');
@@ -582,6 +596,7 @@ const BusinessRFQ = () => {
       companyName: rfqData.companyName,
       category: rfqData.category,
       currency: rfqData?.currency,
+      leadNumber: rfqData?.leadNumber,
       contactName: rfqData.contactName,
       departmentName: rfqData.departmentName,
       phoneNumber: rfqData.phoneNumber,
@@ -694,6 +709,7 @@ const BusinessRFQ = () => {
       departmentName: '',
       currency: 'INR',
       phoneNumber: '',
+      isMoved: false,
       email: '',
       businessVertical: '',
       rfqDescription: [], // Initialize as an array
@@ -721,8 +737,11 @@ const BusinessRFQ = () => {
             date: item.date,
             description: item.description,
             statusRequest: item.statusRequest,
-            status: item.status
+            status: item.status,
+            createdBy: item.createdBy
           }));
+          const approval = historyTableData.filter((item) => item.statusRequest === 'Business Award' && item.status === 'Approval');
+          console.log(approval, 'approval');
           const task = taskTableData.map((item) => ({
             title: item.title,
             description: item.description,
@@ -736,6 +755,7 @@ const BusinessRFQ = () => {
           const formattedData = {
             ...values,
             currency: values.currency,
+            isMoved: approval.length === 1, // Set isMoved to true when approval.length is not 0,
             tcoNumber: tcoNumber || values?.tcoNumber,
             Pilot: valueForSuggest?.title || values?.Pilot,
             companyName: valueForCompany?.title || values?.companyName,
@@ -1245,49 +1265,68 @@ const BusinessRFQ = () => {
         }
         if (localStore) {
           const parsedData = JSON.parse(localStore);
-          const data = await fetchData(RFQ_GET, parsedData?.accessToken);
-          setrfqData(data.data);
-          console.log(data.data, 'fetched using db');
-          const response = await fetchData(LEAD_GET, parsedData?.accessToken);
-          setLeadData(response?.data);
-
-          // Fetch leads data
-          const categoryData = await fetchData(CATEGORY_GET);
-          setCategory(categoryData);
-          console.log(categoryData, 'fetched using categoryData db');
-
-          const data4Employee = await fetchData(PROFILES_GET, parsedData?.accessToken);
-          console.log(data, 'parsedddd');
-          setProfilesData(data4Employee?.data);
-          // Fetch updateId data
-          if (updateId) {
-            const endPointId = RFQ_GET_ID(updateId);
-            const fetchUpdateId = await fetchData(endPointId, parsedData?.accessToken);
-            setUpdatedValue(fetchUpdateId);
-            setTaskTableData(fetchUpdateId?.data?.tasks);
-            // Check if the user has the "Admin" role
-            console.log(parsedData?.Roles, 'who?');
-            if (parsedData?.role === 'Admin') {
-              // Include the "Approval Status" column for Admin
-              setHistoryTableColumns([
-                ...coumnsForHistory,
-                {
-                  accessorKey: 'status',
-                  header: 'Approval Status',
-                  editVariant: 'select',
-                  editSelectOptions: optionsForHistoryApproval,
-                  muiEditTextFieldProps: {
-                    select: true
-                  },
-                  enableEditing: true
-                }
-              ]);
-            } else {
-              // Exclude the "Approval Status" column for non-Admin users
-              setHistoryTableColumns([...coumnsForHistory.filter((col) => col.accessorKey !== 'status')]);
+          try {
+            let profilesApiEndpoint;
+            switch (isFilter) {
+              case 'Overall RFQ':
+                profilesApiEndpoint = RFQ_GET;
+                break;
+              case 'Losted RFQ':
+                profilesApiEndpoint = RFQ_GET_BY_LOST;
+                break;
+              case 'Waiting For Approvals':
+                profilesApiEndpoint = RFQ_GET_BY_PENDINGS;
+                break;
+              default:
+                // Handle default case
+                break;
             }
-            setHistoryTableData(fetchUpdateId?.data?.rfqDescription);
-            console.log(fetchUpdateId, 'fetched updateId');
+            const data = await fetchData(profilesApiEndpoint, parsedData?.accessToken);
+            setrfqData(data.data);
+            console.log(data.data, 'fetched using db');
+            const response = await fetchData(LEAD_GET, parsedData?.accessToken);
+            setLeadData(response?.data);
+
+            // Fetch leads data
+            const categoryData = await fetchData(CATEGORY_GET);
+            setCategory(categoryData);
+            console.log(categoryData, 'fetched using categoryData db');
+
+            const data4Employee = await fetchData(PROFILES_GET, parsedData?.accessToken);
+            console.log(data, 'parsedddd');
+            setProfilesData(data4Employee?.data);
+            // Fetch updateId data
+            if (updateId) {
+              const endPointId = RFQ_GET_ID(updateId);
+              const fetchUpdateId = await fetchData(endPointId, parsedData?.accessToken);
+              setUpdatedValue(fetchUpdateId);
+              setTaskTableData(fetchUpdateId?.data?.tasks);
+              // Check if the user has the "Admin" role
+              console.log(parsedData?.Roles, 'who?');
+              if (parsedData?.role === 'Admin') {
+                // Include the "Approval Status" column for Admin
+                setHistoryTableColumns([
+                  ...coumnsForHistory,
+                  {
+                    accessorKey: 'status',
+                    header: 'Approval Status',
+                    editVariant: 'select',
+                    editSelectOptions: optionsForHistoryApproval,
+                    muiEditTextFieldProps: {
+                      select: true
+                    },
+                    enableEditing: true
+                  }
+                ]);
+              } else {
+                // Exclude the "Approval Status" column for non-Admin users
+                setHistoryTableColumns([...coumnsForHistory.filter((col) => col.accessorKey !== 'status')]);
+              }
+              setHistoryTableData(fetchUpdateId?.data?.rfqDescription);
+              console.log(fetchUpdateId, 'fetched updateId');
+            }
+          } catch (error) {
+            console.error('Error in fetchDataAndUpdate:', error);
           }
         }
       } catch (error) {
@@ -1308,39 +1347,60 @@ const BusinessRFQ = () => {
     <div className="max">
       {view.mode === 'Initial' && (
         <MainCard
-          title="RFQ"
+          title={isFilter}
           secondary={
-            <Box
-              sx={{
-                ml: 2,
-                // mr: 3,
-                [theme.breakpoints.down('md')]: {
-                  mr: 2
-                }
-              }}
-            >
-              <ButtonBase sx={{ borderRadius: '12px' }}>
-                <Avatar
-                  variant="rounded"
-                  sx={{
-                    ...theme.typography.commonAvatar,
-                    ...theme.typography.mediumAvatar,
-                    transition: 'all .2s ease-in-out',
-                    background: theme.palette.secondary.light,
-                    color: theme.palette.secondary.dark,
-                    '&[aria-controls="menu-list-grow"],&:hover': {
-                      background: theme.palette.secondary.dark,
-                      color: theme.palette.secondary.light
-                    }
-                  }}
-                  aria-haspopup="true"
-                  onClick={handleToggle}
-                  color="inherit"
-                >
-                  <IconPlus stroke={2} size="1.3rem" />
-                </Avatar>
-              </ButtonBase>
-            </Box>
+            <div className="d-flex">
+              <Box
+                sx={{
+                  ml: 2,
+                  // mr: 3,
+                  [theme.breakpoints.down('md')]: {
+                    mr: 2
+                  }
+                }}
+              >
+                <ButtonBase>
+                  <div class="select-dropdown">
+                    <select onChange={handleFilter}>
+                      <option value="Overall RFQ">Overall RFQ</option>
+                      <option value="Losted RFQ">Losted RFQ</option>
+                      <option value="Waiting For Approvals">Waiting For Approvals</option>
+                    </select>
+                  </div>
+                </ButtonBase>
+              </Box>
+              <Box
+                sx={{
+                  ml: 2,
+                  // mr: 3,
+                  [theme.breakpoints.down('md')]: {
+                    mr: 2
+                  }
+                }}
+              >
+                <ButtonBase sx={{ borderRadius: '12px' }}>
+                  <Avatar
+                    variant="rounded"
+                    sx={{
+                      ...theme.typography.commonAvatar,
+                      ...theme.typography.mediumAvatar,
+                      transition: 'all .2s ease-in-out',
+                      background: theme.palette.secondary.light,
+                      color: theme.palette.secondary.dark,
+                      '&[aria-controls="menu-list-grow"],&:hover': {
+                        background: theme.palette.secondary.dark,
+                        color: theme.palette.secondary.light
+                      }
+                    }}
+                    aria-haspopup="true"
+                    onClick={handleToggle}
+                    color="inherit"
+                  >
+                    <IconPlus stroke={2} size="1.3rem" />
+                  </Avatar>
+                </ButtonBase>
+              </Box>
+            </div>
           }
         >
           <MaterialReactTable table={table} />
@@ -1910,6 +1970,19 @@ const BusinessRFQ = () => {
                     </FormHelperText>
                   )}
                 </FormControl>
+              </Grid>
+              <Grid xs={4} p={2}>
+                <TextField
+                  name="leadNumber"
+                  value={formik.values.leadNumber}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  fullWidth
+                  id="outlined-basic"
+                  disabled
+                  label="Lead Number"
+                  variant="outlined"
+                />
               </Grid>
               <Grid xs={4} p={2}>
                 {/* <TextField

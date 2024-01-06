@@ -388,7 +388,7 @@ header,
 .select-dropdown {
   position: relative;
   background-color: #ede7f6;
-  border-radius: 4px;
+  border-radius: 8px;
 }
 .select-dropdown select {
   font-size: 1rem;
