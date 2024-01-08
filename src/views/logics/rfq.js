@@ -85,6 +85,7 @@ import { deleteData, fetchData, getById, postData, updateData } from 'utils/apiU
 import {
   CATEGORY_CREATE,
   CATEGORY_GET,
+  LEAD_GET_BY_CODE,
   PROFILES_GET,
   RFQ_CREATION,
   RFQ_DELETE,
@@ -300,11 +301,11 @@ const BusinessRFQ = () => {
     {
       accessorKey: 'date',
       header: 'Date',
-      enableEditing: false,
-      // muiEditTextFieldProps: {
-      //   type: 'date',
-      //   required: true
-      // },
+      enableEditing: true,
+      muiEditTextFieldProps: {
+        type: 'date',
+        required: true
+      },
       Cell: ({ renderedCellValue, row }) => (
         <Box component="span">
           <p>{row.original.date?.slice(0, 10)}</p>
@@ -406,6 +407,8 @@ const BusinessRFQ = () => {
     // { value: 'Lost', label: 'Lost' }
   ]);
   const [rfqSummary, setrfqSummary] = useState('');
+  const [leadSummary, setLeadSummary] = useState('');
+  const [leadView, setLeadView] = useState(false);
   const [rfqData, setrfqData] = useState([]);
   const [deleteId, setDeleteId] = useState('');
   const [isFilter, setIsFilter] = useState('Overall RFQ');
@@ -615,6 +618,17 @@ const BusinessRFQ = () => {
     const getByIdData = await fetchData(endpoint, localData?.accessToken);
     setrfqSummary(getByIdData.data);
     console.log('worked', getByIdData.data);
+    if (getByIdData.data?.leadNumber !== 'New RFQ') {
+      setLeadView(true);
+      const encodedSerialNumber = encodeURIComponent(getByIdData?.data?.leadNumber);
+      const getByCodeEndpoint = LEAD_GET_BY_CODE(encodedSerialNumber);
+      const getByIdCode = await fetchData(getByCodeEndpoint, localData?.accessToken);
+      setLeadSummary(getByIdCode?.data);
+      console.log('getByIdCode', getByIdCode);
+    } else {
+      setLeadView(false);
+    }
+
     setView({
       visible: true,
       mode: 'View'
@@ -747,6 +761,7 @@ const BusinessRFQ = () => {
             description: item.description,
             responsible: item.responsible,
             remark: item.remark,
+            createdBy: item.createdBy,
             assignedDate: item.assignedDate,
             targetDate: item.targetDate,
             status: item.status
@@ -763,6 +778,9 @@ const BusinessRFQ = () => {
             rfqDescription: history,
             tasks: task
           };
+          // if(approval.length ===1){
+          //   toast.info(`${values.serialNumber} - RFQ Moved To Project`)
+          // }
           console.log(values, 'values formed');
           console.log(formattedData, 'formed');
           console.log(rfqDescriptionArray, 'rfqDescriptionArray formed');
@@ -790,7 +808,6 @@ const BusinessRFQ = () => {
                 statusRequest: values.status // Set your default statusRequest here
               }))
             : [];
-
           const formattedData = {
             ...values,
             leadNumber: 'New RFQ',
@@ -1032,7 +1049,8 @@ const BusinessRFQ = () => {
 
   const handleCreateRowHistory = (newData) => {
     const tempId = generateTempId(); // Generate a temporary ID
-    const newTask = { ...newData.values, _id: tempId, date: getCurrentDate(), createdBy: `${localData?.code}-${localData.name}` };
+    const newTask = { ...newData.values, _id: tempId, createdBy: `${localData?.code}-${localData.name}` };
+    // const newTask = { ...newData.values, _id: tempId, date: getCurrentDate(), createdBy: `${localData?.code}-${localData.name}` };
     setHistoryTableData([...historyTableData, newTask]);
     setIsCreatingRow(false);
     if (newData?.values?.statusRequest === 'TCO Submitted' && newData?.values?.status === 'Approval') {
@@ -1271,7 +1289,7 @@ const BusinessRFQ = () => {
               case 'Overall RFQ':
                 profilesApiEndpoint = RFQ_GET;
                 break;
-              case 'Losted RFQ':
+              case 'Lost RFQ':
                 profilesApiEndpoint = RFQ_GET_BY_LOST;
                 break;
               case 'Waiting For Approvals':
@@ -1335,7 +1353,7 @@ const BusinessRFQ = () => {
     };
 
     fetchDataAndUpdate(); // Invoke the async function
-  }, [updateId]); // Add dependencies if needed
+  }, [updateId, isFilter]); // Add dependencies if needed
 
   useEffect(() => {
     console.log(localData, 'localData');
@@ -1363,7 +1381,7 @@ const BusinessRFQ = () => {
                   <div class="select-dropdown">
                     <select onChange={handleFilter}>
                       <option value="Overall RFQ">Overall RFQ</option>
-                      <option value="Losted RFQ">Losted RFQ</option>
+                      <option value="Lost RFQ">Lost RFQ</option>
                       <option value="Waiting For Approvals">Waiting For Approvals</option>
                     </select>
                   </div>
@@ -2427,8 +2445,246 @@ const BusinessRFQ = () => {
       )}
       {view.mode === 'View' && (
         <>
+          {leadView && (
+            <MainCard
+              className="mb-1"
+              title="Lead Note"
+              secondary={
+                <Box
+                  sx={{
+                    ml: 2,
+                    [theme.breakpoints.down('md')]: {
+                      mr: 2
+                    }
+                  }}
+                >
+                  <ButtonBase sx={{ borderRadius: '12px' }}>
+                    <Avatar
+                      variant="rounded"
+                      sx={{
+                        ...theme.typography.commonAvatar,
+                        ...theme.typography.mediumAvatar,
+                        transition: 'all .2s ease-in-out',
+                        background: theme.palette.secondary.light,
+                        color: theme.palette.secondary.dark,
+                        '&[aria-controls="menu-list-grow"],&:hover': {
+                          background: theme.palette.secondary.dark,
+                          color: theme.palette.secondary.light
+                        }
+                      }}
+                      aria-haspopup="true"
+                      onClick={handleClose}
+                      color="inherit"
+                    >
+                      <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
+                    </Avatar>
+                  </ButtonBase>
+                </Box>
+              }
+            >
+              <Grid container m={3}>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Lead Number</label>
+                  <p>{leadSummary?.serialNumber}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Date</label>
+                  <p>{leadSummary?.date?.slice(0, 10)}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Source</label>
+                  <p>{leadSummary?.Source}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Pilot</label>
+                  <p>{leadSummary?.Pilot}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Company Name</label>
+                  <p>{leadSummary?.companyName}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Category</label>
+                  <p>{leadSummary?.category}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Contact Name</label>
+                  <p>{leadSummary?.contactName}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Department</label>
+                  <p>{leadSummary?.departmentName}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Phone Number</label>
+                  <p>{leadSummary?.phoneNumber}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Email</label>
+                  <p>{leadSummary?.email}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Business Verticle</label>
+                  <p>{leadSummary?.businessVertical}</p>
+                </Grid>
+              </Grid>
+              <Grid container p={3}>
+                <Grid xs={4} p={2}>
+                  <div className="history-container">
+                    <MainCard
+                      title="History"
+                      secondary={
+                        <Box
+                          sx={{
+                            ml: 2,
+                            // mr: 3,
+                            [theme.breakpoints.down('md')]: {
+                              mr: 2
+                            }
+                          }}
+                        >
+                          <ButtonBase sx={{ borderRadius: '12px' }}>
+                            <Avatar
+                              variant="rounded"
+                              sx={{
+                                ...theme.typography.commonAvatar,
+                                ...theme.typography.mediumAvatar,
+                                transition: 'all .2s ease-in-out',
+                                background: theme.palette.secondary.light,
+                                color: theme.palette.secondary.dark,
+                                '&[aria-controls="menu-list-grow"],&:hover': {
+                                  background: theme.palette.secondary.dark,
+                                  color: theme.palette.secondary.light
+                                }
+                              }}
+                              aria-haspopup="true"
+                              color="inherit"
+                            >
+                              <History stroke={2} size="1.3rem" />
+                            </Avatar>
+                          </ButtonBase>
+                        </Box>
+                      }
+                    >
+                      <Timeline position="">
+                        {leadSummary?.leadDescription.map((item) => (
+                          <TimelineItem>
+                            <TimelineOppositeContent style={{ display: 'none' }}></TimelineOppositeContent>
+                            <TimelineSeparator>
+                              <Tooltip title="New Lead" placement="top" arrow>
+                                <TimelineDot color="secondary">
+                                  {item.statusRequest === 'newlead' && <PersonAdd />}
+                                  {item.statusRequest === 'Contact Establish' && <ConnectWithoutContact />}
+                                  {item.statusRequest === 'Technicle Meeting' && <Group />}
+                                  {item.statusRequest === 'Hold' && <NotStarted />}
+                                  {item.statusRequest === 'Reject' && <ThumbDown />}
+                                  {item.statusRequest === 'Move to RFQ' && <ThumbUpSharp />}
+                                </TimelineDot>
+                              </Tooltip>
+                              <TimelineConnector />
+                            </TimelineSeparator>
+
+                            <TimelineContent>
+                              <Typography variant="h6" component="span" className="text-muted">
+                                {item.date?.slice(0, 10)} / {item.createdBy}
+                              </Typography>
+                              <br />
+                              <Typography variant="h6" component="span" className="strong">
+                                {item.statusRequest === 'newlead' ? 'New Lead' : item.statusRequest} &nbsp; - &nbsp;
+                                {item.status === '' ? 'Pending' : item.status}
+                              </Typography>
+                              <li> {item.description}</li>
+                            </TimelineContent>
+                          </TimelineItem>
+                        ))}
+                      </Timeline>
+                    </MainCard>
+                  </div>
+                </Grid>
+                <Grid xs={8} p={2}>
+                  <div className="history-container">
+                    <MainCard
+                      title="Task"
+                      secondary={
+                        <Box
+                          sx={{
+                            ml: 2,
+                            // mr: 3,
+                            [theme.breakpoints.down('md')]: {
+                              mr: 2
+                            }
+                          }}
+                        >
+                          <ButtonBase sx={{ borderRadius: '12px' }}>
+                            <Avatar
+                              variant="rounded"
+                              sx={{
+                                ...theme.typography.commonAvatar,
+                                ...theme.typography.mediumAvatar,
+                                transition: 'all .2s ease-in-out',
+                                background: theme.palette.secondary.light,
+                                color: theme.palette.secondary.dark,
+                                '&[aria-controls="menu-list-grow"],&:hover': {
+                                  background: theme.palette.secondary.dark,
+                                  color: theme.palette.secondary.light
+                                }
+                              }}
+                              aria-haspopup="true"
+                              color="inherit"
+                            >
+                              <TaskAlt stroke={2} size="1.3rem" />
+                            </Avatar>
+                          </ButtonBase>
+                        </Box>
+                      }
+                    >
+                      {leadSummary?.tasks?.map((data) => (
+                        <Card sx={{ margin: '1rem', padding: '1rem' }} className="card-hover">
+                          <div className="d-flex justify-content-between">
+                            <div className="d-flex">
+                              <Avatar sx={{ bgcolor: '#ede7f6', color: '#5e35b1' }}>{data?.responsible[0]}</Avatar>
+                              <div className="ms-1">
+                                <p className="avatar-name">{data?.responsible}</p>
+                                <p className="text-muted-light m-0">{data?.taskId}</p> &nbsp;
+                                {/* / */}
+                                {/* <PeopleAltTwoTone style={{ fontSize: 'medium' }} />
+                                <span className="ms-01">{}</span> */}
+                              </div>
+                            </div>
+                            <div className="float-end">
+                              <p className="text-muted-light m-0 text-end">Assigned Date : &nbsp; {data?.assignedDate?.slice(0, 10)}</p>
+                              <p className="text-muted-light m-0 text-end">Target Date : &nbsp; {data?.targetDate?.slice(0, 10)}</p>
+                              <div className="d-flex justify-content-end">
+                                <p
+                                  className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${
+                                    data?.status === 'completed' ? 'badge-success max-width' : ''
+                                  }${data?.status === 'not-started' ? 'badge-danger max-width' : ''}`}
+                                >
+                                  {data?.statusRequest} {data?.status}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mt-2 ms-1">
+                            <p className="text-muted m-0">{data?.title}</p>
+                            <p className="">
+                              <span>{data?.description}</span>
+                            </p>
+                            <p className="text-muted m-0">Remarks</p>
+                            <p className="">
+                              <span> {data?.remark}</span>
+                            </p>
+                          </div>
+                        </Card>
+                      ))}
+                    </MainCard>
+                  </div>
+                </Grid>
+              </Grid>
+            </MainCard>
+          )}
           <MainCard
-            title="Note"
+            title="RFQ Note"
             secondary={
               <Box
                 sx={{
@@ -2520,6 +2776,12 @@ const BusinessRFQ = () => {
                   <p>{rfqSummary?.tcoNumber}</p>
                 </Grid>
               )}
+              {rfqSummary?.currency && (
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Type Of Currency</label>
+                  <p>{rfqSummary?.currency}</p>
+                </Grid>
+              )}
               {rfqSummary?.approximateValue && (
                 <Grid xs={3} p={2}>
                   <label className="text-muted">Approximate Value</label>
@@ -2585,7 +2847,7 @@ const BusinessRFQ = () => {
                           </TimelineSeparator>
                           <TimelineContent>
                             <Typography variant="h6" component="span" className="text-muted">
-                              {item.date?.slice(0, 10)}
+                              {item.date?.slice(0, 10)} / {item.createdBy}
                             </Typography>
                             <br />
                             <Typography variant="h6" component="span" className="strong">

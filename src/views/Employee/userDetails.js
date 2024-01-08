@@ -561,6 +561,8 @@ const UserDetails = () => {
 
                 </TabContext>
             </Box>
+
+            
         </MainCard>
     )
 }

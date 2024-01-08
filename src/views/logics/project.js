@@ -71,7 +71,8 @@ import {
   CurrencyRupee,
   DeleteTwoTone,
   CreateTwoTone,
-  VisibilityTwoTone
+  VisibilityTwoTone,
+  CurrencyExchange
 } from '@mui/icons-material';
 import { useState } from 'react';
 import styled from '@emotion/styled';
@@ -87,6 +88,7 @@ import {
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { DatePicker } from 'rsuite';
 import {
+  LEAD_GET_BY_CODE,
   MILESTONE_CREATE,
   MILESTONE_GET,
   PROFILES_CREATE,
@@ -98,6 +100,7 @@ import {
   PROJECT_GET,
   PROJECT_UPDATE,
   RFQ_GET,
+  RFQ_GET_BY_CODE,
   RFQ_GET_ID,
   RFQ_GET_STATUS
 } from 'api/apiEndPoint';
@@ -808,18 +811,37 @@ const Projects = ({ _history, tasks }) => {
     setTaskTableData(row?.original?.task);
     // setSelectedOption(row?.original?.requirePO === true ? 'yes' : 'no');
   };
-
+  const [rfqView, setRfqView] = useState(false);
+  const [rfqSummary, setRfqSummary] = useState([]);
+  const [leadSummary, setLeadSummary] = useState([]);
   console.log(rfqData, 'rfqData');
   console.log(projectData, 'projectData');
-  const handleView = (row) => {
+  const handleView = async (row) => {
     console.log('worked', row);
     setView({
       visible: true,
       mode: 'View'
     });
     setViewId(row?.original);
+    if (row?.original?.rfqNumber) {
+      const encodedSerialNumber = encodeURIComponent(row?.original?.rfqNumber);
+      const getByCodeEndpoint = RFQ_GET_BY_CODE(encodedSerialNumber);
+      const getByIdCode = await fetchData(getByCodeEndpoint, localData?.accessToken);
+      if (getByIdCode?.data?.leadNumber !== 'New RFQ') {
+        setRfqView(true);
+        const encodedSerialNumberLead = encodeURIComponent(getByIdCode?.data?.leadNumber);
+        const getByLeadEndpoint = LEAD_GET_BY_CODE(encodedSerialNumberLead);
+        const getByIdCodeLead = await fetchData(getByLeadEndpoint, localData?.accessToken);
+        setLeadSummary(getByIdCodeLead?.data);
+      } else {
+        setLeadSummary([]);
+        setRfqView(false);
+      }
+      setRfqSummary(getByIdCode?.data);
+      console.log('getByIdCode', getByIdCode);
+    }
   };
-  console.log(viewId, 'projectAllocation');
+  console.log(leadSummary, 'projectAllocation');
   const table = useMaterialReactTable({
     columns,
     data: projectData,
@@ -1551,7 +1573,6 @@ const Projects = ({ _history, tasks }) => {
                       const isRFQInProject = projectWithRFQData.some(
                         (project) => project.rfqData && project.rfqData.serialNumber === lead.value
                       );
-
                       return (
                         <MenuItem key={index} value={lead.value} disabled={isRFQInProject}>
                           {lead.label}
@@ -2221,8 +2242,508 @@ const Projects = ({ _history, tasks }) => {
       )}
       {view.mode === 'View' && (
         <>
+          {rfqView && (
+            <MainCard
+              className="mb-1"
+              title="Lead Note"
+              secondary={
+                <Box
+                  sx={{
+                    ml: 2,
+                    [theme.breakpoints.down('md')]: {
+                      mr: 2
+                    }
+                  }}
+                >
+                  <ButtonBase sx={{ borderRadius: '12px' }}>
+                    <Avatar
+                      variant="rounded"
+                      sx={{
+                        ...theme.typography.commonAvatar,
+                        ...theme.typography.mediumAvatar,
+                        transition: 'all .2s ease-in-out',
+                        background: theme.palette.secondary.light,
+                        color: theme.palette.secondary.dark,
+                        '&[aria-controls="menu-list-grow"],&:hover': {
+                          background: theme.palette.secondary.dark,
+                          color: theme.palette.secondary.light
+                        }
+                      }}
+                      aria-haspopup="true"
+                      onClick={handleClose}
+                      color="inherit"
+                    >
+                      <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
+                    </Avatar>
+                  </ButtonBase>
+                </Box>
+              }
+            >
+              <Grid container m={3}>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Lead Number</label>
+                  <p>{leadSummary?.serialNumber}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Date</label>
+                  <p>{leadSummary?.date?.slice(0, 10)}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Source</label>
+                  <p>{leadSummary?.Source}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Pilot</label>
+                  <p>{leadSummary?.Pilot}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Company Name</label>
+                  <p>{leadSummary?.companyName}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Category</label>
+                  <p>{leadSummary?.category}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Contact Name</label>
+                  <p>{leadSummary?.contactName}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Department</label>
+                  <p>{leadSummary?.departmentName}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Phone Number</label>
+                  <p>{leadSummary?.phoneNumber}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Email</label>
+                  <p>{leadSummary?.email}</p>
+                </Grid>
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Business Verticle</label>
+                  <p>{leadSummary?.businessVertical}</p>
+                </Grid>
+              </Grid>
+              <Grid container p={3}>
+                <Grid xs={4} p={2}>
+                  <div className="history-container">
+                    <MainCard
+                      title="History"
+                      secondary={
+                        <Box
+                          sx={{
+                            ml: 2,
+                            // mr: 3,
+                            [theme.breakpoints.down('md')]: {
+                              mr: 2
+                            }
+                          }}
+                        >
+                          <ButtonBase sx={{ borderRadius: '12px' }}>
+                            <Avatar
+                              variant="rounded"
+                              sx={{
+                                ...theme.typography.commonAvatar,
+                                ...theme.typography.mediumAvatar,
+                                transition: 'all .2s ease-in-out',
+                                background: theme.palette.secondary.light,
+                                color: theme.palette.secondary.dark,
+                                '&[aria-controls="menu-list-grow"],&:hover': {
+                                  background: theme.palette.secondary.dark,
+                                  color: theme.palette.secondary.light
+                                }
+                              }}
+                              aria-haspopup="true"
+                              color="inherit"
+                            >
+                              <History stroke={2} size="1.3rem" />
+                            </Avatar>
+                          </ButtonBase>
+                        </Box>
+                      }
+                    >
+                      <Timeline position="">
+                        {leadSummary?.leadDescription.map((item) => (
+                          <TimelineItem>
+                            <TimelineOppositeContent style={{ display: 'none' }}></TimelineOppositeContent>
+                            <TimelineSeparator>
+                              <Tooltip title="New Lead" placement="top" arrow>
+                                <TimelineDot color="secondary">
+                                  {item.statusRequest === 'newlead' && <PersonAdd />}
+                                  {item.statusRequest === 'Contact Establish' && <ConnectWithoutContact />}
+                                  {item.statusRequest === 'Technicle Meeting' && <Group />}
+                                  {item.statusRequest === 'Hold' && <NotStarted />}
+                                  {item.statusRequest === 'Reject' && <ThumbDown />}
+                                  {item.statusRequest === 'Move to RFQ' && <ThumbUpSharp />}
+                                </TimelineDot>
+                              </Tooltip>
+                              <TimelineConnector />
+                            </TimelineSeparator>
+
+                            <TimelineContent>
+                              <Typography variant="h6" component="span" className="text-muted">
+                                {item.date?.slice(0, 10)} / {item.createdBy}
+                              </Typography>
+                              <br />
+                              <Typography variant="h6" component="span" className="strong">
+                                {item.statusRequest === 'newlead' ? 'New Lead' : item.statusRequest} &nbsp; - &nbsp;
+                                {item.status === '' ? 'Pending' : item.status}
+                              </Typography>
+                              <li> {item.description}</li>
+                            </TimelineContent>
+                          </TimelineItem>
+                        ))}
+                      </Timeline>
+                    </MainCard>
+                  </div>
+                </Grid>
+                <Grid xs={8} p={2}>
+                  <div className="history-container">
+                    <MainCard
+                      title="Task"
+                      secondary={
+                        <Box
+                          sx={{
+                            ml: 2,
+                            // mr: 3,
+                            [theme.breakpoints.down('md')]: {
+                              mr: 2
+                            }
+                          }}
+                        >
+                          <ButtonBase sx={{ borderRadius: '12px' }}>
+                            <Avatar
+                              variant="rounded"
+                              sx={{
+                                ...theme.typography.commonAvatar,
+                                ...theme.typography.mediumAvatar,
+                                transition: 'all .2s ease-in-out',
+                                background: theme.palette.secondary.light,
+                                color: theme.palette.secondary.dark,
+                                '&[aria-controls="menu-list-grow"],&:hover': {
+                                  background: theme.palette.secondary.dark,
+                                  color: theme.palette.secondary.light
+                                }
+                              }}
+                              aria-haspopup="true"
+                              color="inherit"
+                            >
+                              <TaskAlt stroke={2} size="1.3rem" />
+                            </Avatar>
+                          </ButtonBase>
+                        </Box>
+                      }
+                    >
+                      {leadSummary?.tasks?.map((data) => (
+                        <Card sx={{ margin: '1rem', padding: '1rem' }} className="card-hover">
+                          <div className="d-flex justify-content-between">
+                            <div className="d-flex">
+                              <Avatar sx={{ bgcolor: '#ede7f6', color: '#5e35b1' }}>{data?.responsible[0]}</Avatar>
+                              <div className="ms-1">
+                                <p className="avatar-name">{data?.responsible}</p>
+                                <p className="text-muted-light m-0">{data?.taskId}</p> &nbsp;
+                                {/* / */}
+                                {/* <PeopleAltTwoTone style={{ fontSize: 'medium' }} />
+                                <span className="ms-01">{}</span> */}
+                              </div>
+                            </div>
+                            <div className="float-end">
+                              <p className="text-muted-light m-0 text-end">Assigned Date : &nbsp; {data?.assignedDate?.slice(0, 10)}</p>
+                              <p className="text-muted-light m-0 text-end">Target Date : &nbsp; {data?.targetDate?.slice(0, 10)}</p>
+                              <div className="d-flex justify-content-end">
+                                <p
+                                  className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${
+                                    data?.status === 'completed' ? 'badge-success max-width' : ''
+                                  }${data?.status === 'not-started' ? 'badge-danger max-width' : ''}`}
+                                >
+                                  {data?.statusRequest} {data?.status}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mt-2 ms-1">
+                            <p className="text-muted m-0">{data?.title}</p>
+                            <p className="">
+                              <span>{data?.description}</span>
+                            </p>
+                            <p className="text-muted m-0">Remarks</p>
+                            <p className="">
+                              <span> {data?.remark}</span>
+                            </p>
+                          </div>
+                        </Card>
+                      ))}
+                    </MainCard>
+                  </div>
+                </Grid>
+              </Grid>
+            </MainCard>
+          )}
           <MainCard
-            title="Note"
+            className="mb-2"
+            title="RFQ Note"
+            secondary={
+              <Box
+                sx={{
+                  ml: 2,
+                  // mr: 3,
+                  [theme.breakpoints.down('md')]: {
+                    mr: 2
+                  }
+                }}
+              >
+                <ButtonBase sx={{ borderRadius: '12px' }}>
+                  <Avatar
+                    variant="rounded"
+                    sx={{
+                      ...theme.typography.commonAvatar,
+                      ...theme.typography.mediumAvatar,
+                      transition: 'all .2s ease-in-out',
+                      background: theme.palette.secondary.light,
+                      color: theme.palette.secondary.dark,
+                      '&[aria-controls="menu-list-grow"],&:hover': {
+                        background: theme.palette.secondary.dark,
+                        color: theme.palette.secondary.light
+                      }
+                    }}
+                    aria-haspopup="true"
+                    onClick={handleClose}
+                    color="inherit"
+                  >
+                    <KeyboardBackspaceRounded stroke={2} size="1.3rem" />
+                  </Avatar>
+                </ButtonBase>
+              </Box>
+            }
+          >
+            <Grid container m={3}>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">RFQ Number</label>
+                <p>{rfqSummary?.serialNumber}</p>
+              </Grid>
+              {rfqSummary.leadNumber !== null && (
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Lead Number</label>
+                  <p>{rfqSummary?.leadNumber}</p>
+                </Grid>
+              )}
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Date</label>
+                <p>{rfqSummary?.date?.slice(0, 10)}</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Source</label>
+                <p>{rfqSummary?.Source}</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Pilot</label>
+                <p>{rfqSummary?.Pilot}</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Company Name</label>
+                <p>{rfqSummary?.companyName}</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Category</label>
+                <p>{rfqSummary?.category}</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Contact Name</label>
+                <p>{rfqSummary?.contactName}</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Department</label>
+                <p>{rfqSummary?.departmentName}</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Phone Number</label>
+                <p>{rfqSummary?.phoneNumber}</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Email</label>
+                <p>{rfqSummary?.email}</p>
+              </Grid>
+              <Grid xs={3} p={2}>
+                <label className="text-muted">Business Verticle</label>
+                <p>{rfqSummary?.businessVertical}</p>
+              </Grid>
+              {rfqSummary?.tcoNumber && (
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">TCO Number</label>
+                  <p>{rfqSummary?.tcoNumber}</p>
+                </Grid>
+              )}
+              {rfqSummary?.currency && (
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Type Of Currency</label>
+                  <p>{rfqSummary?.currency}</p>
+                </Grid>
+              )}
+              {rfqSummary?.approximateValue && (
+                <Grid xs={3} p={2}>
+                  <label className="text-muted">Approximate Value</label>
+                  <p>{rfqSummary?.approximateValue}</p>
+                </Grid>
+              )}
+            </Grid>
+            <Grid container p={3}>
+              <Grid xs={4} p={2}>
+                <div className="history-container">
+                  <MainCard
+                    title="History"
+                    secondary={
+                      <Box
+                        sx={{
+                          ml: 2,
+                          // mr: 3,
+                          [theme.breakpoints.down('md')]: {
+                            mr: 2
+                          }
+                        }}
+                      >
+                        <ButtonBase sx={{ borderRadius: '12px' }}>
+                          <Avatar
+                            variant="rounded"
+                            sx={{
+                              ...theme.typography.commonAvatar,
+                              ...theme.typography.mediumAvatar,
+                              transition: 'all .2s ease-in-out',
+                              background: theme.palette.secondary.light,
+                              color: theme.palette.secondary.dark,
+                              '&[aria-controls="menu-list-grow"],&:hover': {
+                                background: theme.palette.secondary.dark,
+                                color: theme.palette.secondary.light
+                              }
+                            }}
+                            aria-haspopup="true"
+                            color="inherit"
+                          >
+                            <History stroke={2} size="1.3rem" />
+                          </Avatar>
+                        </ButtonBase>
+                      </Box>
+                    }
+                  >
+                    <Timeline>
+                      {rfqSummary?.rfqDescription?.map((item) => (
+                        <TimelineItem>
+                          <TimelineOppositeContent style={{ display: 'none' }}></TimelineOppositeContent>
+                          <TimelineSeparator>
+                            <Tooltip title="New Lead" placement="top" arrow>
+                              <TimelineDot color="secondary">
+                                {/* 'New RFQ', 'Tech Meet Done', 'TCO Submitted', 'Negotiation', 'Business Award', 'Lost' */}
+                                {item.statusRequest === 'New RFQ' && <PersonAdd />}
+                                {item.statusRequest === 'Technical Meet Done' && <ConnectWithoutContact />}
+                                {item.statusRequest === 'TCO Submitted' && <Group />}
+                                {item.statusRequest === 'Negotiation' && <CurrencyExchange />}
+                                {item.statusRequest === 'Lost' && <ThumbDown />}
+                                {item.statusRequest === 'Business Award' && <ThumbUpSharp />}
+                              </TimelineDot>
+                            </Tooltip>
+                            <TimelineConnector />
+                          </TimelineSeparator>
+                          <TimelineContent>
+                            <Typography variant="h6" component="span" className="text-muted">
+                              {item.date?.slice(0, 10)} / {item.createdBy}
+                            </Typography>
+                            <br />
+                            <Typography variant="h6" component="span" className="strong">
+                              {item.statusRequest === 'newlead' ? 'New Lead' : item.statusRequest} &nbsp; - &nbsp;
+                              {item.status === '' ? 'Pending' : item.status}
+                            </Typography>
+                            <li> {item.description}</li>
+                          </TimelineContent>
+                        </TimelineItem>
+                      ))}
+                    </Timeline>
+                  </MainCard>
+                </div>
+              </Grid>
+              <Grid xs={8} p={2}>
+                <div className="Task-container">
+                  <MainCard
+                    title="Task"
+                    secondary={
+                      <Box
+                        sx={{
+                          ml: 2,
+                          // mr: 3,
+                          [theme.breakpoints.down('md')]: {
+                            mr: 2
+                          }
+                        }}
+                      >
+                        <ButtonBase sx={{ borderRadius: '12px' }}>
+                          <Avatar
+                            variant="rounded"
+                            sx={{
+                              ...theme.typography.commonAvatar,
+                              ...theme.typography.mediumAvatar,
+                              transition: 'all .2s ease-in-out',
+                              background: theme.palette.secondary.light,
+                              color: theme.palette.secondary.dark,
+                              '&[aria-controls="menu-list-grow"],&:hover': {
+                                background: theme.palette.secondary.dark,
+                                color: theme.palette.secondary.light
+                              }
+                            }}
+                            aria-haspopup="true"
+                            color="inherit"
+                          >
+                            <TaskAlt stroke={2} size="1.3rem" />
+                          </Avatar>
+                        </ButtonBase>
+                      </Box>
+                    }
+                  >
+                    {rfqSummary?.tasks?.map((data) => (
+                      <Card sx={{ margin: '1rem', padding: '1rem' }} className="card-hover">
+                        <div className="d-flex justify-content-between">
+                          <div className="d-flex">
+                            <Avatar sx={{ bgcolor: '#ede7f6', color: '#5e35b1' }}>{data?.responsible[0]}</Avatar>
+                            <div className="ms-1">
+                              <p className="avatar-name">{data?.responsible}</p>
+                              <p className="text-muted-light m-0">{data?.taskId}</p> &nbsp;
+                              {/* / */}
+                              {/* <PeopleAltTwoTone style={{ fontSize: 'medium' }} />
+                                <span className="ms-01">{}</span> */}
+                            </div>
+                          </div>
+                          <div className="float-end">
+                            <p className="text-muted-light m-0 text-end">Assigned Date : &nbsp; {data?.assignedDate?.slice(0, 10)}</p>
+                            <p className="text-muted-light m-0 text-end">Target Date : &nbsp; {data?.targetDate?.slice(0, 10)}</p>
+                            <div className="d-flex justify-content-end">
+                              <p
+                                className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${
+                                  data?.status === 'completed' ? 'badge-success max-width' : ''
+                                }${data?.status === 'not-started' ? 'badge-danger max-width' : ''}`}
+                              >
+                                {data?.statusRequest} {data?.status}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mt-2 ms-1">
+                          <p className="text-muted m-0">{data?.title}</p>
+                          <p className="">
+                            <span>{data?.description}</span>
+                          </p>
+                          <p className="text-muted m-0">Remarks</p>
+                          <p className="">
+                            <span> {data?.remark}</span>
+                          </p>
+                        </div>
+                      </Card>
+                    ))}
+                  </MainCard>
+                </div>
+              </Grid>
+            </Grid>
+          </MainCard>
+          <MainCard
+            title="Project Note"
+            className="mt-1"
             secondary={
               <Box
                 sx={{

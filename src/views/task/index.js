@@ -7,18 +7,21 @@ import {
   AvatarGroup,
   Button,
   ButtonBase,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
   FormControl,
+  FormControlLabel,
   Grid,
   InputAdornment,
   InputLabel,
   MenuItem,
   Select,
   TextField,
+  Tooltip,
   Typography
 } from '@mui/material';
 import React, { useState, useRef, useEffect } from 'react';
@@ -34,7 +37,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import GroupIcon from '@mui/icons-material/Group';
 import FlagIcon from '@mui/icons-material/Flag';
 import { CloseTwoTone, FlagTwoTone, KeyboardBackspaceRounded, PlusOne, ViewAgendaTwoTone } from '@mui/icons-material';
-import { IconPlus } from '@tabler/icons';
+import { IconPlus, IconRefresh } from '@tabler/icons';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -42,7 +45,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { PROFILES_GETBY_STATUS, TASKS_CREATE, TASKS_GET_ALL } from 'api/apiEndPoint';
+import { PROFILES_GETBY_STATUS, TASKS_CREATE, TASKS_FILTER, TASKS_GET_ALL } from 'api/apiEndPoint';
 import { fetchData, postData } from 'utils/apiUtils';
 import { MaterialReactTable, createMRTColumnHelper, useMaterialReactTable } from 'material-react-table';
 import ModalHeader from 'rsuite/esm/Modal/ModalHeader';
@@ -189,10 +192,7 @@ const TaskPanel = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [files, setFiles] = useState([]);
   const fileInputRef = useRef(); // Ref to file input
-  const employeesOption = profilesData?.map((data) => ({
-    label: data?.EmployeeCode + '-' + data?.NameOfCandidate,
-    value: data?.EmployeeCode + '-' + data?.NameOfCandidate
-  }));
+  const [employeesOption, setEmployeesOption] = useState();
   const UPLOAD_ENDPOINT = 'http://localhost/react-php-file-upload/backend/upload.php';
   console.log('employeesOption', employeesOption);
   const handleSubmit = async (e) => {
@@ -279,6 +279,8 @@ const TaskPanel = () => {
   };
   const [localData, setLocalData] = useState();
   const [tasksData, setTasksData] = useState([]);
+  const [AvatarData, setAvatarData] = useState([]);
+  const [editorData, setEditorData] = useState('');
   const [valueForSuggest, setValueForSuggest] = React.useState(null);
 
   const table = useMaterialReactTable({
@@ -296,9 +298,25 @@ const TaskPanel = () => {
           const parsedData = JSON.parse(localStore);
           const data = await fetchData(TASKS_GET_ALL, parsedData?.accessToken);
           setTasksData(data.data);
+          setAvatarData(data?.data);
           const data4Employee = await fetchData(PROFILES_GETBY_STATUS('active'), parsedData?.accessToken);
           console.log(data, 'parsedddd');
           setProfilesData(data4Employee?.data);
+          if (parsedData?.role === 'Employee') {
+            // If the logged-in user is an employee, show only their details in the dropdown
+            const employeeDetails = {
+              label: `${parsedData?.code}-${parsedData?.name}`,
+              value: `${parsedData?.code}-${parsedData?.name}`
+            };
+            setEmployeesOption([employeeDetails]);
+          } else {
+            // If the logged-in user has a different role, show details for all employees
+            const allEmployeesOptions = data4Employee?.data.map((data) => ({
+              label: `${data?.EmployeeCode}-${data?.NameOfCandidate}`,
+              value: `${data?.EmployeeCode}-${data?.NameOfCandidate}`
+            }));
+            setEmployeesOption(allEmployeesOptions);
+          }
         }
       } catch (error) {
         console.error('Error in fetchDataAndUpdate:', error);
@@ -306,6 +324,25 @@ const TaskPanel = () => {
     };
     fetchDataAndUpdate();
   }, []);
+  const handleEditorChange = (content) => {
+    setEditorData(content);
+    console.log(content, 'Editor here');
+  };
+
+  const handleRefresh = async () => {
+    try {
+      const localStore = localStorage.getItem('userData');
+      if (localStore) {
+        const parsedData = JSON.parse(localStore);
+        const data = await fetchData(TASKS_GET_ALL, parsedData?.accessToken);
+        // setAvatarData(data?.data);
+        setTasksData(data?.data);
+      }
+      setSelectedAvatars([]);
+    } catch (error) {
+      console.error('Error in handleRefresh:', error);
+    }
+  };
   const formik = useFormik({
     initialValues: {
       title: '',
@@ -329,41 +366,131 @@ const TaskPanel = () => {
         const formattedData = {
           ...values,
           status: 'In Backlog',
+          description: editorData,
           responsible: valueForSuggest?.label || values?.responsible
         };
         const taskCreation = await postData(TASKS_CREATE, formattedData, localData?.accessToken);
         console.log(taskCreation, 'projectAllocate');
-        setView({
-          visible: true,
-          mode: 'Initial'
-        });
+        await handleRefresh();
+        setOpen(false);
       } catch {}
     }
   });
-  const handleEditorChange = (content) => {
-    console.log(content, 'Editor here');
+  const [selectedAvatars, setSelectedAvatars] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
+
+  const handleAvatarClick = async (responsible) => {
+    if (selectedAvatars.includes(responsible)) {
+      setSelectedAvatars(selectedAvatars.filter((avatar) => avatar !== responsible));
+    } else {
+      setSelectedAvatars([...selectedAvatars, responsible]);
+    }
+    console.log('responsible', selectedAvatars);
+    // const filterEndPoint = TASKS_FILTER('/:employees')
+    const filterByEmployee = await postData(TASKS_FILTER, { employees: [...selectedAvatars, responsible] });
+    console.log('filterByEmployee', filterByEmployee?.data);
+    if (filterByEmployee) {
+      setTasksData(filterByEmployee?.data);
+    }
   };
-  console.log(formik.values, 'values here');
+
+  const uniqueTasksData = AvatarData.filter((task, index, self) => {
+    return index === self.findIndex((t) => t.responsible === task.responsible);
+  });
+
+  const handleOpenModal = () => {
+    console.log('opened');
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
+  console.log(selectedAvatars, 'selectedAvatars');
   return (
     <>
       <MainCard
         title={
           <div className="d-flex">
             <p>Task Panel</p>
-            <AvatarGroup total={24} className="ms-01">
-              <Avatar alt="R" src="/static/images/avatar/1.jpg" />
-              <Avatar alt="T" src="/static/images/avatar/2.jpg" />
-              <Avatar alt="A" src="/static/images/avatar/4.jpg" />
-              <Avatar alt="T" src="/static/images/avatar/5.jpg" />
-            </AvatarGroup>
+            {localData?.role === 'Employee' ? null : (
+              <>
+                {' '}
+                <AvatarGroup renderSurplus={(surplus) => <span onClick={handleOpenModal}>+{surplus.toString()}</span>}>
+                  {uniqueTasksData.map((avatar) => (
+                    <Tooltip key={avatar.responsible} title={avatar.responsible} arrow>
+                      <Avatar
+                        sx={{
+                          cursor: 'pointer',
+                          backgroundColor: selectedAvatars.includes(avatar.responsible) ? '#1976D2' : '#90caf9',
+                          color: selectedAvatars.includes(avatar.responsible) && '#fff'
+                        }}
+                        onClick={() => handleAvatarClick(avatar.responsible)}
+                      >
+                        {avatar.responsible?.slice(8, 12)?.charAt(0).toUpperCase()}
+                      </Avatar>
+                    </Tooltip>
+                  ))}
+                </AvatarGroup>
+                <Dialog open={openModal} fullWidth onClose={handleCloseModal}>
+                  <DialogTitle className="d-flex justify-content-between m-0">
+                    <Typography variant="h3">Select Employees</Typography>
+                    <Typography variant="h4" onClick={handleCloseModal}>
+                      <CloseTwoTone />
+                    </Typography>
+                  </DialogTitle>
+                  <DialogContent>
+                    <Grid container className="p-2">
+                      {uniqueTasksData.map((avatar) => (
+                        <Grid item key={avatar.responsible} xs={12} sm={12} md={12} lg={6}>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={selectedAvatars.includes(avatar.responsible)}
+                                onChange={() => handleAvatarClick(avatar.responsible)}
+                              />
+                            }
+                            label={avatar.responsible}
+                          />
+                        </Grid>
+                      ))}
+                    </Grid>
+                    <div className="w-100  d-flex justify-content-center mb-1">
+                      <Button onClick={handleCloseModal} variant="contained" color="primary" className="">
+                        Filter
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </>
+            )}
           </div>
         }
         secondary={
           <div className="d-flex justify-content-center align-items-center">
             {/* <AccessTimeIcon sx={{ fontSize: '1.1rem' }} /> */}
-            {/* <span className="text-muted" style={{ paddingLeft: '5px', paddingRight: '10px' }}>
-              7 days remaining
-            </span> */}
+            <ButtonBase sx={{ borderRadius: '12px' }}>
+              <Avatar
+                variant="rounded"
+                sx={{
+                  ...theme.typography.commonAvatar,
+                  ...theme.typography.mediumAvatar,
+                  transition: 'all .2s ease-in-out',
+                  background: theme.palette.secondary.light,
+                  color: theme.palette.secondary.dark,
+                  '&[aria-controls="menu-list-grow"],&:hover': {
+                    background: theme.palette.secondary.dark,
+                    color: theme.palette.secondary.light
+                  }
+                }}
+                aria-haspopup="true"
+                onClick={handleRefresh}
+                color="inherit"
+              >
+                <IconRefresh />
+              </Avatar>
+            </ButtonBase>
 
             <Box sx={{ ml: 2 }}>
               <ButtonBase sx={{ borderRadius: '12px' }} onClick={handleOpen}>
