@@ -30,12 +30,16 @@ import {
   useMaterialReactTable,
 } from 'material-react-table';
 import YearlyAttendance from './YearlyAttendance';
+import TonalitySharpIcon from '@mui/icons-material/TonalitySharp';
+import WatchLaterSharpIcon from '@mui/icons-material/WatchLaterSharp';
 
 
 
-
-
-
+const SnailIcon = () => (
+  <span role="img" aria-label="snail" style={{marginTop:'10px', fontSize:'15px'}}>
+    🐌
+  </span>
+);
 
 
 
@@ -117,12 +121,12 @@ const Overallattendance = () => {
     {
       name: 'Zara',
       code: 'CACE0015',
-      values: ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'L', 'L', 'L', 'WK', 'WK', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'WK', 'WK', 'L', 'SH', 'SH', 'SH', 'FH', 'FH', 'FH'],
+      values: ['P', 'P', 'P', 'P', 'SH', 'P', 'P', 'L', 'L', 'L', 'WK', 'WK', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'WK', 'WK', 'L', 'SH', 'SH', 'SH', 'FH', 'FH', 'FH'],
     },
     {
       name: 'Sam',
       code: 'CACE0016',
-      values: ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'L', 'L', 'L', 'WK', 'WK', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'WK', 'WK', 'L', 'SH', 'SH', 'SH', 'FH', 'FH', 'FH'],
+      values: ['P', 'P', 'P', 'P', 'FH', 'P', 'P', 'L', 'L', 'L', 'WK', 'WK', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'WK', 'WK', 'L', 'SH', 'SH', 'SH', 'FH', 'FH', 'FH'],
     },
     {
       name: 'Jack',
@@ -440,8 +444,8 @@ const Overallattendance = () => {
                         <span style={{ fontSize: '13px' }}>{row.name}</span>
                         <Tooltip title={<>
                           <Typography >Total Working Hours : 40H:30M</Typography>
-                           <Typography>Early Out Hours : 00H:30M</Typography>
-                           <Typography>Late In Hours : 26H:00M</Typography>
+                          <Typography>Early Out Hours : 00H:30M</Typography>
+                          <Typography>Late In Hours : 26H:00M</Typography>
                         </>}><AccessAlarmTwoToneIcon style={{ fontSize: '19px', marginLeft: '30px', color: '#1da1f2' }} /></Tooltip>
                         <Button style={{ backgroundColor: '#6e6a6a', color: '#364152', padding: '5px', fontSize: '13px', height: '20px', marginLeft: '5px' }}>10<span className='text-muted'>/22</span></Button>
 
@@ -457,7 +461,64 @@ const Overallattendance = () => {
                             color: value === 'L' ? '#c62828' : value === 'P' ? '#00c853' : value === 'WK' ? '#1da1f2' : value === 'HL' ? '#4267b2' : value === 'FH' ? '#590be3' : value === 'SH' ? '#ffc13f' : 'white',
                           }}
                         >
-                          {value}
+
+                          {value === 'SH' ? (
+                            <Tooltip title={<>
+                              <Typography>Second Half Leave</Typography>
+                              <div className='d-flex'>
+                                <WatchLaterSharpIcon style={{ color: '#00c853', fontSize: '15px', marginTop: '10px' }} />
+                                <Typography>IN TIME: 1:10 PM</Typography>
+                              </div>
+                              <div className='d-flex'>
+                                <WatchLaterSharpIcon style={{ color: '#ce2d3e', fontSize: '15px', marginTop: '10px' }} />
+                                <Typography>OUT TIME : 6:10 PM</Typography>
+                              </div>
+                            </>}>
+                              <TonalitySharpIcon />
+                            </Tooltip>
+                          ) : value === 'FH' ? (
+                            <Tooltip title={<>
+                              <Typography>First Half Leave</Typography>
+                              <div className='d-flex'>
+                                <WatchLaterSharpIcon style={{ color: '#00c853', fontSize: '15px', marginTop: '10px' }} />
+                                <Typography>IN TIME: 9:10 AM</Typography>
+                              </div>
+                              <div className='d-flex'>
+                                <WatchLaterSharpIcon style={{ color: '#ce2d3e', fontSize: '15px', marginTop: '10px' }} />
+                                <Typography>OUT TIME : 1:10 AM</Typography>
+                              </div>
+                            </>
+                            }>
+                              <TonalitySharpIcon style={{ rotate: '180deg' }} />
+                            </Tooltip>
+                          ) : value === 'L' ? (
+                            <Tooltip title="Leave">
+                              <span>L</span>
+                            </Tooltip>
+                          ) : value === 'WK' ? (
+                            <Tooltip title="WeekEnd">
+                              <span>WK</span>
+                            </Tooltip>
+                          ) : value === 'P' ? (
+                            <Tooltip title={<>
+                              <div className='d-flex'>
+                                <WatchLaterSharpIcon style={{ color: '#00c853', fontSize: '15px', marginTop: '10px' }} />
+                                <Typography>IN TIME: 9:10 AM</Typography>
+                              </div>
+                              <div className='d-flex'>
+                                <WatchLaterSharpIcon style={{ color: '#ce2d3e', fontSize: '15px', marginTop: '10px' }} />
+                                <Typography>OUT TIME : 1:10 AM</Typography>
+                              </div>
+                              <Typography>Total Working Hours : 9H:00M</Typography>
+                              <Typography>Early Out : 5H:59M</Typography>
+                              <div className='d-flex'> <SnailIcon  /> <Typography>Late IN : 5H:59M</Typography></div>
+                            </>}>
+                              <span>P</span>
+                            </Tooltip>
+                          ) : (
+                            value
+                          )}
+
                         </TableCell>
                       ))}
                     </TableRow>
