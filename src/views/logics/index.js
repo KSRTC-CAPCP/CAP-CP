@@ -283,13 +283,13 @@ const BusinessLeads = () => {
     {
       accessorKey: 'date',
       header: 'Date',
-      enableEditing: false,
-      // muiEditTextFieldProps: {
-      //   type: 'date',
-      //   required: true,
-      //   minDate: new Date(maxDateHistory).toString()
-      //   // maxDate :new Date(maxDateHistory).toString()
-      // },
+      enableEditing: true,
+      muiEditTextFieldProps: {
+        type: 'date',
+        required: true,
+        minDate: new Date(maxDateHistory).toString()
+        // maxDate :new Date(maxDateHistory).toString()
+      },
       Cell: ({ renderedCellValue, row }) => (
         <Box component="span">
           <p>{row.original.date.slice(0, 10)}</p>
@@ -358,6 +358,11 @@ const BusinessLeads = () => {
       accessorKey: 'remark',
       header: 'Remarks',
       enableEditing: true
+    },
+    {
+      accessorKey: 'createdBy',
+      header: 'Created By',
+      enableEditing: false
     },
     {
       accessorKey: 'assignedDate',
@@ -576,6 +581,7 @@ const BusinessLeads = () => {
       category: leadData.category,
       contactName: leadData.contactName,
       remark: leadData.remark,
+      leadId: leadData._id,
       departmentName: leadData.departmentName,
       phoneNumber: leadData.phoneNumber,
       email: leadData.email,
@@ -629,7 +635,7 @@ const BusinessLeads = () => {
                 description: item.trim()
               }))
             : [];
-
+          console.log(values, 'valuesssss');
           const newRfq = {
             date: values.date,
             Source: values.Source,
@@ -642,6 +648,7 @@ const BusinessLeads = () => {
             departmentName: values.departmentName,
             phoneNumber: values.phoneNumber,
             email: values.email,
+            leadId: values._id,
             businessVertical: values.businessVertical,
             leadDescription: leadDescriptionArray
           };
@@ -669,7 +676,6 @@ const BusinessLeads = () => {
       console.error('API error:', error);
     }
   };
-
   console.log(moveRFQ, 'moverfq');
   const filter = createFilterOptions();
   const [valueForSuggest, setValueForSuggest] = React.useState(null);
@@ -687,6 +693,7 @@ const BusinessLeads = () => {
       category: '',
       contactName: '',
       serialNumber: '',
+      leadId: '',
       departmentName: '',
       remark: '',
       phoneNumber: '',
@@ -703,7 +710,7 @@ const BusinessLeads = () => {
       console.log('worked', values);
       try {
         if (updateId) {
-          console.log('handle update', updateId);
+          console.log('handle update values', values);
           const formattedData = {
             ...values,
             serialNumber: leadNumber,
@@ -711,6 +718,7 @@ const BusinessLeads = () => {
             companyName: valueForCompany?.title || values?.companyName,
             contactName: valueForContact?.title || values?.contactName
           };
+          console.log('handle update formatted', formattedData);
           handleUpdate(formattedData);
         } else {
           console.log('handle submit');
@@ -726,14 +734,15 @@ const BusinessLeads = () => {
               }))
             : [];
 
+          console.log('leadDescriptionArray', leadDescriptionArray);
           const formattedData = {
             ...values,
             Pilot: valueForSuggest?.title,
             companyName: valueForCompany?.title,
             contactName: valueForContact?.title,
-            leadDescription: leadDescriptionArray
+            leadDescription: localData?.code ? leadDescriptionArray : []
           };
-
+          console.log('leadDescriptionArray formattedData', formattedData);
           await postData(LEAD_CREATION, formattedData, localData?.accessToken);
           setView({
             visible: true,
@@ -819,6 +828,7 @@ const BusinessLeads = () => {
       serialNumber: value?.serialNumber,
       remark: value?.remark,
       // category: value?.category,
+      leadId: value._id,
       contactName: value?.contactName,
       departmentName: value?.departmentName,
       phoneNumber: value?.phoneNumber,
@@ -895,10 +905,11 @@ const BusinessLeads = () => {
   };
   const handleCreateRowTask = (newData) => {
     const tempId = generateTempId(); // Generate a temporary ID
-    const newTask = { ...newData.values, _id: tempId };
+    const newTask = { ...newData.values, _id: tempId, createdBy: `${localData?.code}-${localData.name}` };
     setTaskTableData([...taskTableData, newTask]);
     setIsCreatingRow(false);
   };
+  console.log('taskTableData---------->', taskTableData);
   const handleEditRowTask = (row) => {
     const editingId = row._id; // Use _id if available, otherwise use _tempId
     setEditingRowId(editingId);
@@ -942,7 +953,7 @@ const BusinessLeads = () => {
   const handleCreateRowHistory = (newData) => {
     console.log('handleSaveRowHistory - updatedData:', newData);
     const tempId = generateTempId(); // Generate a temporary ID
-    const newTask = { ...newData.values, _id: tempId, date: getCurrentDate(), createdBy: `${localData?.code}-${localData.name}` };
+    const newTask = { ...newData.values, _id: tempId, createdBy: `${localData?.code}-${localData.name}` };
     setHistoryTableData([...historyTableData, newTask]);
     setIsCreatingRow(false);
   };

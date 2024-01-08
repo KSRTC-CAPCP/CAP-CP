@@ -46,12 +46,18 @@ video {
 .css-9d4wr9 {
   border-top-left-radius: 0 !important;
 }
-
+.urgent-task
+{
+  background-color: #ffdfdf !important;
+}
 .css-1vkmmdj-MuiPaper-root-MuiCard-root {
   border-color: transparent !important;
 }
 .border-top {
   border-top: 1px solid gray;
+}
+.border-bottom {
+  border-bottom: 1px solid #d4d4d4;
 }
 .css-d0lab9-MuiPaper-root,
 .css-1kcnu38-MuiTableRow-root {
@@ -203,6 +209,9 @@ main {
 }
 .m-1 {
   margin: 1rem;
+}
+.p-2{
+  padding: 2rem;
 }
 .me-1 {
   margin-right: 1rem !important;
@@ -362,8 +371,8 @@ header,
 .css-1rcxgiw-MuiPaper-root-MuiDrawer-paper {
   z-index: 1049 !important;
 }
-.css-sut2xh-MuiTableCell-root, .css-1k2nulk-MuiTableCell-root
-{
+.css-sut2xh-MuiTableCell-root,
+.css-1k2nulk-MuiTableCell-root {
   box-shadow: none !important;
 }
 .rs-modal-dialog {
@@ -371,19 +380,20 @@ header,
   justify-content: center;
   align-items: center;
 }
-.rs-picker-date-menu
-{
+.rs-picker-date-menu {
   z-index: 1300;
 }
 /* hr {
   padding-left: 36rem;
 } */
-.fs-1
-{
+.fs-1 {
   font-size: 14px !important;
 }
 .css-1w9i8cz-MuiTypography-root {
   padding-top: 12px;
+}
+.d-grid {
+  display: grid;
 }
 .select-dropdown {
   position: relative;
