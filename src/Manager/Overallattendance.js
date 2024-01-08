@@ -22,7 +22,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { Avatar } from '@mui/material';
+import { Avatar, Tooltip, Typography, styled } from '@mui/material';
 import AccessAlarmTwoToneIcon from '@mui/icons-material/AccessAlarmTwoTone';
 import { useMemo } from 'react';
 import {
@@ -30,6 +30,12 @@ import {
   useMaterialReactTable,
 } from 'material-react-table';
 import YearlyAttendance from './YearlyAttendance';
+
+
+
+
+
+
 
 
 
@@ -431,7 +437,12 @@ const Overallattendance = () => {
                       </TableCell>
                       <TableCell component="th" scope="row" style={{ display: 'flex', alignItems: 'center', }}>
                         <Avatar style={{ width: '24px', height: '24px', marginRight: '8px', fontSize: '14px', backgroundColor: '#6495ED' }}>{row.name.charAt(0)}</Avatar>
-                        <span style={{ fontSize: '13px' }}>{row.name}</span> <AccessAlarmTwoToneIcon style={{ fontSize: '19px', marginLeft: '30px', color: '#1da1f2' }} />
+                        <span style={{ fontSize: '13px' }}>{row.name}</span>
+                        <Tooltip title={<>
+                          <Typography >Total Working Hours : 40H:30M</Typography>
+                           <Typography>Early Out Hours : 00H:30M</Typography>
+                           <Typography>Late In Hours : 26H:00M</Typography>
+                        </>}><AccessAlarmTwoToneIcon style={{ fontSize: '19px', marginLeft: '30px', color: '#1da1f2' }} /></Tooltip>
                         <Button style={{ backgroundColor: '#6e6a6a', color: '#364152', padding: '5px', fontSize: '13px', height: '20px', marginLeft: '5px' }}>10<span className='text-muted'>/22</span></Button>
 
 
@@ -462,7 +473,7 @@ const Overallattendance = () => {
       case 'yearly':
         return (
           <div>
-          <YearlyAttendance/>
+            <YearlyAttendance />
           </div>
         );
       default:
@@ -573,7 +584,7 @@ const Overallattendance = () => {
       <div>
         {renderCalendarView()}
       </div>
-    </div >
+    </div>
   )
 }
 
