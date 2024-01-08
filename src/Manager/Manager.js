@@ -590,42 +590,42 @@ const Manager = ({ _history, tasks }) => {
         if (editId) {
           const teamsValue = teamData
             ? teamData.map((item) => ({
-                fromDate: item.fromDate,
-                employeeCode: item.employeeCode?.slice(0, 7),
-                employeeId: managerId?._id,
-                toDate: item.toDate,
-                location: item.location,
-                percentage: Number(item.percentage),
-                team: item.team
-              }))
+              fromDate: item.fromDate,
+              employeeCode: item.employeeCode?.slice(0, 7),
+              employeeId: managerId?._id,
+              toDate: item.toDate,
+              location: item.location,
+              percentage: Number(item.percentage),
+              team: item.team
+            }))
             : [];
           const historyValue = historyTableData
             ? historyTableData.map((data) => ({
-                date: data.date,
-                projectDescription: data.projectDescription,
-                requestStatus: data.requestStatus,
-                approvalStatus: data.approvalStatus
-              }))
+              date: data.date,
+              projectDescription: data.projectDescription,
+              requestStatus: data.requestStatus,
+              approvalStatus: data.approvalStatus
+            }))
             : [];
           const taskValue = taskTableData
             ? taskTableData.map((data) => ({
-                title: data.title,
-                description: data.description,
-                responsible: data.responsible,
-                remarks: data.remarks,
-                assignedDate: data.assignedDate,
-                targetDate: data.targetDate,
-                status: data.status
-              }))
+              title: data.title,
+              description: data.description,
+              responsible: data.responsible,
+              remarks: data.remarks,
+              assignedDate: data.assignedDate,
+              targetDate: data.targetDate,
+              status: data.status
+            }))
             : [];
           const financeValue = financeData
             ? financeData.map((data) => ({
-                date: data.date,
-                refNumber: data.refNumber,
-                amount: data.amount,
-                tax: data.tax,
-                status: data.status
-              }))
+              date: data.date,
+              refNumber: data.refNumber,
+              amount: data.amount,
+              tax: data.tax,
+              status: data.status
+            }))
             : [];
           console.log(values, 'upd');
           const formattedData = {
@@ -651,42 +651,42 @@ const Manager = ({ _history, tasks }) => {
           console.log('handle submit', values, startDate, endDate);
           const teamsValue = teamData
             ? teamData.map((item) => ({
-                fromDate: item.fromDate,
-                employeeCode: item.employeeCode?.slice(0, 7),
-                employeeId: managerId?._id,
-                toDate: item.toDate,
-                location: item.location,
-                percentage: Number(item.percentage),
-                team: item.team
-              }))
+              fromDate: item.fromDate,
+              employeeCode: item.employeeCode?.slice(0, 7),
+              employeeId: managerId?._id,
+              toDate: item.toDate,
+              location: item.location,
+              percentage: Number(item.percentage),
+              team: item.team
+            }))
             : [];
           const historyValue = historyTableData
             ? historyTableData.map((data) => ({
-                date: data.date,
-                projectDescription: data.description,
-                requestStatus: data.requeststatus,
-                approvalStatus: data.approvalstatus
-              }))
+              date: data.date,
+              projectDescription: data.description,
+              requestStatus: data.requeststatus,
+              approvalStatus: data.approvalstatus
+            }))
             : [];
           const taskValue = taskTableData
             ? taskTableData.map((data) => ({
-                title: data.title,
-                description: data.description,
-                responsible: data.responsible,
-                remarks: data.remarks,
-                assignedDate: data.assigneddate,
-                targetDate: data.targetdate,
-                status: data.status
-              }))
+              title: data.title,
+              description: data.description,
+              responsible: data.responsible,
+              remarks: data.remarks,
+              assignedDate: data.assigneddate,
+              targetDate: data.targetdate,
+              status: data.status
+            }))
             : [];
           const financeValue = financeData
             ? financeData.map((data) => ({
-                date: data.date,
-                refNumber: data.refNumber,
-                amount: data.amount,
-                tax: data.tax,
-                status: data.status
-              }))
+              date: data.date,
+              refNumber: data.refNumber,
+              amount: data.amount,
+              tax: data.tax,
+              status: data.status
+            }))
             : [];
           const formattedData = {
             ...values,
@@ -1430,7 +1430,7 @@ const Manager = ({ _history, tasks }) => {
                   /> */}
                   <Tab
                     label={<div style={{ display: 'flex', alignItems: 'center' }}>Attendance Logs</div>}
-                    value="2"
+                    value="1"
                     style={{ fontSize: '15px' }}
                   />
                   <Tab
@@ -1458,9 +1458,9 @@ const Manager = ({ _history, tasks }) => {
               {/* <TabPanel value="1">
                 <MaterialReactTable table={table} />
               </TabPanel> */}
-              <TabPanel value="2">
+              <TabPanel value="1">
                 {/* <Attendance /> */}
-                <Overallattendance/>
+                <Overallattendance />
               </TabPanel>
             </TabContext>
           </Box>
@@ -1630,9 +1630,8 @@ const Manager = ({ _history, tasks }) => {
                                 <p className="text-muted-light m-0">Target Date : &nbsp; {data?.toDate}</p>
                                 <div className="d-flex justify-content-end">
                                   <p
-                                    className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${
-                                      data?.status === 'completed' ? 'badge-success max-width' : ''
-                                    }${data?.status === 'not-started' ? 'badge-danger max-width' : ''}`}
+                                    className={`${data?.status === 'in-progress' ? 'badge-warning max-width' : ''}${data?.status === 'completed' ? 'badge-success max-width' : ''
+                                      }${data?.status === 'not-started' ? 'badge-danger max-width' : ''}`}
                                   >
                                     {data?.statusRequest} {data?.status}
                                   </p>
